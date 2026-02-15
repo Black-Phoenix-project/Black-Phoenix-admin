@@ -2,25 +2,23 @@ import React, { useState } from "react";
 import { Eye, EyeOff, Mail, Lock, ArrowRight, Sparkles } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "../redux/slices/authSlice";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
 
 const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const BACKENT_URL = import.meta.env.BACKENT_URL;
-  console.log("backent url:", BACKENT_URL);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email || !password) {
+    if (!phoneNumber || !password) {
       setError("Please fill all fields");
       return;
     }
@@ -30,14 +28,19 @@ const Login = () => {
 
     try {
       const res = await axios.post(
-        "https://black-phoenix-backent.onrender.com/api/auth/login",
-        { email, password }
+        "http://localhost:5000/api/auth/login",
+        { phoneNumber, password }
       );
+
+      console.log("Login response:", res.data); 
+
       dispatch(loginSuccess({ user: res.data.user, token: res.data.token }));
       navigate("/");
       toast.success("Login successful");
     } catch (err) {
+      console.error(err.response?.data); 
       setError(err.response?.data?.message || "Login failed");
+      toast.error("Login failed");
     } finally {
       setLoading(false);
     }
@@ -56,22 +59,20 @@ const Login = () => {
       <div className="w-full max-w-4xl relative">
         <div className="bg-base-100 rounded-3xl shadow-2xl border border-warning/20 overflow-hidden backdrop-blur-sm">
           {/* Header Section */}
-          <div className="bg-gradient-to-r from-warning to-warning/80 p-8 text-center relative">
+          <div className=" from-warning to-warning/80 p-8 text-center relative">
             <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMC41IiBvcGFjaXR5PSIwLjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30"></div>
             
             <div className="relative">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl mb-4 shadow-lg">
                 <Sparkles className="w-8 h-8 text-white" />
               </div>
-              <h1 className="text-3xl font-bold text-white mb-2">Welcome Back</h1>
-              <p className="text-white/80 text-sm">Sign in to continue your journey</p>
+              <h1 className="text-3xl font-bold text-white mb-2">Qaytganingiz bilan</h1>
+              <p className="text-white/80 text-sm">Ishingizga omad tilaymiz</p>
             </div>
           </div>
 
-          {/* Form Section */}
           <div className="p-8">
             <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Error Alert */}
               {error && (
                 <div className="bg-error/10 border border-error/30 text-error rounded-xl p-4 text-sm animate-shake">
                   <div className="flex items-center gap-2">
@@ -83,17 +84,17 @@ const Login = () => {
 
               <div className="space-y-2">
                 <label className="text-sm font-medium text-base-content/70 ml-1">
-                  Email Address
+                  PhoneNumber
                 </label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
                     <Mail className="w-5 h-5 text-warning group-focus-within:text-warning transition-colors" />
                   </div>
                   <input
-                    type="email"
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    type="number"
+                    placeholder="telefon raqamingizni kiriting"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
                     className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-base-200/50 border-2 border-transparent focus:border-warning focus:bg-base-200 outline-none transition-all duration-200 placeholder:text-base-content/40"
                   />
                 </div>
@@ -109,7 +110,7 @@ const Login = () => {
                   </div>
                   <input
                     type={showPassword ? "text" : "password"}
-                    placeholder="Enter your password"
+                    placeholder="Passwordingizni kiriting"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full pl-12 pr-12 py-3.5 rounded-xl bg-base-200/50 border-2 border-transparent focus:border-warning focus:bg-base-200 outline-none transition-all duration-200 placeholder:text-base-content/40"
@@ -127,8 +128,6 @@ const Login = () => {
                   </button>
                 </div>
               </div>
-
-          
 
               <button
                 type="submit"
@@ -149,18 +148,8 @@ const Login = () => {
               </button>
             </form>
 
-            <div className="relative my-8">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-base-300"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-base-100 text-base-content/50">
-                  New here?
-                </span>
-              </div>
-            </div>
+           
 
-    
           </div>
         </div>
 

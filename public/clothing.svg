@@ -1,0 +1,39 @@
+<svg width="120" height="120" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" fill="none">
+  
+  <!-- Shield Background -->
+  <path 
+    d="M100 10 
+       L170 40 
+       V100 
+       C170 145 135 175 100 190 
+       C65 175 30 145 30 100 
+       V40 
+       Z"
+    fill="#0f0f0f"
+  />
+
+  <!-- Phoenix Wings -->
+  <path 
+    d="M60 90 
+       C70 65, 90 60, 100 75 
+       C110 60, 130 65, 140 90 
+       C125 80, 110 85, 100 95 
+       C90 85, 75 80, 60 90 Z"
+    fill="#facc15"
+  />
+
+  <!-- Phoenix Body -->
+  <path 
+    d="M100 75 
+       C95 95, 95 115, 100 135 
+       C105 115, 105 95, 100 75 Z"
+    fill="#f59e0b"
+  />
+
+  <!-- Crown (Admin Authority) -->
+  <path 
+    d="M80 55 L90 45 L100 55 L110 45 L120 55 Z"
+    fill="#facc15"
+  />
+
+</svg>

@@ -17,6 +17,7 @@ import Register from "./pages/Register";
 import Login from "./pages/Login";
 import AuthRoute from "./components/AuthRoute";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Profile from "./pages/Profile";
 
 export const router = createBrowserRouter([
   {
@@ -32,6 +33,8 @@ export const router = createBrowserRouter([
           { path: "products", element: <Products /> },
           { path: "/workers", element: <Workers /> },
           { path: "/wallet", element: <Wallet /> },
+          { path: "/profile", element: <Profile /> },
+
         ],
       },
     ],

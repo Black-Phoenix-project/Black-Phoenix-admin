@@ -1,227 +1,178 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Line, Doughnut, Bar } from "react-chartjs-2";
 import "chart.js/auto";
-import Container from "../components/Container";
+import LoadingTemplate from "../components/LoadingTemplate";
 
 const currencyUZS = (v) =>
   Number(v || 0).toLocaleString("uz-UZ") + " so'm";
 
-const kpi = {
-  todayAppointments: 18,
-  monthRevenue: 48600000,
-  unpaidCount: 7,
-  satisfaction: 92,
-};
-
-const last7DaysRevenue = [
-  { d: "Du", amt: 6_200_000 },
-  { d: "Se", amt: 7_450_000 },
-  { d: "Ch", amt: 5_900_000 },
-  { d: "Pa", amt: 8_300_000 },
-  { d: "Ju", amt: 9_100_000 },
-  { d: "Sh", amt: 6_750_000 },
-  { d: "Ya", amt: 7_800_000 },
-];
-
-const services = [
-  { label: "base-300ning", value: 23 },
-  { label: "Filling", value: 31 },
-  { label: "Root Canal", value: 12 },
-  { label: "Scaling", value: 18 },
-  { label: "Implant", value: 8 },
-];
-
-const weekAppointments = [
-  { d: "Du", count: 16 },
-  { d: "Se", count: 21 },
-  { d: "Ch", count: 14 },
-  { d: "Pa", count: 19 },
-  { d: "Ju", count: 24 },
-  { d: "Sh", count: 13 },
-  { d: "Ya", count: 17 },
-];
-
 export default function DentistChartsDashboard() {
-  const revenueLine = useMemo(() => {
-    return {
-      labels: last7DaysRevenue.map((x) => x.d),
-      datasets: [
-        {
-          label: "So‘nggi 7 kun daromad",
-          data: last7DaysRevenue.map((x) => x.amt),
-          fill: true,
-          tension: 0.35,
-          backgroundColor: "rgba(59,130,246,0.15)",
-          borderColor: "rgba(59,130,246,1)",
-          pointRadius: 3,
-        },
-      ],
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // ================= FETCH DATA =================
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/api/product");
+        const json = await res.json();
+
+        if (json.success) {
+          // if API returns single object
+          if (Array.isArray(json.data)) {
+            setProducts(json.data);
+          } else {
+            setProducts([json.data]);
+          }
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     };
+
+    fetchProducts();
   }, []);
 
-  const revenueLineOpts = useMemo(
-    () => ({
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: true },
-        tooltip: {
-          callbacks: {
-            label: (ctx) => currencyUZS(ctx.parsed.y),
-          },
-        },
-      },
-      scales: {
-        y: {
-          ticks: {
-            callback: (v) =>
-              Number(v).toLocaleString("uz-UZ") + " so'm",
-          },
-          grid: { color: "rgba(148,163,184,0.2)" },
-        },
-        x: { grid: { display: false } },
-      },
-    }),
-    []
-  );
+  // ================= KPI CALCULATIONS =================
+  const totalRevenue = useMemo(() => {
+    return products.reduce((sum, p) => sum + (p.price || 0), 0);
+  }, [products]);
 
-  const servicesDoughnut = useMemo(() => {
-    return {
-      labels: services.map((s) => s.label),
-      datasets: [
-        {
-          label: "Xizmatlar ulushi",
-          data: services.map((s) => s.value),
-          backgroundColor: [
-            "rgba(59,130,246,0.8)",   // blue
-            "rgba(34,197,94,0.8)",    // green
-            "rgba(249,115,22,0.8)",   // orange
-            "rgba(99,102,241,0.8)",   // indigo
-            "rgba(236,72,153,0.8)",   // pink
-          ],
-          borderWidth: 0,
-        },
-      ],
-    };
-  }, []);
+  const totalProducts = products.length;
 
-  const servicesDoughnutOpts = useMemo(
-    () => ({
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { position: "bottom" },
+  const last7DaysRevenue = useMemo(() => {
+    const last7 = Array.from({ length: 7 }).map((_, i) => {
+      const date = new Date();
+      date.setDate(date.getDate() - (6 - i));
+      const label = date.toLocaleDateString("uz-UZ", { weekday: "short" });
+
+      const dayRevenue = products
+        .filter(
+          (p) =>
+            new Date(p.createdAt).toDateString() === date.toDateString()
+        )
+        .reduce((sum, p) => sum + p.price, 0);
+
+      return { d: label, amt: dayRevenue };
+    });
+
+    return last7;
+  }, [products]);
+
+  // ================= CHART DATA =================
+  const revenueLine = useMemo(() => ({
+    labels: last7DaysRevenue.map((x) => x.d),
+    datasets: [
+      {
+        label: "So‘nggi 7 kun daromad",
+        data: last7DaysRevenue.map((x) => x.amt),
+        fill: true,
+        tension: 0.35,
+        backgroundColor: "rgba(234,179,8,0.2)", // warning light
+        borderColor: "rgba(234,179,8,1)", // warning
+        pointRadius: 4,
       },
-      cutout: "60%",
-    }),
-    []
-  );
+    ],
+  }), [last7DaysRevenue]);
 
-  const weekBar = useMemo(() => {
-    return {
-      labels: weekAppointments.map((x) => x.d),
-      datasets: [
-        {
-          label: "Haftalik qabul (soni)",
-          data: weekAppointments.map((x) => x.count),
-          backgroundColor: "rgba(34,197,94,0.8)", // green-500
-          borderRadius: 6,
-          maxBarThickness: 42,
-        },
-      ],
-    };
-  }, []);
+  const revenueLineOpts = {
+    responsive: true,
+    maintainAspectRatio: false,
+  };
 
-  const weekBarOpts = useMemo(
-    () => ({
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: { legend: { display: true } },
-      scales: {
-        y: {
-          grid: { color: "rgba(148,163,184,0.2)" },
-          ticks: { precision: 0 },
-        },
-        x: { grid: { display: false } },
+  const productsDoughnut = useMemo(() => ({
+    labels: products.map((p) => p.name),
+    datasets: [
+      {
+        data: products.map((p) => p.price),
+        backgroundColor: [
+          "#facc15",
+          "#fbbf24",
+          "#f59e0b",
+          "#d97706",
+          "#b45309",
+        ],
+        borderWidth: 0,
       },
-    }),
-    []
-  );
+    ],
+  }), [products]);
+
+  // ================= UI =================
+  if (loading) {
+    return <div>
+      <LoadingTemplate/>
+    </div>;
+  }
 
   return (
-    <div className="min-h-screen bg-base-300 rounded-2xl ">
-      <div className="navbar bg-base-300 rounded-2xl shadow-md border-b border-base-300 sticky top-0 z-20">
-        <div className="max-w-7xl mx-auto w-full px-4">
-          <span className="text-lg font-bold">Dentist Dashboard</span>
-        </div>
-      </div>
+    <div className="min-h-screen bg-base-300 rounded-2xl">
+    <div className="p-6">
+      <h1 className="text-2xl text-warning font-bold">Dashboard</h1>
+    </div>
+
       <div className="max-w-7xl mx-auto p-4 md:p-6 space-y-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className="card bg-base-100 border border-base-300 shadow-sm">
+
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          <div className="card bg-base-100 border border-warning shadow-sm">
             <div className="card-body p-4">
-              <p className="text-xs text-base-content/70">Bugungi qabul</p>
-              <h3 className="text-2xl font-bold">{kpi.todayAppointments}</h3>
+              <p className="text-xs">Total Products</p>
+              <h3 className="text-2xl font-bold text-warning">
+                {totalProducts}
+              </h3>
             </div>
           </div>
-          <div className="card bg-base-100 border border-base-300 shadow-sm">
+
+          <div className="card bg-base-100 border border-warning shadow-sm">
             <div className="card-body p-4">
-              <p className="text-xs text-base-content/70">Oylik tushum</p>
-              <h3 className="text-2xl font-bold">{currencyUZS(kpi.monthRevenue)}</h3>
+              <p className="text-xs">Umumiy summa</p>
+              <h3 className="text-2xl font-bold text-success">
+                {currencyUZS(totalRevenue)}
+              </h3>
             </div>
           </div>
-          <div className="card bg-base-100 border border-base-300 shadow-sm">
+
+          <div className="card bg-base-100 border border-warning shadow-sm">
             <div className="card-body p-4">
-              <p className="text-xs text-base-content/70">To‘lanmagan</p>
-              <h3 className="text-2xl font-bold">{kpi.unpaidCount}</h3>
-            </div>
-          </div>
-          <div className="card bg-base-100 border border-base-300 shadow-sm">
-            <div className="card-body p-4">
-              <p className="text-xs text-base-content/70">Qoniqish</p>
-              <h3 className="text-2xl font-bold">{kpi.satisfaction}%</h3>
+              <p className="text-xs">So'nggi 7 kunda</p>
+              <h3 className="text-2xl font-bold text-success">
+                {currencyUZS(
+                  last7DaysRevenue.reduce((s, d) => s + d.amt, 0)
+                )}
+              </h3>
             </div>
           </div>
         </div>
 
-        {/* Charts grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Revenue line (span 2) */}
-          <div className="card bg-base-100 border border-base-300 shadow-sm lg:col-span-2">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+          <div className="card bg-base-100 border border-warning shadow-sm">
             <div className="card-body p-5">
-              <div className="flex items-center justify-between mb-2">
-                <h2 className="card-title text-base">So‘nggi 7 kun tushum</h2>
-                <span className="badge badge-outline">UZS</span>
-              </div>
+              <h2 className="card-title text-base text-warning">
+                So‘nggi 7 kun tushum
+              </h2>
               <div className="h-64">
                 <Line data={revenueLine} options={revenueLineOpts} />
               </div>
             </div>
           </div>
 
-          {/* Services doughnut */}
-          <div className="card bg-base-100 border border-base-300 shadow-sm">
+          <div className="card bg-base-100 border border-warning shadow-sm">
             <div className="card-body p-5">
-              <h2 className="card-title text-base mb-2">Xizmatlar ulushi</h2>
+              <h2 className="card-title text-base text-warning">
+                Mahsulot narxlari
+              </h2>
               <div className="h-64">
-                <Doughnut data={servicesDoughnut} options={servicesDoughnutOpts} />
+                <Doughnut data={productsDoughnut} />
               </div>
             </div>
           </div>
 
-          {/* Weekly appointments bar (span 3 on lg) */}
-          <div className="card bg-base-100 border border-base-300 shadow-sm lg:col-span-3">
-            <div className="card-body p-5">
-              <h2 className="card-title text-base mb-2">Haftalik qabul (soni)</h2>
-              <div className="h-72">
-                <Bar data={weekBar} options={weekBarOpts} />
-              </div>
-            </div>
-          </div>
         </div>
 
-        {/* Footer */}
-        <div className="text-xs text-base-content/60 text-center py-6">
-          © {new Date().getFullYear()} Dentist Admin • Charts by Chart.js
+        <div className="text-xs text-center py-6 text-warning">
+          © {new Date().getFullYear()} PRODUCT WARIORS !
         </div>
       </div>
     </div>
