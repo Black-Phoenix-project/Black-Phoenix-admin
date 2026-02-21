@@ -2,10 +2,10 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 
 import { CiHome, CiWallet } from "react-icons/ci";
-import { FaCoffee } from "react-icons/fa";
+import { FaCoffee, FaListUl } from "react-icons/fa";
 import { MdOutlineWorkOutline } from "react-icons/md";
-import { LuPlus } from "react-icons/lu";
-
+import { LuClipboardList, LuPlus } from "react-icons/lu";
+import { RxDashboard } from "react-icons/rx";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
@@ -24,10 +24,11 @@ const Sidebar = () => {
   }, []);
 
   const menuItems = [
-    { label: "Dashboard", path: "/", icon: <CiHome size={20} /> },
+    { label: "Dashboard", path: "/", icon: <RxDashboard size={20} /> },
     { label: "Products", path: "/products", icon: <FaCoffee size={18} /> },
-    { label: "Wallet", path: "/wallet", icon: <CiWallet size={20} /> },
+    { label: "Orders", path: "/orders", icon: <LuClipboardList size={20} /> },
     { label: "Workers", path: "/workers", icon: <MdOutlineWorkOutline size={20} /> },
+    { label: "Wallet", path: "/wallet", icon: <CiWallet size={20} /> },
   ];
 
   const promoSlides = [
@@ -112,7 +113,6 @@ const Sidebar = () => {
     );
   }
 
-  /* ================= MOBILE BOTTOM NAV ================= */
   return (
     <nav className="fixed bottom-0 left-0 w-full z-50 bg-base-300 border-t-2 border-warning shadow-xl flex justify-around items-center h-16">
       {menuItems.map(({ path, icon }) => (
