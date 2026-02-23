@@ -29,6 +29,7 @@ const Sidebar = () => {
     { label: "Orders", path: "/orders", icon: <LuClipboardList size={20} /> },
     { label: "Workers", path: "/workers", icon: <MdOutlineWorkOutline size={20} /> },
     { label: "Wallet", path: "/wallet", icon: <CiWallet size={20} /> },
+
   ];
 
   const promoSlides = [

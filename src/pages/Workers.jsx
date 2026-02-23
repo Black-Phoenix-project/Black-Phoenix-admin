@@ -4,6 +4,62 @@ import { FiEdit, FiTrash2, FiSearch } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 import LoadingTemplate from "../components/LoadingTemplate";
 import WorkerModal from "../components/WorkerModal";
+import { CheckCircle, AlertCircle, Trash2, RefreshCw } from "lucide-react";
+
+const API_URL = `${import.meta.env.VITE_BACKENT_URL}/api/workers` 
+
+function Toast({ toast }) {
+  if (!toast) return null;
+  return (
+    <div
+      className={`fixed bottom-6 right-6 z-[999] flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl border text-sm font-medium transition-all
+        ${toast.type === "error"
+          ? "bg-red-950 border-red-500/40 text-red-300"
+          : "bg-zinc-900 border-emerald-500/40 text-emerald-300"
+        }`}
+    >
+      {toast.type === "error" ? <AlertCircle size={16} /> : <CheckCircle size={16} />}
+      {toast.msg}
+    </div>
+  );
+}
+
+function ConfirmDialog({ open, onConfirm, onCancel, name }) {
+  if (!open) return null;
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+      onClick={onCancel}
+    >
+      <div
+        className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 w-full max-w-sm shadow-2xl"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/20 mx-auto mb-4">
+          <Trash2 size={24} className="text-red-400" />
+        </div>
+        <h3 className="text-center font-bold text-zinc-100 text-lg mb-1">O'chirishni tasdiqlang</h3>
+        <p className="text-center text-zinc-400 text-sm mb-6">
+          <span className="text-zinc-200 font-medium">{name}</span> ni o'chirishga ishonchingiz komilmi?
+        </p>
+        <div className="flex gap-3">
+          <button
+            onClick={onCancel}
+            className="flex-1 py-2.5 rounded-2xl border border-zinc-700 text-zinc-400 hover:bg-zinc-800 text-sm font-medium transition-all active:scale-95"
+          >
+            Bekor qilish
+          </button>
+          <button
+            onClick={onConfirm}
+            className="flex-1 py-2.5 rounded-2xl bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 text-red-400 text-sm font-semibold transition-all active:scale-95"
+          >
+            O'chirish
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const Workers = () => {
   const [workers, setWorkers] = useState([]);
@@ -19,12 +75,17 @@ const Workers = () => {
     position: "",
     salary: "",
     phone: "",
-    status: "Active"
+    status: "Active",
   });
+  const [toast, setToast] = useState(null);
+  const [confirmDialog, setConfirmDialog] = useState({ open: false, id: null, name: "" });
+  const [deleting, setDeleting] = useState(false);
 
-  const API_URL = "http://localhost:5000/api/workers";
+  const showToast = (msg, type = "success") => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
-  // Fetch workers
   const fetchWorkers = async () => {
     try {
       setLoading(true);
@@ -40,11 +101,8 @@ const Workers = () => {
     }
   };
 
-  useEffect(() => {
-    fetchWorkers();
-  }, []);
+  useEffect(() => { fetchWorkers(); }, []);
 
-  // Search filter
   useEffect(() => {
     const filtered = workers.filter((w) =>
       `${w.firstname} ${w.lastname} ${w.position}`
@@ -54,19 +112,30 @@ const Workers = () => {
     setFilteredWorkers(filtered);
   }, [searchTerm, workers]);
 
-  // Delete worker
-  const deleteWorkerHandler = async (id) => {
-    if (!window.confirm("Bu ishchini o'chirishga ishonchingiz komilmi?")) return;
+  const deleteWorkerHandler = (worker) => {
+    setConfirmDialog({
+      open: true,
+      id: worker._id,
+      name: `${worker.firstname} ${worker.lastname}`,
+    });
+  };
+
+  const confirmDelete = async () => {
+    const { id, name } = confirmDialog;
+    setDeleting(true);
     try {
       const response = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
       if (!response.ok) throw new Error("Failed to delete worker");
       setWorkers((prev) => prev.filter((w) => w._id !== id));
+      setConfirmDialog({ open: false, id: null, name: "" });
+      showToast(` ${name} o'chirildi`);
     } catch (err) {
-      alert(err.message);
+      showToast(err.message || "O'chirishda xatolik", "error");
+    } finally {
+      setDeleting(false);
     }
   };
 
-  // Open modal for add/edit
   const openModal = (worker = null) => {
     if (worker) {
       setEditWorker(worker);
@@ -76,40 +145,23 @@ const Workers = () => {
         position: worker.position,
         salary: worker.salary,
         phone: worker.phone || "",
-        status: worker.status || "Active"
+        status: worker.status || "Active",
       });
     } else {
       setEditWorker(null);
-      setFormData({
-        firstname: "",
-        lastname: "",
-        position: "",
-        salary: "",
-        phone: "",
-        status: "Active"
-      });
+      setFormData({ firstname: "", lastname: "", position: "", salary: "", phone: "", status: "Active" });
     }
     setModalOpen(true);
   };
 
-  // Close modal
   const closeModal = () => {
     setModalOpen(false);
     setEditWorker(null);
-    setFormData({
-      firstname: "",
-      lastname: "",
-      position: "",
-      salary: "",
-      phone: "",
-      status: "Active"
-    });
+    setFormData({ firstname: "", lastname: "", position: "", salary: "", phone: "", status: "Active" });
   };
 
-  // Add / Edit worker
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-
     const submitData = {
       firstname: formData.firstname,
       lastname: formData.lastname,
@@ -118,29 +170,28 @@ const Workers = () => {
       phone: formData.phone,
       status: formData.status,
     };
-
     try {
       if (editWorker) {
-        // Update
         const response = await fetch(`${API_URL}/${editWorker._id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(submitData),
         });
         if (!response.ok) throw new Error("Failed to update worker");
+        showToast(` ${submitData.firstname} ${submitData.lastname} yangilandi`);
       } else {
-        // Create
         const response = await fetch(API_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(submitData),
         });
         if (!response.ok) throw new Error("Failed to create worker");
+        showToast(` ${submitData.firstname} ${submitData.lastname} qo'shildi`);
       }
       closeModal();
       fetchWorkers();
     } catch (err) {
-      alert(err.message);
+      showToast(err.message || "Xatolik yuz berdi", "error");
     }
   };
 
@@ -155,19 +206,27 @@ const Workers = () => {
 
   return (
     <div className="p-4 md:p-6 space-y-6">
-      {/* Header with search */}
+      <Toast toast={toast} />
+      <ConfirmDialog
+        open={confirmDialog.open}
+        name={confirmDialog.name}
+        onConfirm={confirmDelete}
+        onCancel={() => setConfirmDialog({ open: false, id: null, name: "" })}
+      />
+
+      {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-3xl font-bold text-warning">Ishchilarimiz</h1>
         <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-3">
-          {/* Search input */}
+          {/* Search */}
           <div className="relative sm:w-64">
-            <FiSearch className="absolute top-1/2 -translate-y-1/2 text-base-content/40" />
+            <FiSearch className="absolute top-1/2 left-3 -translate-y-1/2 text-base-content/40" />
             <input
               type="text"
               placeholder="Ishchilarni qidiring..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="input input-bordered border-warning w-full  focus:outline-warning"
+              className="input input-bordered border-warning w-full pl-9 focus:outline-warning"
             />
           </div>
           {/* Add button */}
@@ -214,11 +273,9 @@ const Workers = () => {
                     <td>{worker.phone || "—"}</td>
                     <td>
                       <span
-                        className={`badge bg-success text-black ${
-                          worker.status === "Active"
-                            ? "badge-success"
-                            : "badge-ghost"
-                        }`}
+                        className={`badge ${
+                          worker.status === "Active" ? "badge-success" : "badge-success"
+                        } text-black`}
                       >
                         {worker.status === "Active" ? "Faol" : "Faol"}
                       </span>
@@ -233,10 +290,14 @@ const Workers = () => {
                       </button>
                       <button
                         className="btn btn-sm btn-outline btn-error"
-                        onClick={() => deleteWorkerHandler(worker._id)}
+                        onClick={() => deleteWorkerHandler(worker)}
                         title="O'chirish"
+                        disabled={deleting && confirmDialog.id === worker._id}
                       >
-                        <FiTrash2 />
+                        {deleting && confirmDialog.id === worker._id
+                          ? <RefreshCw size={14} className="animate-spin" />
+                          : <FiTrash2 />
+                        }
                       </button>
                     </td>
                   </motion.tr>

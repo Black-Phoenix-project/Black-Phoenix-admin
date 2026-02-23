@@ -34,13 +34,13 @@ const Profile = () => {
           />
 
           <div className="text-center md:text-left flex-1">
-            <h2 className="text-2xl font-bold">My Profile</h2>
+            <h2 className="text-2xl font-bold">Admin</h2>
             <p className="text-sm text-gray-500">Personal information</p>
           </div>
 
           <button
             onClick={handleLogout}
-            className="btn btn-warning text-black font-semibold"
+            className="btn btn-error text-black font-semibold"
           >
             Logout
           </button>

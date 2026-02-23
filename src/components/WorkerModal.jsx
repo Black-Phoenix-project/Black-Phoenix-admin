@@ -29,7 +29,6 @@ const WorkerModal = ({
     <AnimatePresence>
       {modalOpen && (
         <>
-          {/* Backdrop */}
           <motion.div
             className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
             initial={{ opacity: 0 }}
@@ -38,7 +37,6 @@ const WorkerModal = ({
             onClick={closeModal}
           />
 
-          {/* Modal Container */}
           <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 pointer-events-none">
             <motion.div
               className="bg-base-100 rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden pointer-events-auto"
@@ -178,7 +176,7 @@ const WorkerModal = ({
                           </span>
                         </label>
                         <input
-                          type="text"
+                          type="phone"
                           name="phone"
                           value={formData.phone}
                           onChange={handleInputChange}
@@ -220,88 +218,8 @@ const WorkerModal = ({
                     transition={{ delay: 0.3 }}
                     className="space-y-4"
                   >
-                    <div className="flex items-center gap-3 pb-2 border-b-2 border-warning/20">
-                      {formData.status === "Active" ? (
-                        <FiToggleRight className="text-warning text-2xl" />
-                      ) : (
-                        <FiToggleLeft className="text-base-content/40 text-2xl" />
-                      )}
-                      <h3 className="text-base sm:text-lg font-bold text-base-content">
-                        Ish Holati
-                      </h3>
-                    </div>
+                  
 
-                    <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setFormData((prev) => ({ ...prev, status: "Active" }))
-                        }
-                        className={`p-4 sm:p-6 rounded-2xl border-2 transition-all duration-200 ${
-                          formData.status === "Active"
-                            ? "border-warning bg-warning/10 shadow-lg shadow-warning/20"
-                            : "border-base-300 hover:border-warning/50"
-                        }`}
-                      >
-                        <div className="flex items-center justify-center gap-2 sm:gap-3">
-                          <div
-                            className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center ${
-                              formData.status === "Active"
-                                ? "border-warning"
-                                : "border-base-300"
-                            }`}
-                          >
-                            {formData.status === "Active" && (
-                              <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-warning"></div>
-                            )}
-                          </div>
-                          <span
-                            className={`font-bold text-base sm:text-lg ${
-                              formData.status === "Active"
-                                ? "text-warning"
-                                : "text-base-content/60"
-                            }`}
-                          >
-                            Faol
-                          </span>
-                        </div>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setFormData((prev) => ({ ...prev, status: "Inactive" }))
-                        }
-                        className={`p-4 sm:p-6 rounded-2xl border-2 transition-all duration-200 ${
-                          formData.status === "Inactive"
-                            ? "border-warning bg-warning/10 shadow-lg shadow-warning/20"
-                            : "border-base-300 hover:border-warning/50"
-                        }`}
-                      >
-                        <div className="flex items-center justify-center gap-2 sm:gap-3">
-                          <div
-                            className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center ${
-                              formData.status === "Inactive"
-                                ? "border-warning"
-                                : "border-base-300"
-                            }`}
-                          >
-                            {formData.status === "Inactive" && (
-                              <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-warning"></div>
-                            )}
-                          </div>
-                          <span
-                            className={`font-bold text-base sm:text-lg ${
-                              formData.status === "Inactive"
-                                ? "text-warning"
-                                : "text-base-content/60"
-                            }`}
-                          >
-                            Nofaol
-                          </span>
-                        </div>
-                      </button>
-                    </div>
                   </motion.div>
                 </div>
 

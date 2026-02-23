@@ -13,21 +13,35 @@ const currencyUZS = (v) => Number(v || 0).toLocaleString("uz-UZ") + " so'm";
 
 function KpiCard({ icon, label, value, colorClass, sub }) {
   return (
-    <div className="card bg-base-100 shadow border border-base-300 p-5 flex flex-col gap-1">
-      <div className="flex justify-between items-center">
-        <p className="text-xs text-base-content/50 uppercase tracking-widest font-semibold">{label}</p>
-        <span className={`${colorClass} opacity-80`}>{icon}</span>
+    <div className="card bg-base-200 p-3 md:p-4 flex flex-col justify-between gap-1">
+      {/* Top row: label + icon */}
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] md:text-xs text-base-content/50 font-medium uppercase tracking-wide">
+          {label}
+        </span>
+        <span className={`hidden md:flex items-center justify-center ${colorClass}`}>
+          {icon}
+        </span>
       </div>
-      <p className={`text-2xl font-black break-all leading-tight ${colorClass}`}>{value}</p>
-      {sub && <p className="text-xs text-base-content/30 mt-0.5">{sub}</p>}
+      {/* Value */}
+      <div className={`font-bold text-sm md:text-base leading-tight break-all ${colorClass}`}>
+        {value}
+      </div>
+      {/* Sub */}
+      {sub && (
+        <div className="flex items-center gap-1">
+          <span className={`inline-block w-1.5 h-1.5 rounded-full ${colorClass} opacity-60`} />
+          <span className="text-[10px] text-base-content/40">{sub}</span>
+        </div>
+      )}
     </div>
   );
 }
 
 export default function DentistChartsDashboard() {
-  const [orders, setOrders]         = useState([]);
-  const [stats, setStats]           = useState(null);
-  const [loading, setLoading]       = useState(true);
+  const [orders, setOrders] = useState([]);
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
 
@@ -35,15 +49,14 @@ export default function DentistChartsDashboard() {
     if (isRefresh) setRefreshing(true);
     else setLoading(true);
     try {
-      // ✅ ONLY delivered + paid = real profit
       const [ordersRes, statsRes] = await Promise.all([
-        fetch(`${BASE_URL}/api/orders?status=delivered&paymentStatus=paid&limit=1000`),
+        fetch(`${BASE_URL}/api/orders?status=confirmed&paymentStatus=paid&limit=1000`),
         fetch(`${BASE_URL}/api/orders/stats`),
       ]);
       const ordersJson = await ordersRes.json();
-      const statsJson  = await statsRes.json();
+      const statsJson = await statsRes.json();
       if (ordersJson.success) setOrders(Array.isArray(ordersJson.data) ? ordersJson.data : []);
-      if (statsJson.success)  setStats(statsJson.data);
+      if (statsJson.success) setStats(statsJson.data);
       setLastUpdated(new Date());
     } catch (err) {
       console.error("Dashboard fetch error:", err);
@@ -55,7 +68,6 @@ export default function DentistChartsDashboard() {
 
   useEffect(() => { fetchData(); }, []);
 
-  // ✅ Revenue = sum of order.totalAmount (price * quantity, saved in backend)
   const totalRevenue = useMemo(
     () => orders.reduce((sum, o) => sum + (Number(o.totalAmount) || 0), 0),
     [orders]
@@ -86,7 +98,6 @@ export default function DentistChartsDashboard() {
 
   const topProducts = Object.entries(productRevenueMap).sort((a, b) => b[1] - a[1]);
 
-  // Chart configs
   const lineData = {
     labels: last7DaysRevenue.map((x) => x.d),
     datasets: [{
@@ -109,22 +120,18 @@ export default function DentistChartsDashboard() {
     maintainAspectRatio: false,
     plugins: {
       legend: { display: false },
-      tooltip: {
-        callbacks: { label: (c) => ` ${currencyUZS(c.raw)}` },
-      },
+      tooltip: { callbacks: { label: (c) => ` ${currencyUZS(c.raw)}` } },
     },
     scales: {
       y: {
         grid: { color: "rgba(234,179,8,0.08)" },
         ticks: {
           color: "#94a3b8",
+          maxTicksLimit: 4,
           callback: (v) => v >= 1_000_000 ? (v / 1_000_000).toFixed(1) + "M" : v.toLocaleString(),
         },
       },
-      x: {
-        grid: { display: false },
-        ticks: { color: "#94a3b8" },
-      },
+      x: { grid: { display: false }, ticks: { color: "#94a3b8" } },
     },
   };
 
@@ -146,52 +153,42 @@ export default function DentistChartsDashboard() {
     maintainAspectRatio: false,
     cutout: "68%",
     plugins: {
-      tooltip: {
-        callbacks: { label: (c) => ` ${c.label}: ${currencyUZS(c.raw)}` },
-      },
+      legend: { display: false },
+      tooltip: { callbacks: { label: (c) => ` ${c.label}: ${currencyUZS(c.raw)}` } },
     },
   };
 
   if (loading) return <LoadingTemplate />;
 
   return (
-    <div className="min-h-screen bg-base-300 p-4 md:p-6">
+    <div className="min-h-screen flex flex-col gap-5 md:gap-6 pb-8">
 
       {/* ── Header ── */}
-      <div className="flex flex-wrap justify-between items-start gap-4 mb-6">
-        <div>
-          <div className="flex items-center gap-2">
-            <BarChart2 className="text-warning" size={28} />
-            <h1 className="text-3xl font-black text-warning">Dashboard</h1>
-          </div>
-          <div className="flex items-center gap-2 mt-1">
-            <AlertCircle size={13} className="text-base-content/40" />
-            <p className="text-xs text-base-content/40">
-              Foyda faqat{" "}
-              <span className="badge badge-success badge-xs font-bold">delivered</span>
-              {" "}+{" "}
-              <span className="badge badge-info badge-xs font-bold">paid</span>
-              {" "}orderlardan hisoblanadi
-            </p>
-          </div>
-          {lastUpdated && (
-            <p className="text-xs text-base-content/25 mt-1">
-              Yangilandi: {lastUpdated.toLocaleTimeString("uz-UZ")}
-            </p>
-          )}
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between px-3 md:px-6 py-3 md:py-4 border-b border-base-300">
+        <div className="flex items-center gap-2">
+          <BarChart2 className="text-warning" size={20} />
+          <h1 className="text-base md:text-xl font-bold">Dashboard</h1>
+          <span className="badge badge-warning badge-xs md:badge-sm">delivered + paid</span>
         </div>
-        <button
-          onClick={() => fetchData(true)}
-          disabled={refreshing}
-          className="btn btn-warning btn-outline btn-sm gap-2"
-        >
-          <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} />
-          {refreshing ? "Yuklanmoqda..." : "Yangilash"}
-        </button>
+        <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3">
+          {lastUpdated && (
+            <span className="text-[10px] md:text-xs text-base-content/40">
+              {lastUpdated.toLocaleTimeString("uz-UZ")}
+            </span>
+          )}
+          <button
+            onClick={() => fetchData(true)}
+            disabled={refreshing}
+            className="btn btn-warning btn-outline btn-xs md:btn-sm gap-1"
+          >
+            <RefreshCw size={12} className={refreshing ? "animate-spin" : ""} />
+            {refreshing ? "..." : "Yangilash"}
+          </button>
+        </div>
       </div>
 
       {/* ── KPI Cards ── */}
-      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 mb-5">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 md:gap-4 px-3 md:px-6">
         <KpiCard
           icon={<DollarSign size={20} />}
           label="Sof foyda"
@@ -221,7 +218,7 @@ export default function DentistChartsDashboard() {
           sub="pending"
         />
         <KpiCard
-          icon={<ShoppingBag size={20} />}
+          icon={<Package size={20} />}
           label="Jami"
           value={stats?.totalOrders ?? "—"}
           colorClass="text-primary"
@@ -237,34 +234,48 @@ export default function DentistChartsDashboard() {
       </div>
 
       {/* ── Charts ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-5">
+      <div className="flex flex-col lg:flex-row gap-4 md:gap-6 px-3 md:px-6">
 
         {/* Line Chart */}
-        <div className="card bg-base-100 shadow border border-base-300 p-5">
-          <div className="flex items-center gap-2 mb-1">
-            <TrendingUp size={16} className="text-warning" />
-            <span className="font-bold text-sm">So'nggi 7 kun tushum</span>
+        <div className="card bg-base-200 flex-1 flex flex-col p-3 md:p-4">
+          <div className="flex items-start justify-between mb-2 md:mb-3">
+            <div>
+              <div className="font-semibold text-xs md:text-sm flex items-center gap-2">
+                <TrendingUp size={13} className="text-warning" />
+                So'nggi 7 kun tushum
+              </div>
+              <div className="text-[10px] md:text-xs text-base-content/50 mt-0.5">
+                Faqat yakunlangan buyurtmalar
+              </div>
+            </div>
           </div>
-          <p className="text-xs text-base-content/35 mb-4">Faqat yakunlangan buyurtmalar</p>
-          <div className="h-56">
+          <div className="flex-1" style={{ height: "clamp(160px, 30vw, 240px)" }}>
             <Line data={lineData} options={lineOpts} />
           </div>
         </div>
 
         {/* Doughnut */}
-        <div className="card bg-base-100 shadow border border-base-300 p-5">
-          <div className="flex items-center gap-2 mb-1">
-            <PieChart size={16} className="text-warning" />
-            <span className="font-bold text-sm">Mahsulotlar bo'yicha</span>
+        <div className="card bg-base-200 w-full lg:w-72 flex flex-col p-3 md:p-4">
+          <div className="flex items-start justify-between mb-2 md:mb-3">
+            <div>
+              <div className="font-semibold text-xs md:text-sm flex items-center gap-2">
+                <PieChart size={13} className="text-warning" />
+                Mahsulotlar bo'yicha
+              </div>
+              <div className="text-[10px] md:text-xs text-base-content/50 mt-0.5">
+                Har mahsulotdan tushgan foyda
+              </div>
+            </div>
           </div>
-          <p className="text-xs text-base-content/35 mb-4">Har mahsulotdan tushgan foyda</p>
-          <div className="h-56">
+          <div className="flex-1" style={{ height: "clamp(150px, 28vw, 210px)" }}>
             {topProducts.length > 0 ? (
               <Doughnut data={doughnutData} options={doughnutOpts} />
             ) : (
-              <div className="flex flex-col items-center justify-center h-full gap-2 text-base-content/30">
-                <Package size={36} />
-                <span className="text-sm">Ma'lumot yo'q</span>
+              <div className="h-full flex items-center justify-center">
+                <div className="text-center text-base-content/30">
+                  <AlertCircle size={28} className="mx-auto mb-2" />
+                  <p className="text-xs">Ma'lumot yo'q</p>
+                </div>
               </div>
             )}
           </div>
@@ -273,39 +284,35 @@ export default function DentistChartsDashboard() {
 
       {/* ── Top Products Table ── */}
       {topProducts.length > 0 && (
-        <div className="card bg-base-100 shadow border border-base-300 p-5 mb-5">
-          <div className="flex items-center gap-2 mb-4">
-            <ShoppingBag size={16} className="text-warning" />
-            <span className="font-bold text-sm">Mahsulotlar reytingi</span>
+        <div className="px-3 md:px-6">
+          <div className="font-semibold text-sm md:text-base flex items-center gap-2 mb-2 md:mb-3">
+            <ShoppingBag size={15} className="text-warning" />
+            Mahsulotlar reytingi
           </div>
-          <div className="overflow-x-auto">
-            <table className="table table-sm w-full">
+          <div className="overflow-x-auto rounded-xl">
+            <table className="table table-zebra w-full">
               <thead>
-                <tr className="border-base-300">
-                  <th className="text-base-content/40 font-semibold text-xs">#</th>
-                  <th className="text-base-content/40 font-semibold text-xs">Mahsulot</th>
-                  <th className="text-base-content/40 font-semibold text-xs text-right">Tushum</th>
-                  <th className="text-base-content/40 font-semibold text-xs text-right">Ulush</th>
+                <tr className="text-[10px] md:text-xs">
+                  <th>#</th>
+                  <th>Mahsulot</th>
+                  <th>Tushum</th>
+                  <th className="hidden sm:table-cell">Ulush</th>
                 </tr>
               </thead>
               <tbody>
                 {topProducts.map(([name, amt], i) => (
-                  <tr key={name} className="border-base-300 hover">
-                    <td>
-                      <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-black ${i < 3 ? "bg-warning/20 text-warning" : "text-base-content/30"}`}>
-                        {i + 1}
-                      </span>
-                    </td>
-                    <td className="font-semibold">{name}</td>
-                    <td className="text-right font-black text-warning">{currencyUZS(amt)}</td>
-                    <td className="text-right">
-                      <div className="flex items-center justify-end gap-2">
+                  <tr key={name}>
+                    <td className="font-bold text-warning text-xs md:text-sm">{i + 1}</td>
+                    <td className="text-xs md:text-sm max-w-[100px] md:max-w-none truncate">{name}</td>
+                    <td className="font-semibold text-xs md:text-sm whitespace-nowrap">{currencyUZS(amt)}</td>
+                    <td className="hidden sm:table-cell">
+                      <div className="flex items-center gap-2">
                         <progress
-                          className="progress progress-warning w-14 h-1.5"
+                          className="progress progress-warning w-14 md:w-20"
                           value={totalRevenue > 0 ? (amt / totalRevenue) * 100 : 0}
                           max="100"
                         />
-                        <span className="text-xs text-base-content/40 w-9 text-right">
+                        <span className="text-[10px] md:text-xs text-base-content/60">
                           {totalRevenue > 0 ? ((amt / totalRevenue) * 100).toFixed(1) + "%" : "0%"}
                         </span>
                       </div>
@@ -320,24 +327,31 @@ export default function DentistChartsDashboard() {
 
       {/* ── Stats cards from API ── */}
       {stats && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-          {[
-            { label: "Jami buyurtmalar", value: stats.totalOrders,     color: "text-warning"      },
-            { label: "Kutilmoqda",        value: stats.pendingOrders,   color: "text-orange-400"   },
-            { label: "Yetkazildi",        value: stats.completedOrders, color: "text-success"      },
-            { label: "Bekor qilindi",     value: stats.cancelledOrders, color: "text-error"        },
-          ].map((s) => (
-            <div key={s.label} className="card bg-base-100 shadow border border-base-300 p-4 text-center">
-              <p className="text-xs text-base-content/40 mb-1">{s.label}</p>
-              <p className={`text-3xl font-black ${s.color}`}>{s.value}</p>
-            </div>
-          ))}
+        <div className="px-3 md:px-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
+            {[
+              { label: "Jami buyurtmalar", value: stats.totalOrders, color: "text-warning" },
+              { label: "Kutilmoqda", value: stats.pendingOrders, color: "text-orange-400" },
+              { label: "Yetkazildi", value: stats.completedOrders, color: "text-success" },
+              { label: "Bekor qilindi", value: stats.cancelledOrders, color: "text-error" },
+            ].map((s) => (
+              <div
+                key={s.label}
+                className="card bg-base-200 p-3 md:p-4 flex flex-col items-center justify-center gap-1 text-center"
+              >
+                <div className="text-[10px] md:text-xs text-base-content/50">{s.label}</div>
+                <div className={`text-xl md:text-2xl font-bold ${s.color}`}>{s.value}</div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
-      <footer className="text-center text-xs text-base-content/20 py-4">
+      {/* ── Footer ── */}
+      <footer className="flex items-center justify-center text-[10px] md:text-xs text-base-content/30 mt-auto pt-3">
         © {new Date().getFullYear()} PRODUCT WARIORS
       </footer>
+
     </div>
   );
 }
