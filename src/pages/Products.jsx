@@ -9,9 +9,8 @@ import { FiPlusCircle } from "react-icons/fi";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const BASE_URL = import.meta.env.VITE_BACKENT_URL || "http://localhost:5000";
+const BASE_URL = import.meta.env.VITE_BACKENT_URL;
 
-// ─── Reusable Action Button ──────────────────────────────────────────────────
 const ActionBtn = ({ icon, bg, color, label, onClick }) => (
   <button
     className="flex flex-col items-center justify-center gap-0.5 group/btn"

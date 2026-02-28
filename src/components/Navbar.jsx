@@ -31,7 +31,7 @@ const Navbar = () => {
             <div tabIndex={0} className="btn btn-ghost btn-circle avatar">
               <div className="w-10 rounded-full">
                 <img
-                  src={user.image}
+                  src={user?.image}
                   alt="User Avatar"
                 />
               </div>
