@@ -27,6 +27,16 @@ const ActionBtn = ({ icon, bg, color, label, onClick }) => (
     )}
   </button>
 );
+
+const parseApiError = async (res, fallbackMessage) => {
+  try {
+    const data = await res.json();
+    return data?.message || fallbackMessage;
+  } catch {
+    return fallbackMessage;
+  }
+};
+
 const Products = () => {
   const [products, setProducts] = useState([]);
   const [showGrid, setShowGrid] = useState(false);
@@ -117,15 +127,33 @@ const Products = () => {
       const payload = {
         name: newProduct.name,
         description: newProduct.description,
-        price: newProduct.price,
+        price: Number(newProduct.price),
         image: validImages,
       };
-      const res = await fetch(`${BASE_URL}/api/product`, {
+      let res = await fetch(`${BASE_URL}/api/product`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error("Mahsulot qo'shilmadi");
+
+      if (!res.ok) {
+        const legacyPayload = {
+          name: newProduct.name,
+          description: newProduct.description,
+          price: Number(newProduct.price),
+          image: validImages[0] || "",
+        };
+        res = await fetch(`${BASE_URL}/api/product`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(legacyPayload),
+        });
+      }
+
+      if (!res.ok) {
+        const message = await parseApiError(res, "Mahsulot qo'shilmadi");
+        throw new Error(message);
+      }
       const added = await res.json();
       const createdProduct = added?.data || added;
       setProducts((prev) => [...prev, createdProduct]);
@@ -133,7 +161,7 @@ const Products = () => {
       setNewProduct({ name: "", images: ["", "", ""], description: "", price: "" });
       document.getElementById("product_modal").close();
     } catch (err) {
-      toast.error("Mahsulot qo'shishda xatolik.");
+      toast.error(err.message || "Mahsulot qo'shishda xatolik.");
       console.error(err);
     }
   };
@@ -144,15 +172,33 @@ const Products = () => {
       const payload = {
         name: newProduct.name,
         description: newProduct.description,
-        price: newProduct.price,
+        price: Number(newProduct.price),
         image: validImages,
       };
-      const res = await fetch(`${BASE_URL}/api/product/${editingProductId}`, {
+      let res = await fetch(`${BASE_URL}/api/product/${editingProductId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error("Mahsulot yangilanmadi");
+
+      if (!res.ok) {
+        const legacyPayload = {
+          name: newProduct.name,
+          description: newProduct.description,
+          price: Number(newProduct.price),
+          image: validImages[0] || "",
+        };
+        res = await fetch(`${BASE_URL}/api/product/${editingProductId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(legacyPayload),
+        });
+      }
+
+      if (!res.ok) {
+        const message = await parseApiError(res, "Mahsulot yangilanmadi");
+        throw new Error(message);
+      }
       const updated = await res.json();
       const updatedProduct = updated?.data || updated;
       setProducts((prev) =>
@@ -162,7 +208,7 @@ const Products = () => {
       resetProductForm();
       document.getElementById("product_modal").close();
     } catch (err) {
-      toast.error("Mahsulotni yangilashda xatolik.");
+      toast.error(err.message || "Mahsulotni yangilashda xatolik.");
       console.error(err);
     }
   };
@@ -181,18 +227,44 @@ const Products = () => {
   const duplicateProduct = async (item) => {
     try {
       const { _id, ...rest } = item;
-      const res = await fetch(`${BASE_URL}/api/product`, {
+      const normalizedImages = Array.isArray(rest.image)
+        ? rest.image.filter(Boolean).slice(0, 3)
+        : [rest.image].filter(Boolean);
+      const payload = {
+        ...rest,
+        price: Number(rest.price),
+        image: normalizedImages,
+      };
+
+      let res = await fetch(`${BASE_URL}/api/product`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(rest),
+        body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error();
+
+      if (!res.ok) {
+        const legacyPayload = {
+          ...rest,
+          price: Number(rest.price),
+          image: normalizedImages[0] || "",
+        };
+        res = await fetch(`${BASE_URL}/api/product`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(legacyPayload),
+        });
+      }
+
+      if (!res.ok) {
+        const message = await parseApiError(res, "Mahsulot nusxalanmadi");
+        throw new Error(message);
+      }
       const added = await res.json();
       const duplicatedProduct = added?.data || added;
       setProducts((prev) => [...prev, duplicatedProduct]);
       toast.success("Mahsulot nusxalandi!");
-    } catch {
-      toast.error("Mahsulotni nusxalashda xatolik.");
+    } catch (err) {
+      toast.error(err.message || "Mahsulotni nusxalashda xatolik.");
     }
   };
 

@@ -376,11 +376,10 @@ export default function Orders() {
     <div className="min-h-screen bg-base-300 p-4 text-zinc-100 ">
       <Toast toast={toast} />
 
-    {/* project */}
       
       <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2 text-warning">
             <ShoppingBag size={22} className="text-amber-400" />
             Buyurtmalar
           </h1>
