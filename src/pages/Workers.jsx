@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { TbUsersPlus } from "react-icons/tb";
 import { FiEdit, FiTrash2, FiSearch } from "react-icons/fi";
-import { motion, AnimatePresence } from "framer-motion";
 import LoadingTemplate from "../components/LoadingTemplate";
 import WorkerModal from "../components/WorkerModal";
 import { CheckCircle, AlertCircle, Trash2, RefreshCw } from "lucide-react";
@@ -255,14 +254,10 @@ const Workers = () => {
               </tr>
             </thead>
             <tbody>
-              <AnimatePresence>
+              <>
                 {filteredWorkers.map((worker, index) => (
-                  <motion.tr
+                  <tr
                     key={worker._id}
-                    initial={{ opacity: 0, y: -5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 5 }}
-                    layout
                     className="hover:bg-base-200 transition-colors"
                   >
                     <td className="font-mono">{index + 1}</td>
@@ -300,9 +295,9 @@ const Workers = () => {
                         }
                       </button>
                     </td>
-                  </motion.tr>
+                  </tr>
                 ))}
-              </AnimatePresence>
+              </>
             </tbody>
           </table>
         </div>

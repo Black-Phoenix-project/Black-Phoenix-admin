@@ -174,7 +174,7 @@ const Products = () => {
       if (!res.ok) throw new Error("O'chirishda xatolik");
       setProducts((prev) => prev.filter((p) => p._id !== id));
       toast.success("Mahsulot o'chirildi.");
-    } catch (err) {
+    } catch {
       toast.error("Mahsulotni o'chirishda xatolik.");
     }
   };

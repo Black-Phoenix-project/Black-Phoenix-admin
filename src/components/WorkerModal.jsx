@@ -1,5 +1,4 @@
 import React from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { TbUsersPlus, TbUserCircle } from "react-icons/tb";
 import {
   FiX,
@@ -26,24 +25,17 @@ const WorkerModal = ({
   };
 
   return (
-    <AnimatePresence>
+    <>
       {modalOpen && (
         <>
-          <motion.div
+          <div
             className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
             onClick={closeModal}
           />
 
           <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 pointer-events-none">
-            <motion.div
+            <div
               className="bg-base-100 rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden pointer-events-auto"
-              initial={{ scale: 0.9, opacity: 0, y: 50 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 50 }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
               onClick={(e) => e.stopPropagation()}
             >
               
@@ -82,12 +74,7 @@ const WorkerModal = ({
               >
                 <div className="p-6 sm:p-8 space-y-8">
                   
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
-                    className="space-y-4"
-                  >
+                  <div className="space-y-4">
                     <div className="flex items-center gap-3 pb-2 border-b-2 border-warning/20">
                       <FiUser className="text-warning text-xl" />
                       <h3 className="text-base sm:text-lg font-bold text-base-content">
@@ -132,15 +119,10 @@ const WorkerModal = ({
                         />
                       </div>
                     </div>
-                  </motion.div>
+                  </div>
 
                   
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                    className="space-y-4"
-                  >
+                  <div className="space-y-4">
                     <div className="flex items-center gap-3 pb-2 border-b-2 border-warning/20">
                       <FiBriefcase className="text-warning text-xl" />
                       <h3 className="text-base sm:text-lg font-bold text-base-content">
@@ -209,18 +191,13 @@ const WorkerModal = ({
                         </div>
                       </div>
                     </div>
-                  </motion.div>
+                  </div>
 
                   
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                    className="space-y-4"
-                  >
+                  <div className="space-y-4">
                   
 
-                  </motion.div>
+                  </div>
                 </div>
 
                 
@@ -252,11 +229,11 @@ const WorkerModal = ({
                   </button>
                 </div>
               </form>
-            </motion.div>
+            </div>
           </div>
         </>
       )}
-    </AnimatePresence>
+    </>
   );
 };
 
