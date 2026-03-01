@@ -15,22 +15,21 @@ const WorkerList = ({ workers, professions, editWorkerHandler, deleteWorkerHandl
 
     return (
         <div className="overflow-x-auto h-[65vh] text-xs w-full">
-            {/* Sarlavhalar */}
+            
             <div className="grid grid-cols-12 bg-primary text-base-content font-semibold p-3 rounded-t-lg">
                 <div className="text-center w-[5%]">ID</div>
                 <div className="flex items-center gap-3"><FaUser />First Name</div>
                 <div className="flex items-center gap-3"><FaUser />Last Name</div>
                 <div className="text-center">Age</div>
                 <div className="flex items-center gap-3"><FaVenusMars />Gender</div>
-                <div className="flex items-center gap-3"><FaPhone />Phone</div>
+                <div className="flex items-center gap-3"><FaPhone />Telefon</div>
                 <div className="flex items-center gap-3"><FaBriefcase />Profession</div>
                 <div className="flex items-center gap-3"><CiMoneyBill />Salary</div>
                 <div className="flex items-center gap-3"><FaClock />Work Time</div>
-                <div className="flex items-center gap-3"><RiLockPasswordFill />Password</div>
-                <div className="text-center">Status</div>
-                <div className="text-center">Actions</div>
+                <div className="flex items-center gap-3"><RiLockPasswordFill />Parol</div>
+                <div className="text-center">Holat</div>
+                <div className="text-center">Amallar</div>
             </div>
-
 
             {workers.map((worker, index) => (
                 <div key={worker.id} className="grid grid-cols-12 font-medium text-base-content p-3 border-b border-opacity-30 border-base-300 bg-opacity-30  text-left items-center">
@@ -60,24 +59,10 @@ const WorkerList = ({ workers, professions, editWorkerHandler, deleteWorkerHandl
                     </div>
                     <div className="text-center">
                         <span className={`badge badge-xs font-normal text-base-100 ${worker?.status?.toLowerCase() === "active" ? "badge-success" : "badge-error"}`}>
-                            {worker.status || "Active"}
+                            {worker.status || "Faol"}
                         </span>
 
-                        {/* {
-                            worker.status === "active" ? (
-                                <div className="inline-grid *:[grid-area:1/1]">
-                                    <div className="status status-error animate-ping"></div>
-                                    <div className="status status-error"></div>
-                                </div>
-                            ) : (
-                                <div className="inline-grid *:[grid-area:1/1]">
-                                    <div className="status status-error animate-ping"></div>
-                                    <div className="status status-error"></div>
-                                </div>
-                            )
-                        } */}
-
-
+                        
 
                     </div>
                     <div className="flex gap-2 justify-center ">

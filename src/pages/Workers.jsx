@@ -75,7 +75,7 @@ const Workers = () => {
     position: "",
     salary: "",
     phone: "",
-    status: "Active",
+    status: "Faol",
   });
   const [toast, setToast] = useState(null);
   const [confirmDialog, setConfirmDialog] = useState({ open: false, id: null, name: "" });
@@ -90,12 +90,12 @@ const Workers = () => {
     try {
       setLoading(true);
       const response = await fetch(API_URL);
-      if (!response.ok) throw new Error("Failed to fetch workers");
+      if (!response.ok) throw new Error("Ishchilarni yuklashda xatolik");
       const data = await response.json();
       setWorkers(data.data || []);
       setFilteredWorkers(data.data || []);
     } catch (err) {
-      setError(err.message || "Something went wrong");
+      setError(err.message || "Nimadir xato ketdi");
     } finally {
       setLoading(false);
     }
@@ -125,7 +125,7 @@ const Workers = () => {
     setDeleting(true);
     try {
       const response = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
-      if (!response.ok) throw new Error("Failed to delete worker");
+      if (!response.ok) throw new Error("Ishchini o'chirishda xatolik");
       setWorkers((prev) => prev.filter((w) => w._id !== id));
       setConfirmDialog({ open: false, id: null, name: "" });
       showToast(` ${name} o'chirildi`);
@@ -145,11 +145,11 @@ const Workers = () => {
         position: worker.position,
         salary: worker.salary,
         phone: worker.phone || "",
-        status: worker.status || "Active",
+        status: worker.status || "Faol",
       });
     } else {
       setEditWorker(null);
-      setFormData({ firstname: "", lastname: "", position: "", salary: "", phone: "", status: "Active" });
+      setFormData({ firstname: "", lastname: "", position: "", salary: "", phone: "", status: "Faol" });
     }
     setModalOpen(true);
   };
@@ -157,7 +157,7 @@ const Workers = () => {
   const closeModal = () => {
     setModalOpen(false);
     setEditWorker(null);
-    setFormData({ firstname: "", lastname: "", position: "", salary: "", phone: "", status: "Active" });
+    setFormData({ firstname: "", lastname: "", position: "", salary: "", phone: "", status: "Faol" });
   };
 
   const handleFormSubmit = async (e) => {
@@ -177,7 +177,7 @@ const Workers = () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(submitData),
         });
-        if (!response.ok) throw new Error("Failed to update worker");
+        if (!response.ok) throw new Error("Ishchini yangilashda xatolik");
         showToast(` ${submitData.firstname} ${submitData.lastname} yangilandi`);
       } else {
         const response = await fetch(API_URL, {
@@ -185,7 +185,7 @@ const Workers = () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(submitData),
         });
-        if (!response.ok) throw new Error("Failed to create worker");
+        if (!response.ok) throw new Error("Ishchi qo'shishda xatolik");
         showToast(` ${submitData.firstname} ${submitData.lastname} qo'shildi`);
       }
       closeModal();
@@ -214,11 +214,11 @@ const Workers = () => {
         onCancel={() => setConfirmDialog({ open: false, id: null, name: "" })}
       />
 
-      {/* Header */}
+      
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-3xl font-bold text-warning">Ishchilarimiz</h1>
         <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-3">
-          {/* Search */}
+          
           <div className="relative sm:w-64">
             <FiSearch className="absolute top-1/2 left-3 -translate-y-1/2 text-base-content/40" />
             <input
@@ -229,7 +229,7 @@ const Workers = () => {
               className="input input-bordered border-warning w-full pl-9 focus:outline-warning"
             />
           </div>
-          {/* Add button */}
+          
           <button
             className="btn btn-warning text-base-300 gap-2"
             onClick={() => openModal()}
@@ -240,7 +240,7 @@ const Workers = () => {
         </div>
       </div>
 
-      {/* Table */}
+      
       <div className="bg-base-100 rounded-xl shadow-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="table table-zebra w-full">
@@ -250,7 +250,7 @@ const Workers = () => {
                 <th>To'liq Ism</th>
                 <th>Kasb</th>
                 <th>Telefon</th>
-                <th>Status</th>
+                <th>Holat</th>
                 <th className="rounded-tr-xl text-center">Harakatlar</th>
               </tr>
             </thead>
@@ -274,10 +274,10 @@ const Workers = () => {
                     <td>
                       <span
                         className={`badge ${
-                          worker.status === "Active" ? "badge-success" : "badge-success"
+                          worker.status === "Faol" ? "badge-success" : "badge-success"
                         } text-black`}
                       >
-                        {worker.status === "Active" ? "Faol" : "Faol"}
+                        {worker.status === "Faol" ? "Faol" : "Faol"}
                       </span>
                     </td>
                     <td className="flex gap-2 justify-center">
@@ -314,7 +314,7 @@ const Workers = () => {
         )}
       </div>
 
-      {/* Modal */}
+      
       <WorkerModal
         modalOpen={modalOpen}
         closeModal={closeModal}

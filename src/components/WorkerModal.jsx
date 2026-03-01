@@ -46,7 +46,7 @@ const WorkerModal = ({
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Header */}
+              
               <div className="bg-gradient-to-r from-warning to-warning/80 px-8 py-6 relative overflow-hidden">
                 <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAwIDEwIEwgNDAgMTAgTSAxMCAwIEwgMTAgNDAgTSAwIDIwIEwgNDAgMjAgTSAyMCAwIEwgMjAgNDAgTSAwIDMwIEwgNDAgMzAgTSAzMCAwIEwgMzAgNDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjEpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30"></div>
                 <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -75,13 +75,13 @@ const WorkerModal = ({
                 </div>
               </div>
 
-              {/* Form Body */}
+              
               <form
                 onSubmit={handleFormSubmit}
                 className="overflow-y-auto max-h-[calc(90vh-200px)]"
               >
                 <div className="p-6 sm:p-8 space-y-8">
-                  {/* Personal Information Section */}
+                  
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -96,7 +96,7 @@ const WorkerModal = ({
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                      {/* First Name */}
+                      
                       <div className="form-control">
                         <label className="label">
                           <span className="label-text font-semibold flex items-center gap-2">
@@ -114,7 +114,7 @@ const WorkerModal = ({
                         />
                       </div>
 
-                      {/* Last Name */}
+                      
                       <div className="form-control">
                         <label className="label">
                           <span className="label-text font-semibold flex items-center gap-2">
@@ -134,7 +134,7 @@ const WorkerModal = ({
                     </div>
                   </motion.div>
 
-                  {/* Job Information Section */}
+                  
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -149,7 +149,7 @@ const WorkerModal = ({
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                      {/* Position */}
+                      
                       <div className="form-control">
                         <label className="label">
                           <span className="label-text font-semibold flex items-center gap-2">
@@ -167,7 +167,7 @@ const WorkerModal = ({
                         />
                       </div>
 
-                      {/* Phone */}
+                      
                       <div className="form-control">
                         <label className="label">
                           <span className="label-text font-semibold flex items-center gap-2">
@@ -185,7 +185,7 @@ const WorkerModal = ({
                         />
                       </div>
 
-                      {/* Salary */}
+                      
                       <div className="form-control lg:col-span-2">
                         <label className="label">
                           <span className="label-text font-semibold flex items-center gap-2">
@@ -211,7 +211,7 @@ const WorkerModal = ({
                     </div>
                   </motion.div>
 
-                  {/* Status Section */}
+                  
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -223,7 +223,7 @@ const WorkerModal = ({
                   </motion.div>
                 </div>
 
-                {/* Footer Actions */}
+                
                 <div className="px-6 sm:px-8 py-4 sm:py-6 bg-base-200/50 border-t border-base-300 flex flex-col sm:flex-row gap-3 justify-end sticky bottom-0">
                   <button
                     type="button"

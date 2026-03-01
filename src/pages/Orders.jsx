@@ -32,8 +32,6 @@ function isDeliveredAllowed(currentStatus) {
   const currentIdx = STATUS_ORDER.indexOf(currentStatus);
   return currentIdx >= confirmedIdx && currentStatus !== "cancelled";
 }
-
-// ── Custom Dropdown ──────────────────────────────────────────────
 function CustomSelect({ value, onChange, options, disabled, className, dropUp }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
@@ -55,12 +53,12 @@ function CustomSelect({ value, onChange, options, disabled, className, dropUp })
         onClick={() => setOpen(p => !p)}
         className={`
           w-full flex items-center justify-between gap-2
-          bg-zinc-900 border rounded-xl px-3 py-2
+          bg-base-100 border rounded-xl px-3 py-2
           text-xs font-medium transition-all
           hover:border-amber-400/50 focus:outline-none
           disabled:opacity-60 disabled:cursor-not-allowed
           ${current?.borderClass || "border-zinc-700"}
-          ${current?.colorClass || "text-zinc-300"}
+          ${current?.colorClass || "text-base-content"}
         `}
       >
         <span className="flex items-center gap-1.5 truncate">
@@ -92,7 +90,7 @@ function CustomSelect({ value, onChange, options, disabled, className, dropUp })
               }}
               className={`
                 w-full flex items-center justify-between px-3.5 py-2.5 text-xs
-                transition-colors duration-100
+                transition-colors duration-100 cursor-pointer
                 ${opt.disabled ? "opacity-30 cursor-not-allowed" : "cursor-pointer hover:bg-white/5"}
                 ${opt.value === value ? "bg-white/5" : ""}
                 ${opt.colorClass || "text-zinc-300"}
@@ -147,32 +145,31 @@ function Toast({ toast }) {
     </div>
   );
 }
-
-// ── Order Card ────────────────────────────────────────────────────
 function OrderCard({ order, idx, page, LIMIT, updating, deleting, onView, onDelete, onStatusChange, onPaymentChange }) {
   return (
-    <div className="bg-base-300 border border-zinc-800/80 rounded-2xl px-4 py-3.5 hover:border-zinc-700/80 transition-colors">
+    <div className={`w-full rounded-2xl border px-4 py-3.5   transition-all hover:border-warning/40 ${
+      idx % 2 === 0 ? "bg-base-100 border-base-content/10" : "bg-base-200 border-base-content/5"
+    }`}>
       <div className="flex items-center gap-3 flex-wrap lg:flex-nowrap">
 
-        {/* Index */}
+        
         <span className="text-zinc-600 font-mono text-xs w-5 shrink-0 hidden sm:block">
           {(page - 1) * LIMIT + idx + 1}
         </span>
 
-        {/* Customer */}
+        
         <div className="flex items-center gap-2.5 w-44 shrink-0">
-          <div className="w-8 h-8 rounded-xl bg-zinc-800 flex items-center justify-center shrink-0">
+          <div className="w-8 h-8 rounded-xl  flex items-center justify-center shrink-0">
             <User size={13} className="text-zinc-500" />
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-zinc-100 truncate leading-tight">{order.username}</p>
-            <p className="text-xs text-zinc-500 truncate">{order.phoneNumber}</p>
+            <p className="text-sm font-semibold text-base-content truncate leading-tight">{order.username}</p>
+            <p className="text-xs text-base-content/50 truncate">{order.phoneNumber}</p>
           </div>
         </div>
 
-        <div className="hidden lg:block w-px h-8 bg-zinc-800 shrink-0" />
+        <div className="hidden lg:block w-px h-8 shrink-0" />
 
-        {/* Product */}
         <div className="flex items-center gap-2.5 flex-1 min-w-[180px]">
           {order.product?.image ? (
             <img
@@ -187,22 +184,20 @@ function OrderCard({ order, idx, page, LIMIT, updating, deleting, onView, onDele
             </div>
           )}
           <div className="min-w-0">
-            <p className="text-sm font-medium text-zinc-200 truncate leading-tight max-w-[180px]">
+            <p className="text-sm font-medium text-base-content truncate leading-tight max-w-[180px]">
               {order.product?.productName || "—"}
             </p>
-            <p className="text-xs text-zinc-500">{order.product?.quantity || 1} dona</p>
+            <p className="text-xs text-base-content/50">{order.product?.quantity || 1} dona</p>
           </div>
         </div>
 
-        {/* Price */}
         <div className="w-36 shrink-0 text-right hidden md:block">
-          <p className="text-sm font-bold text-amber-400">{currencyUZS(order.totalAmount)}</p>
-          <p className="text-xs text-zinc-600">{currencyUZS(order.product?.price)} / dona</p>
+          <p className="text-sm font-bold text-warning">{currencyUZS(order.totalAmount)}</p>
+          <p className="text-xs text-base-content/50">{currencyUZS(order.product?.price)} / dona</p>
         </div>
 
-        <div className="hidden lg:block w-px h-8 bg-zinc-800 shrink-0" />
+        <div className="hidden lg:block w-px h-8  shrink-0" />
 
-        {/* Status */}
         <div className="w-36 shrink-0">
           <CustomSelect
             value={order.status}
@@ -212,7 +207,6 @@ function OrderCard({ order, idx, page, LIMIT, updating, deleting, onView, onDele
           />
         </div>
 
-        {/* Payment */}
         <div className="w-32 shrink-0">
           <CustomSelect
             value={order.paymentStatus}
@@ -222,9 +216,8 @@ function OrderCard({ order, idx, page, LIMIT, updating, deleting, onView, onDele
           />
         </div>
 
-        <div className="hidden lg:block w-px h-8 bg-zinc-800 shrink-0" />
+        <div className="hidden lg:block w-px h-8  shrink-0" />
 
-        {/* Date */}
         <div className="items-center gap-1.5 text-zinc-500 text-xs w-24 shrink-0 hidden xl:flex">
           <Calendar size={11} className="shrink-0" />
           <span>
@@ -234,7 +227,6 @@ function OrderCard({ order, idx, page, LIMIT, updating, deleting, onView, onDele
           </span>
         </div>
 
-        {/* Actions */}
         <div className="flex items-center gap-2 ml-auto shrink-0">
           {(updating[order._id + "_status"] || updating[order._id + "_pay"]) && (
             <RefreshCw size={12} className="animate-spin text-amber-400" />
@@ -264,7 +256,6 @@ function OrderCard({ order, idx, page, LIMIT, updating, deleting, onView, onDele
   );
 }
 
-// ── Main Component ────────────────────────────────────────────────
 export default function Orders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -324,7 +315,7 @@ export default function Orders() {
       if (json.success) {
         setOrders(prev => prev.map(o => o._id === orderId ? { ...o, status: newStatus } : o));
         if (selectedOrder?._id === orderId) setSelectedOrder(p => ({ ...p, status: newStatus }));
-        showToast(`✅ Status: "${STATUS_CONFIG[newStatus]?.label}" ga o'zgartirildi`);
+        showToast(`✅ Holat: "${STATUS_CONFIG[newStatus]?.label}" ga o'zgartirildi`);
       } else showToast(json.message || "Xatolik", "error");
     } catch {
       showToast("Server xatosi", "error");
@@ -382,15 +373,15 @@ export default function Orders() {
   });
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 p-6">
+    <div className="min-h-screen bg-base-300 p-4 text-zinc-100 ">
       <Toast toast={toast} />
 
-      {/* Header */}
+      
       <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
             <ShoppingBag size={22} className="text-amber-400" />
-            Orders
+            Buyurtmalar
           </h1>
           <p className="text-zinc-500 text-sm mt-0.5">
             Jami <span className="text-amber-400 font-semibold">{totalCount}</span> ta buyurtma
@@ -405,7 +396,7 @@ export default function Orders() {
         </button>
       </div>
 
-      {/* Filters */}
+      
       <div className="flex flex-wrap gap-3 mb-5">
         <div className="relative flex-1 min-w-[200px]">
           <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
@@ -413,7 +404,7 @@ export default function Orders() {
             value={search}
             placeholder="Qidirish..."
             onChange={e => setSearch(e.target.value)}
-            className="w-full bg-zinc-900 border border-zinc-700 rounded-xl pl-9 pr-4 py-2.5 text-sm focus:border-amber-400 focus:outline-none transition-colors"
+            className="w-full bg-zinc-900 border border-warning rounded-xl pl-9 pr-4 py-2.5 text-sm focus:border-amber-400 focus:outline-none transition-colors"
           />
         </div>
 
@@ -462,7 +453,7 @@ export default function Orders() {
         )}
       </div>
 
-      {/* Column labels */}
+      
       {!loading && filteredOrders.length > 0 && (
         <div className="hidden lg:flex items-center gap-3 px-4 mb-2 text-xs font-semibold text-zinc-600 uppercase tracking-wider">
           <span className="w-5 shrink-0">#</span>
@@ -471,15 +462,15 @@ export default function Orders() {
           <span className="flex-1 min-w-[180px]">Mahsulot</span>
           <span className="w-36 shrink-0 text-right hidden md:block">Narx</span>
           <div className="w-px" />
-          <span className="w-36 shrink-0">Status</span>
+          <span className="w-36 shrink-0">Holat</span>
           <span className="w-32 shrink-0">To'lov</span>
           <div className="w-px" />
           <span className="w-24 shrink-0 hidden xl:block">Sana</span>
-          <span className="ml-auto w-20 text-right">Xolat</span>
+          <span className="ml-auto w-20 text-right">Amallar</span>
         </div>
       )}
 
-      {/* Content */}
+      
       {loading ? (
         <LoadingTemplate />
       ) : filteredOrders.length === 0 ? (
@@ -507,7 +498,7 @@ export default function Orders() {
             ))}
           </div>
 
-          {/* Pagination */}
+          
           {totalPages > 1 && (
             <div className="flex items-center justify-center gap-2 mt-6">
               <button
@@ -542,7 +533,7 @@ export default function Orders() {
         </>
       )}
 
-      {/* Detail Modal */}
+      
       {selectedOrder && (
         <div
           className="fixed inset-0 z-50 bg-base-300 backdrop-blur-sm flex items-center justify-center p-4"
@@ -550,7 +541,7 @@ export default function Orders() {
         >
           <div className="bg-zinc-900 border border-zinc-800 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden">
 
-            {/* Modal header */}
+            
             <div className="flex items-center justify-between px-6 py-5 border-b border-zinc-800">
               <h2 className="font-bold text-lg flex items-center gap-2">
                 <FileText size={18} className="text-amber-400" />
@@ -566,7 +557,7 @@ export default function Orders() {
 
             <div className="p-6 space-y-4 overflow-y-auto max-h-[70vh]">
 
-              {/* Customer */}
+              
               <div className="bg-zinc-800/40 rounded-2xl p-4 space-y-3">
                 <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Mijoz ma'lumotlari</p>
                 <div className="flex items-center gap-3">
@@ -588,7 +579,7 @@ export default function Orders() {
                 )}
               </div>
 
-              {/* Product */}
+              
               <div className="bg-zinc-800/40 rounded-2xl p-4">
                 <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">Mahsulot</p>
                 <div className="flex items-center gap-3">
@@ -614,10 +605,10 @@ export default function Orders() {
                 </div>
               </div>
 
-              {/* Status + Payment */}
+              
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-zinc-800/40 rounded-2xl p-4 space-y-2">
-                  <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Status</p>
+                  <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Holat</p>
                   <CustomSelect
                     value={selectedOrder.status}
                     onChange={v => updateStatus(selectedOrder._id, v, selectedOrder.status)}
@@ -641,14 +632,14 @@ export default function Orders() {
                 </div>
               </div>
 
-              {/* Date */}
+              
               <p className="text-xs text-center text-zinc-600 flex items-center justify-center gap-1.5">
                 <Calendar size={11} />
                 {new Date(selectedOrder.createdAt).toLocaleString("uz-UZ")}
               </p>
             </div>
 
-            {/* Footer */}
+            
             <div className="flex gap-3 px-6 pb-6">
               <button
                 onClick={() => { deleteOrder(selectedOrder._id); setSelectedOrder(null); }}
@@ -670,3 +661,6 @@ export default function Orders() {
     </div>
   );
 }
+
+
+ 

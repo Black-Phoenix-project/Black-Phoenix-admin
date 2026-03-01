@@ -27,32 +27,37 @@ const ActionBtn = ({ icon, bg, color, label, onClick }) => (
     )}
   </button>
 );
-
-// ─── Main Component ───────────────────────────────────────────────────────────
 const Products = () => {
   const [products, setProducts] = useState([]);
   const [showGrid, setShowGrid] = useState(false);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [editingProductId, setEditingProductId] = useState(null);
   const [newProduct, setNewProduct] = useState({
     name: "",
-    image: "",
+    images: ["", "", ""],
     description: "",
     price: "",
   });
+  const resetProductForm = () => {
+    setNewProduct({
+      name: "",
+      images: ["", "", ""],
+      description: "",
+      price: "",
+    });
+    setEditingProductId(null);
+  };
 
   useEffect(() => {
     fetchProducts();
   }, []);
-
-  // ── Fetch all products ──────────────────────────────────────────────────────
   const fetchProducts = async () => {
     setLoading(true);
     try {
       const res = await fetch(`${BASE_URL}/api/product`);
-      if (!res.ok) throw new Error("Failed to fetch products");
+      if (!res.ok) throw new Error("Mahsulotlarni olishda xatolik");
       const data = await res.json();
-      // API may return { products: [] } or { data: [] } or directly []
       const list = Array.isArray(data)
         ? data
         : Array.isArray(data.products)
@@ -62,65 +67,117 @@ const Products = () => {
         : [];
       setProducts(list);
     } catch (err) {
-      toast.error("Failed to load products.");
+      toast.error("Mahsulotlarni yuklashda xatolik.");
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
-
-  // ── Input handler ───────────────────────────────────────────────────────────
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewProduct((prev) => ({ ...prev, [name]: value }));
   };
-
-  // ── Validate form ───────────────────────────────────────────────────────────
+  const handleImageChange = (index, value) => {
+    setNewProduct((prev) => {
+      const nextImages = [...prev.images];
+      nextImages[index] = value;
+      return { ...prev, images: nextImages };
+    });
+  };
   const validateInputs = () => {
-    const { name, image, description, price} =  newProduct;
-    if (!name || !image || !description || !price) {
-      toast.error("All fields are required!");
+    const { name, images, description, price } = newProduct;
+    const validImages = (images || []).map((img) => img.trim()).filter(Boolean);
+    if (!name || !description || !price) {
+      toast.error("Barcha maydonlar to'ldirilishi shart!");
+      return false;
+    }
+    if (validImages.length < 1 || validImages.length > 3) {
+      toast.error("Kamida 1 ta, ko'pi bilan 3 ta rasm kiriting!");
       return false;
     }
     return true;
   };
-
-  // ── Create product ──────────────────────────────────────────────────────────
+  const openEditModal = (product) => {
+    const rawImages = Array.isArray(product.image) ? product.image : [product.image];
+    const cleanImages = rawImages.filter(Boolean).slice(0, 3);
+    const filledImages = [...cleanImages, "", ""].slice(0, 3);
+    setEditingProductId(product._id);
+    setNewProduct({
+      name: product.name || "",
+      description: product.description || "",
+      price: product.price ?? "",
+      images: filledImages,
+    });
+    document.getElementById("product_modal").showModal();
+  };
   const sendNewProduct = async () => {
     if (!validateInputs()) return;
     try {
+      const validImages = (newProduct.images || []).map((img) => img.trim()).filter(Boolean);
+      const payload = {
+        name: newProduct.name,
+        description: newProduct.description,
+        price: newProduct.price,
+        image: validImages,
+      };
       const res = await fetch(`${BASE_URL}/api/product`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newProduct),
+        body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error("Failed to add product");
+      if (!res.ok) throw new Error("Mahsulot qo'shilmadi");
       const added = await res.json();
-      setProducts((prev) => [...prev, added]);
-      toast.success("Product added successfully!");
-      setNewProduct({ name: "", image: "", description: "", price: "",  });
+      const createdProduct = added?.data || added;
+      setProducts((prev) => [...prev, createdProduct]);
+      toast.success("Mahsulot muvaffaqiyatli qo'shildi!");
+      setNewProduct({ name: "", images: ["", "", ""], description: "", price: "" });
       document.getElementById("product_modal").close();
     } catch (err) {
-      toast.error("Error adding product.");
+      toast.error("Mahsulot qo'shishda xatolik.");
       console.error(err);
     }
   };
-
-  // ── Delete product ──────────────────────────────────────────────────────────
+  const updateProduct = async () => {
+    if (!validateInputs() || !editingProductId) return;
+    try {
+      const validImages = (newProduct.images || []).map((img) => img.trim()).filter(Boolean);
+      const payload = {
+        name: newProduct.name,
+        description: newProduct.description,
+        price: newProduct.price,
+        image: validImages,
+      };
+      const res = await fetch(`${BASE_URL}/api/product/${editingProductId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error("Mahsulot yangilanmadi");
+      const updated = await res.json();
+      const updatedProduct = updated?.data || updated;
+      setProducts((prev) =>
+        prev.map((item) => (item._id === editingProductId ? updatedProduct : item))
+      );
+      toast.success("Mahsulot muvaffaqiyatli yangilandi!");
+      resetProductForm();
+      document.getElementById("product_modal").close();
+    } catch (err) {
+      toast.error("Mahsulotni yangilashda xatolik.");
+      console.error(err);
+    }
+  };
   const deleteProduct = async (id) => {
     try {
       const res = await fetch(`${BASE_URL}/api/product/${id}`, {
         method: "DELETE",
       });
-      if (!res.ok) throw new Error("Delete failed");
+      if (!res.ok) throw new Error("O'chirishda xatolik");
       setProducts((prev) => prev.filter((p) => p._id !== id));
-      toast.success("Product deleted.");
+      toast.success("Mahsulot o'chirildi.");
     } catch (err) {
-      toast.error("Failed to delete product.");
+      toast.error("Mahsulotni o'chirishda xatolik.");
     }
   };
-
-  // ── Duplicate product ───────────────────────────────────────────────────────
   const duplicateProduct = async (item) => {
     try {
       const { _id, ...rest } = item;
@@ -131,10 +188,11 @@ const Products = () => {
       });
       if (!res.ok) throw new Error();
       const added = await res.json();
-      setProducts((prev) => [...prev, added]);
-      toast.success("Product duplicated!");
+      const duplicatedProduct = added?.data || added;
+      setProducts((prev) => [...prev, duplicatedProduct]);
+      toast.success("Mahsulot nusxalandi!");
     } catch {
-      toast.error("Failed to duplicate product.");
+      toast.error("Mahsulotni nusxalashda xatolik.");
     }
   };
 
@@ -144,31 +202,31 @@ const Products = () => {
 
   return (
     <div className="min-h-screen bg-base-300 p-6">
-      {/* ── HEADER ─────────────────────────────────────────────────────────── */}
+      
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold text-warning tracking-tight">
-            Products
+            Mahsulotlar
           </h1>
           <p className="text-base-content/60 text-sm mt-1">
-            Manage your product catalog
+            Mahsulotlar katalogini boshqaring
           </p>
         </div>
 
         <div className="flex items-center gap-3 flex-wrap">
-          {/* Search */}
+          
           <div className="flex items-center border border-warning/40 rounded-xl px-4 py-2 bg-base-100 shadow-sm w-full md:w-72">
             <LiaSearchSolid className="text-xl text-warning" />
             <input
               type="text"
-              placeholder="Search products..."
+              placeholder="Mahsulot qidirish..."
               className="ml-2 w-full bg-transparent text-base-content border-none outline-none text-sm"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
 
-          {/* View Toggle */}
+          
           <div className="flex items-center gap-2">
             <button
               className={`p-2.5 rounded-xl border transition-all ${
@@ -177,7 +235,7 @@ const Products = () => {
                   : "bg-base-100 border-base-content/20 text-base-content/50"
               }`}
               onClick={() => setShowGrid(false)}
-              title="List view"
+              title="Ro'yxat ko'rinishi"
             >
               <IoMdReorder className="text-2xl" />
             </button>
@@ -188,37 +246,37 @@ const Products = () => {
                   : "bg-base-100 border-base-content/20 text-base-content/50"
               }`}
               onClick={() => setShowGrid(true)}
-              title="Grid view"
+              title="Katak ko'rinishi"
             >
               <TiThLarge className="text-2xl" />
             </button>
           </div>
 
-          {/* Add Button */}
+          
           <button
             className="btn bg-warning text-warning-content border-none hover:bg-warning/80 shadow-md gap-2 rounded-xl"
-            onClick={() =>
-              document.getElementById("product_modal").showModal()
-            }
+            onClick={() => {
+              resetProductForm();
+              document.getElementById("product_modal").showModal();
+            }}
           >
             <FaPlus />
-            New Product
+            Yangi mahsulot
           </button>
         </div>
       </div>
 
-      {/* ── MODAL ──────────────────────────────────────────────────────────── */}
+      
       <dialog id="product_modal" className="modal modal-bottom sm:modal-middle">
         <div className="modal-box bg-base-100 border border-warning/30 shadow-2xl rounded-2xl">
           <h3 className="text-2xl font-bold text-warning text-center mb-6">
-            Add New Product
+            {editingProductId ? "Mahsulotni tahrirlash" : "Yangi mahsulot qo'shish"}
           </h3>
           <div className="flex flex-col gap-3">
             {[
-              { name: "name", placeholder: "Product name" },
-              { name: "image", placeholder: "Image URL" },
-              { name: "description", placeholder: "Description" },
-              { name: "price", placeholder: "Price (e.g. 29.99)" },
+              { name: "name", placeholder: "Mahsulot nomi" },
+              { name: "description", placeholder: "Tavsif" },
+              { name: "price", placeholder: "Narx (masalan: 29.99)" },
             ].map((field) => (
               <input
                 key={field.name}
@@ -230,58 +288,70 @@ const Products = () => {
                 onChange={handleInputChange}
               />
             ))}
+            {newProduct.images.map((image, index) => (
+              <input
+                key={`image-${index}`}
+                type="text"
+                placeholder={`Rasm URL manzili ${index + 1} ${index === 0 ? "(majburiy)" : "(ixtiyoriy)"}`}
+                className="input input-bordered border-warning/40 focus:border-warning bg-base-200 w-full rounded-xl"
+                value={image}
+                onChange={(e) => handleImageChange(index, e.target.value)}
+              />
+            ))}
           </div>
           <div className="modal-action flex gap-3 mt-6">
             <button
               className="btn flex-1 bg-warning text-warning-content border-none hover:bg-warning/80 rounded-xl"
-              onClick={sendNewProduct}
+              onClick={editingProductId ? updateProduct : sendNewProduct}
             >
-              <FaPlus className="mr-1" /> Add Product
+              <FaPlus className="mr-1" /> {editingProductId ? "Saqlash" : "Qo'shish"}
             </button>
             <form method="dialog" className="flex-1">
               <button className="btn w-full bg-base-300 border-none rounded-xl">
-                Cancel
+                Bekor qilish
               </button>
             </form>
           </div>
         </div>
         <form method="dialog" className="modal-backdrop">
-          <button>close</button>
+          <button>yopish</button>
         </form>
       </dialog>
 
-      {/* ── LOADING ────────────────────────────────────────────────────────── */}
+      
       {loading && (
         <div className="flex justify-center items-center py-20">
           <span className="loading loading-spinner loading-lg text-warning"></span>
         </div>
       )}
 
-      {/* ── EMPTY STATE ────────────────────────────────────────────────────── */}
+      
       {!loading && filteredProducts.length === 0 && (
         <div className="flex flex-col items-center justify-center py-20 opacity-50">
           <div className="text-6xl mb-4">📦</div>
           <p className="text-xl font-semibold text-base-content">
-            No products found
+            Mahsulot topilmadi
           </p>
           <p className="text-sm text-base-content/50 mt-1">
-            Try a different search or add a new product.
+            Boshqa so'z bilan qidiring yoki yangi mahsulot qo'shing.
           </p>
         </div>
       )}
 
-      {/* ── GRID VIEW ──────────────────────────────────────────────────────── */}
+      
       {!loading && showGrid && (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mt-4 pt-10">
-          {filteredProducts.map((product) => (
+          {filteredProducts.map((product) => {
+            const productImage = Array.isArray(product.image) ? product.image[0] : product.image;
+            return (
             <div
               key={product._id}
               className="bg-base-100 rounded-2xl shadow-md p-4 pt-14 relative mt-10 border border-warning/10 hover:border-warning/40 transition-all group"
             >
-              {/* Floating avatar */}
+              
               <div className="absolute -top-9 left-1/2 -translate-x-1/2 w-20 h-20 rounded-full overflow-hidden border-4 border-warning shadow-lg bg-base-300">
                 <img
-                  src={product.image || "https://placehold.co/80x80?text=P"}
+                  src={productImage || "https://placehold.co/80x80?text=P"}
                   alt={product.name}
                   className="w-full h-full object-cover"
                   onError={(e) => {
@@ -306,49 +376,51 @@ const Products = () => {
                   icon={<MdOutlineRemoveRedEye />}
                   bg="bg-emerald-100"
                   color="text-emerald-600"
-                  label="View"
-                  onClick={() => toast.info(`Viewing: ${product.name}`)}
+                  label="Ko'rish"
+                  onClick={() => toast.info(`Ko'rilmoqda: ${product.name}`)}
                 />
                 <ActionBtn
                   icon={<FiPlusCircle />}
                   bg="bg-base-200"
                   color="text-base-content/60"
-                  label="Copy"
+                  label="Nusxa"
                   onClick={() => duplicateProduct(product)}
                 />
                 <ActionBtn
                   icon={<FaRegPenToSquare />}
                   bg="bg-warning/20"
                   color="text-warning"
-                  label="Edit"
-                  onClick={() => toast.info("Edit coming soon")}
+                  label="Tahrir"
+                  onClick={() => openEditModal(product)}
                 />
                 <ActionBtn
                   icon={<RiDeleteBinLine />}
                   bg="bg-red-100"
                   color="text-red-500"
-                  label="Del"
+                  label="O'chir"
                   onClick={() => deleteProduct(product._id)}
                 />
               </div>
             </div>
-          ))}
+          )})}
         </div>
       )}
 
-      {/* ── LIST VIEW ──────────────────────────────────────────────────────── */}
+      
       {!loading && !showGrid && (
         <div className="space-y-2 mt-4">
-          {/* Table header */}
+          
           <div className="hidden md:grid grid-cols-12 gap-4 px-5 py-2 text-xs font-bold uppercase tracking-widest text-warning/70 bg-base-100 rounded-xl border border-warning/10">
-            <div className="col-span-1">Image</div>
-            <div className="col-span-3">Name</div>
-            <div className="col-span-1">Price</div>
-            <div className="col-span-4">Description</div>
-            <div className="col-span-1 text-right">Actions</div>
+            <div className="col-span-1">Rasm</div>
+            <div className="col-span-3">Nomi</div>
+            <div className="col-span-2">Narx</div>
+            <div className="col-span-4">Tavsif</div>
+            <div className="col-span-2 text-right">Amallar</div>
           </div>
 
-          {filteredProducts.map((product, index) => (
+          {filteredProducts.map((product, index) => {
+            const productImage = Array.isArray(product.image) ? product.image[0] : product.image;
+            return (
             <div
               key={product._id}
               className={`grid grid-cols-12 gap-4 items-center px-5 py-3 rounded-xl border transition-all hover:border-warning/40 ${
@@ -360,7 +432,7 @@ const Products = () => {
               <div className="col-span-1">
                 <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-warning/30 bg-base-300">
                   <img
-                    src={product.image || "https://placehold.co/40x40?text=P"}
+                    src={productImage || "https://placehold.co/40x40?text=P"}
                     alt={product.name}
                     className="w-full h-full object-cover"
                     onError={(e) => {
@@ -377,10 +449,6 @@ const Products = () => {
               </div>
 
               <div className="col-span-2">
-             
-              </div>
-
-              <div className="col-span-1">
                 <span className="font-bold text-base-content text-sm">
                   ${product.price}
                 </span>
@@ -392,12 +460,12 @@ const Products = () => {
                 </p>
               </div>
 
-              <div className="col-span-1 flex justify-end gap-1.5">
+              <div className="col-span-2 flex justify-end gap-1.5">
                 <ActionBtn
                   icon={<MdOutlineRemoveRedEye />}
                   bg="bg-emerald-100"
                   color="text-emerald-600"
-                  onClick={() => toast.info(`Viewing: ${product.name}`)}
+                  onClick={() => toast.info(`Ko'rilmoqda: ${product.name}`)}
                 />
                 <ActionBtn
                   icon={<FiPlusCircle />}
@@ -409,7 +477,7 @@ const Products = () => {
                   icon={<FaRegPenToSquare />}
                   bg="bg-warning/20"
                   color="text-warning"
-                  onClick={() => toast.info("Edit coming soon")}
+                  onClick={() => openEditModal(product)}
                 />
                 <ActionBtn
                   icon={<RiDeleteBinLine />}
@@ -419,11 +487,11 @@ const Products = () => {
                 />
               </div>
             </div>
-          ))}
+          )})}
         </div>
       )}
 
-      {/* ── TOAST CONTAINER (bottom-right) ─────────────────────────────────── */}
+      
       <ToastContainer
         position="bottom-right"
         autoClose={3000}

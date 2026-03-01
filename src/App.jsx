@@ -8,10 +8,10 @@ import { FaCoffee } from "react-icons/fa";
 import { MdOutlineWorkOutline } from "react-icons/md";
 
 const menuItems = [
-  { label: "Dashboard", path: "/", icon: <CiHome size={20} /> },
-  { label: "Products", path: "/products", icon: <FaCoffee size={18} /> },
-  { label: "Wallet", path: "/wallet", icon: <CiWallet size={20} /> },
-  { label: "Workers", path: "/workers", icon: <MdOutlineWorkOutline size={20} /> },
+  { label: "Bosh sahifa", path: "/", icon: <CiHome size={20} /> },
+  { label: "Mahsulotlar", path: "/products", icon: <FaCoffee size={18} /> },
+  { label: "Hamyon", path: "/wallet", icon: <CiWallet size={20} /> },
+  { label: "Ishchilar", path: "/workers", icon: <MdOutlineWorkOutline size={20} /> },
 ];
 
 function App() {
@@ -25,7 +25,7 @@ function App() {
       </aside>
 
       <main className="flex-1 flex flex-col w-full">
-        {/* FIXED TOP NAVBAR */}
+        
         <nav className="fixed top-0 left-0 md:left-[17%] w-full md:w-[83%] z-50">
           <Navbar />
         </nav>

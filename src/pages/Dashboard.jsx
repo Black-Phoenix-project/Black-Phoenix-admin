@@ -8,13 +8,13 @@ import {
   BarChart2, PieChart, AlertCircle
 } from "lucide-react";
 
-const BASE_URL = import.meta.env.VITE_BACKENT_URL || "http://localhost:5000";
+const BASE_URL = import.meta.env.VITE_BACKENT_URL;
 const currencyUZS = (v) => Number(v || 0).toLocaleString("uz-UZ") + " so'm";
 
 function KpiCard({ icon, label, value, colorClass, sub }) {
   return (
     <div className="card bg-base-200 p-3 md:p-4 flex flex-col justify-between gap-1">
-      {/* Top row: label + icon */}
+      
       <div className="flex items-center justify-between">
         <span className="text-[10px] md:text-xs text-base-content/50 font-medium uppercase tracking-wide">
           {label}
@@ -23,11 +23,11 @@ function KpiCard({ icon, label, value, colorClass, sub }) {
           {icon}
         </span>
       </div>
-      {/* Value */}
+      
       <div className={`font-bold text-sm md:text-base leading-tight break-all ${colorClass}`}>
         {value}
       </div>
-      {/* Sub */}
+      
       {sub && (
         <div className="flex items-center gap-1">
           <span className={`inline-block w-1.5 h-1.5 rounded-full ${colorClass} opacity-60`} />
@@ -163,12 +163,12 @@ export default function DentistChartsDashboard() {
   return (
     <div className="min-h-screen flex flex-col gap-5 md:gap-6 pb-8">
 
-      {/* ── Header ── */}
+      
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between px-3 md:px-6 py-3 md:py-4 border-b border-base-300">
         <div className="flex items-center gap-2">
           <BarChart2 className="text-warning" size={20} />
-          <h1 className="text-base md:text-xl font-bold">Dashboard</h1>
-          <span className="badge badge-warning badge-xs md:badge-sm">delivered + paid</span>
+          <h1 className="text-base md:text-xl font-bold">Boshqaruv paneli</h1>
+          <span className="badge badge-warning badge-xs md:badge-sm">Foyda faqat tasdiqlangan va to'langan mijozlardan keladi</span>
         </div>
         <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3">
           {lastUpdated && (
@@ -187,14 +187,14 @@ export default function DentistChartsDashboard() {
         </div>
       </div>
 
-      {/* ── KPI Cards ── */}
+      
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 md:gap-4 px-3 md:px-6">
         <KpiCard
           icon={<DollarSign size={20} />}
           label="Sof foyda"
           value={currencyUZS(totalRevenue)}
           colorClass="text-warning"
-          sub="delivered + paid"
+          sub="Tasdiqlandi, to'langan"
         />
         <KpiCard
           icon={<TrendingUp size={20} />}
@@ -208,14 +208,14 @@ export default function DentistChartsDashboard() {
           label="Yetkazildi"
           value={stats?.completedOrders ?? orders.length}
           colorClass="text-info"
-          sub="delivered"
+          sub="yetkazilgan"
         />
         <KpiCard
           icon={<Clock size={20} />}
           label="Kutilmoqda"
           value={stats?.pendingOrders ?? "—"}
           colorClass="text-orange-400"
-          sub="pending"
+          sub="kutilmoqda"
         />
         <KpiCard
           icon={<Package size={20} />}
@@ -229,14 +229,14 @@ export default function DentistChartsDashboard() {
           label="Bekor"
           value={stats?.cancelledOrders ?? "—"}
           colorClass="text-error"
-          sub="cancelled"
+          sub="bekor qilingan"
         />
       </div>
 
-      {/* ── Charts ── */}
+      
       <div className="flex flex-col lg:flex-row gap-4 md:gap-6 px-3 md:px-6">
 
-        {/* Line Chart */}
+        
         <div className="card bg-base-200 flex-1 flex flex-col p-3 md:p-4">
           <div className="flex items-start justify-between mb-2 md:mb-3">
             <div>
@@ -254,7 +254,7 @@ export default function DentistChartsDashboard() {
           </div>
         </div>
 
-        {/* Doughnut */}
+        
         <div className="card bg-base-200 w-full lg:w-72 flex flex-col p-3 md:p-4">
           <div className="flex items-start justify-between mb-2 md:mb-3">
             <div>
@@ -282,7 +282,7 @@ export default function DentistChartsDashboard() {
         </div>
       </div>
 
-      {/* ── Top Products Table ── */}
+      
       {topProducts.length > 0 && (
         <div className="px-3 md:px-6">
           <div className="font-semibold text-sm md:text-base flex items-center gap-2 mb-2 md:mb-3">
@@ -325,7 +325,7 @@ export default function DentistChartsDashboard() {
         </div>
       )}
 
-      {/* ── Stats cards from API ── */}
+      
       {stats && (
         <div className="px-3 md:px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
@@ -347,9 +347,9 @@ export default function DentistChartsDashboard() {
         </div>
       )}
 
-      {/* ── Footer ── */}
+      
       <footer className="flex items-center justify-center text-[10px] md:text-xs text-base-content/30 mt-auto pt-3">
-        © {new Date().getFullYear()} PRODUCT WARIORS
+        © {new Date().getFullYear()} Black Phoenix
       </footer>
 
     </div>

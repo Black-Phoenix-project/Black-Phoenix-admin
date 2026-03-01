@@ -47,7 +47,7 @@ const Sidebar = () => {
     },
   ];
 
-  /* ================= DESKTOP SIDEBAR ================= */
+  
   if (!isMobile) {
     return (
       <aside className="fixed top-0 left-0 h-screen w-[17%] bg-base-300 shadow-xl flex flex-col p-3 border-r-2 border-warning rounded-b-2xl">

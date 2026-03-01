@@ -1,7 +1,6 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate, Link } from 'react-router-dom'
-import { HiOutlineMenu, HiX } from 'react-icons/hi'
 import { logout } from '../redux/slices/authSlice'
 
 const Navbar = () => {
@@ -22,7 +21,7 @@ const Navbar = () => {
       <div className="hidden md:flex justify-between items-center px-6 py-3">
         <div>
           <span className="text-sm font-bold">
-            Welcome back, <span className="text-warning font-bold">{user?.username || 'admin'}</span>
+            Xush kelibsiz, <span className="text-warning font-bold">{user?.username || 'admin'}</span>
           </span>
         </div>
 
@@ -42,13 +41,13 @@ const Navbar = () => {
             >
               <li>
                 <Link className="justify-between" to={`/profile`}>
-                  Profile
-                  <span className="badge">New</span>
+                  Profil
+                  <span className="badge">Yangi</span>
                 </Link>
               </li>
               <li>
                 <button className="text-error font-bold" onClick={handleLogout}>
-                  Logout
+                  Chiqish
                 </button>
               </li>
             </ul>
@@ -58,7 +57,7 @@ const Navbar = () => {
 
       <div className="flex md:hidden justify-between w-full items-center px-4 py-3">
         <span className="text-sm italic">
-          Welcome, <span className="text-warning font-bold">{user?.username}</span>
+          Salom, <span className="text-warning font-bold">{user?.username}</span>
         </span>
 
         <div tabIndex={0} className="btn btn-ghost btn-circle avatar">

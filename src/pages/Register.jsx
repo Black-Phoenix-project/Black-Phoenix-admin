@@ -25,15 +25,14 @@ const Register = () => {
 
   const handleSubmit = () => {
     if (!formData.name || !formData.email || !formData.password) {
-      toast.error("All fields are required");
+      toast.error("Barcha maydonlar to'ldirilishi shart");
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      toast.error("Passwords do not match");
+      toast.error("Parollar mos kelmadi");
       return;
     }
-
 
     const newUser = {
       user: {
@@ -47,9 +46,9 @@ const Register = () => {
     navigate("/login");
   };
   const passwordRequirements = [
-    { text: "At least 8 characters", met: formData.password.length >= 8 },
-    { text: "Contains a number", met: /\d/.test(formData.password) },
-    { text: "Contains uppercase letter", met: /[A-Z]/.test(formData.password) },
+    { text: "Kamida 8 ta belgi", met: formData.password.length >= 8 },
+    { text: "Kamida 1 ta raqam", met: /\d/.test(formData.password) },
+    { text: "Kamida 1 ta katta harf", met: /[A-Z]/.test(formData.password) },
   ];
 
   return (
@@ -61,16 +60,16 @@ const Register = () => {
               <User className="w-8 h-8 text-base-300" />
             </div>
             <h2 className="text-3xl font-bold text-base-300 mb-2">
-              Create Account
+              Hisob yaratish
             </h2>
-            <p className="text-cyan-200">Join our admin dashboard today</p>
+            <p className="text-cyan-200">Bugun admin panelga qo'shiling</p>
           </div>
 
           <div className="space-y-5">
-            {/* NAME + EMAIL */}
+            
             <div className="flex gap-4">
               <div className="flex-1">
-                <label className="text-sm text-cyan-100">Full Name</label>
+                <label className="text-sm text-cyan-100">To'liq ism</label>
                 <input
                   type="text"
                   value={formData.name}
@@ -90,10 +89,10 @@ const Register = () => {
               </div>
             </div>
 
-            {/* PASSWORDS */}
+            
             <div className="flex gap-4">
               <div className="flex-1">
-                <label className="text-sm text-cyan-100">Password</label>
+                <label className="text-sm text-cyan-100">Parol</label>
                 <div className="relative">
                   <input
                     type={showPassword ? "text" : "password"}
@@ -115,7 +114,7 @@ const Register = () => {
 
               <div className="flex-1">
                 <label className="text-sm text-cyan-100">
-                  Confirm Password
+                  Parolni tasdiqlang
                 </label>
                 <div className="relative">
                   <input
@@ -139,7 +138,7 @@ const Register = () => {
               </div>
             </div>
 
-            {/* PASSWORD RULES */}
+            
             {formData.password && (
               <div className="space-y-1">
                 {passwordRequirements.map((req, i) => (
@@ -158,20 +157,20 @@ const Register = () => {
               </div>
             )}
 
-            {/* SUBMIT */}
+            
             <button
               onClick={handleSubmit}
               className="w-full from-cyan-500 to-blue-500 text-base-300 font-semibold py-3 rounded-xl flex items-center justify-center gap-2"
             >
-              Create Account <ArrowRight />
+              Hisob yaratish <ArrowRight />
             </button>
           </div>
 
           <div className="mt-6 text-center">
             <p className="text-cyan-200">
-              Already have an account?{" "}
+              Akkauntingiz bormi?{" "}
               <Link to="/login" className="text-cyan-300 font-semibold">
-                Sign in
+                Kirish
               </Link>
             </p>
           </div>
