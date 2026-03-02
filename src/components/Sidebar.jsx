@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 
-import { CiHome, CiWallet } from "react-icons/ci";
-import { FaCoffee, FaListUl } from "react-icons/fa";
+import { CiWallet } from "react-icons/ci";
+import { FaCoffee } from "react-icons/fa";
 import { MdOutlineWorkOutline } from "react-icons/md";
 import { LuClipboardList, LuPlus } from "react-icons/lu";
 import { RxDashboard } from "react-icons/rx";
+import { TbCarouselHorizontal } from "react-icons/tb";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
@@ -29,7 +30,7 @@ const Sidebar = () => {
     { label: "Orders", path: "/orders", icon: <LuClipboardList size={20} /> },
     { label: "Workers", path: "/workers", icon: <MdOutlineWorkOutline size={20} /> },
     { label: "Wallet", path: "/wallet", icon: <CiWallet size={20} /> },
-
+    { label: "Swiper", path: "/swiper", icon: <TbCarouselHorizontal size={20} /> },
   ];
 
   const promoSlides = [
@@ -40,14 +41,13 @@ const Sidebar = () => {
       buttonLabel: "Add Product",
     },
     {
-      description: "Add new workers to manage your business.",
-      image: "https://png.pngtree.com/png-clipart/20250108/original/pngtree-cute-young-chef-png-image_6787274.png",
-      link: "/workers",
-      buttonLabel: "Add Worker",
+      description: "Add slider content to keep your dashboard dynamic.",
+      image: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
+      link: "/swiper",
+      buttonLabel: "Add Swiper",
     },
   ];
 
-  
   if (!isMobile) {
     return (
       <aside className="fixed top-0 left-0 h-screen w-[17%] bg-base-300 shadow-xl flex flex-col p-3 border-r-2 border-warning rounded-b-2xl">
@@ -55,7 +55,7 @@ const Sidebar = () => {
           <p className="text-xl font-bold text-warning">Black Phoenix</p>
         </div>
 
-        <div className="h-[55%] ro rounded-xl p-2 overflow-hidden">
+        <div className="h-[55%] rounded-xl p-2 overflow-hidden">
           <Swiper
             direction="vertical"
             slidesPerView={6.2}
@@ -67,7 +67,11 @@ const Sidebar = () => {
                 <Link
                   to={path}
                   className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all
-                    ${isActive(path) ? "bg-bg-warning text-white" : "t"}`}
+                    ${
+                      isActive(path)
+                        ? "bg-warning text-warning-content shadow"
+                        : "text-base-content/70 hover:bg-base-200 hover:text-base-content"
+                    }`}
                 >
                   {icon}
                   <span className="text-sm font-medium">{label}</span>
@@ -77,7 +81,7 @@ const Sidebar = () => {
           </Swiper>
         </div>
 
-        <div className="h-[23%] mt-3 bg-bg-warning rounded-xl overflow-hidden">
+        <div className="h-[23%] mt-3 bg-warning rounded-xl overflow-hidden">
           <Swiper
             slidesPerView={1}
             loop
@@ -89,10 +93,10 @@ const Sidebar = () => {
             {promoSlides.map((item, index) => (
               <SwiperSlide key={index} className="flex items-center gap-3 p-3">
                 <div className="flex-1 flex flex-col justify-between gap-3">
-                  <p className="text-sm text-white font-semibold">{item.description}</p>
+                  <p className="text-sm text-warning-content font-semibold">{item.description}</p>
                   <Link
                     to={item.link}
-                    className="btn btn-sm bg-white text-primary hover:bg-base-200 w-fit"
+                    className="btn btn-sm bg-base-100 text-warning hover:bg-base-200 border-none w-fit"
                   >
                     <LuPlus size={16} />
                     {item.buttonLabel}
@@ -120,8 +124,12 @@ const Sidebar = () => {
         <Link
           key={path}
           to={path}
-          className={`flex flex-col items-center justify-center text-xs transition-colors
-            ${isActive(path) ? "text-warning" : "text-base-content/50"}`}
+          className={`h-11 w-11 rounded-xl flex items-center justify-center transition-all
+            ${
+              isActive(path)
+                ? "bg-warning text-warning-content"
+                : "text-base-content/50 hover:bg-base-200"
+            }`}
         >
           {icon}
         </Link>

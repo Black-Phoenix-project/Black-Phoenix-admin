@@ -189,20 +189,8 @@ export default function DentistChartsDashboard() {
 
       
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 md:gap-4 px-3 md:px-6">
-        <KpiCard
-          icon={<DollarSign size={20} />}
-          label="Sof foyda"
-          value={currencyUZS(totalRevenue)}
-          colorClass="text-warning"
-          sub="Tasdiqlandi, to'langan"
-        />
-        <KpiCard
-          icon={<TrendingUp size={20} />}
-          label="7 kun"
-          value={currencyUZS(last7Total)}
-          colorClass="text-success"
-          sub="oxirgi 7 kun"
-        />
+        
+       
         <KpiCard
           icon={<CheckCircle size={20} />}
           label="Yetkazildi"

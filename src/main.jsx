@@ -1,9 +1,9 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
-import { ToastContainer } from 'react-toastify';
+import { ToastContainer } from "react-toastify";
 import "./index.css";
 import App from "./App";
 import { store, persistor } from "./redux/store";
@@ -18,23 +18,23 @@ import Login from "./pages/Login";
 import AuthRoute from "./components/AuthRoute";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Profile from "./pages/Profile";
+import Banners from "./pages/Banners";
 
 export const router = createBrowserRouter([
   {
     element: <ProtectedRoute />,
     children: [
-      { 
+      {
         path: "/",
         element: <App />,
         children: [
-        
           { path: "/", element: <Dashboard /> },
           { path: "orders", element: <Orders /> },
           { path: "products", element: <Products /> },
-          { path: "/workers", element: <Workers /> },
-          { path: "/wallet", element: <Wallet /> },
-          { path: "/profile", element: <Profile /> },
-
+          { path: "workers", element: <Workers /> },
+          { path: "wallet", element: <Wallet /> },
+          { path: "profile", element: <Profile /> },
+          { path: "swiper", element: <Banners /> },
         ],
       },
     ],
@@ -51,7 +51,7 @@ export const router = createBrowserRouter([
 ReactDOM.createRoot(document.getElementById("root")).render(
   <Provider store={store}>
     <PersistGate loading={null} persistor={persistor}>
-      <ToastContainer/>
+      <ToastContainer />
       <RouterProvider router={router} />
     </PersistGate>
   </Provider>

@@ -8,6 +8,7 @@ import { RiDeleteBinLine } from "react-icons/ri";
 import { FiPlusCircle } from "react-icons/fi";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import LoadingTemplate from "../components/LoadingTemplate";
 
 const BASE_URL = import.meta.env.VITE_BACKENT_URL;
 
@@ -49,6 +50,8 @@ const Products = () => {
     description: "",
     price: "",
   });
+
+  console.log('products: ', products);
   const resetProductForm = () => {
     setNewProduct({
       name: "",
@@ -393,7 +396,7 @@ const Products = () => {
       
       {loading && (
         <div className="flex justify-center items-center py-20">
-          <span className="loading loading-spinner loading-lg text-warning"></span>
+            <LoadingTemplate/>
         </div>
       )}
 

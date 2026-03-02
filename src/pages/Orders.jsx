@@ -2,9 +2,10 @@ import React, { useEffect, useState, useCallback, useRef } from "react";
 import LoadingTemplate from "../components/LoadingTemplate";
 import {
   Clock, CheckCircle, XCircle, Truck, Package, RefreshCw,
-  Trash2, Eye, Search, Filter, ChevronLeft, ChevronRight,
+  Trash2, Search, Filter, ChevronLeft, ChevronRight,
   ShoppingBag, CreditCard, AlertCircle, User, Phone,
   FileText, ChevronDown, Check, Calendar,
+  SquarePen,
 } from "lucide-react";
 
 const BASE_URL = import.meta.env.VITE_BACKENT_URL;
@@ -233,15 +234,15 @@ function OrderCard({ order, idx, page, LIMIT, updating, deleting, onView, onDele
           )}
           <button
             onClick={() => onView(order)}
-            className="p-2 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-400 hover:bg-blue-500/20 transition-all active:scale-95"
+            className="p-2 rounded-xl bg-blue-500/10 border cursor-pointer border-blue-500/30 text-blue-400 hover:bg-blue-500/20 transition-all active:scale-95"
             title="Ko'rish"
           >
-            <Eye size={14} />
+            <SquarePen size={14} />
           </button>
           <button
             onClick={() => onDelete(order._id)}
             disabled={deleting === order._id}
-            className="p-2 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 transition-all active:scale-95 disabled:opacity-50"
+            className="p-2 rounded-xl bg-red-500/10 cursor-pointer border border-red-500/30 text-red-400 hover:bg-red-500/20 transition-all active:scale-95 disabled:opacity-50"
             title="O'chirish"
           >
             {deleting === order._id
@@ -301,7 +302,7 @@ export default function Orders() {
 
   const updateStatus = async (orderId, newStatus, currentStatus) => {
     if (newStatus === "delivered" && !isDeliveredAllowed(currentStatus)) {
-      showToast("⚠️ Yetkazildi faqat Tasdiqlandi dan keyin belgilanadi", "error");
+      showToast(" Yetkazildi faqat Tasdiqlandi dan keyin belgilanadi", "error");
       return;
     }
     setUpdating(p => ({ ...p, [orderId + "_status"]: true }));
@@ -315,7 +316,7 @@ export default function Orders() {
       if (json.success) {
         setOrders(prev => prev.map(o => o._id === orderId ? { ...o, status: newStatus } : o));
         if (selectedOrder?._id === orderId) setSelectedOrder(p => ({ ...p, status: newStatus }));
-        showToast(`✅ Holat: "${STATUS_CONFIG[newStatus]?.label}" ga o'zgartirildi`);
+        showToast(` Holat: "${STATUS_CONFIG[newStatus]?.label}" ga o'zgartirildi`);
       } else showToast(json.message || "Xatolik", "error");
     } catch {
       showToast("Server xatosi", "error");
@@ -336,7 +337,7 @@ export default function Orders() {
       if (json.success) {
         setOrders(prev => prev.map(o => o._id === orderId ? { ...o, paymentStatus: newPayment } : o));
         if (selectedOrder?._id === orderId) setSelectedOrder(p => ({ ...p, paymentStatus: newPayment }));
-        showToast(`💳 To'lov: "${PAYMENT_CONFIG[newPayment]?.label}" ga o'zgartirildi`);
+        showToast(` To'lov: "${PAYMENT_CONFIG[newPayment]?.label}" ga o'zgartirildi`);
       } else showToast(json.message || "Xatolik", "error");
     } catch {
       showToast("Server xatosi", "error");
@@ -353,7 +354,7 @@ export default function Orders() {
       if (json.success) {
         setOrders(prev => prev.filter(o => o._id !== orderId));
         if (selectedOrder?._id === orderId) setSelectedOrder(null);
-        showToast("🗑️ Buyurtma o'chirildi");
+        showToast(" Buyurtma o'chirildi");
       } else showToast(json.message || "Xatolik", "error");
     } catch {
       showToast("Server xatosi", "error");
