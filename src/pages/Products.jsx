@@ -440,7 +440,7 @@ const Products = () => {
               </h3>
              
               <p className="text-sm text-center font-semibold text-base-content mt-1">
-                ${product.price}
+                sum{product.price}
               </p>
               <p className="text-xs text-center text-base-content/40 mt-1 line-clamp-2">
                 {product.description}
@@ -524,8 +524,8 @@ const Products = () => {
               </div>
 
               <div className="col-span-2">
-                <span className="font-bold text-base-content text-sm">
-                  ${product.price}
+                <span className="font-bold text-success text-sm">
+                  {product.price} S
                 </span>
               </div>
 
