@@ -14,6 +14,8 @@ const Navbar = () => {
 
   const user = useSelector(state => state.auth.user)
 
+  console.log(user)
+
   return (
     <nav className="bg-base-300 border-b-2 border-warning shadow-sm rounded-r-2xl relative">
       <div className="hidden md:flex justify-between items-center px-6 py-3">
@@ -28,7 +30,7 @@ const Navbar = () => {
             <div tabIndex={0} className="btn btn-ghost btn-circle avatar">
               <div className="w-10 rounded-full">
                 <img
-                  src={user?.image}
+                  src={user?.image || 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSgF2suM5kFwk9AdFjesEr8EP1qcyUvah8G7w&s'}
                   alt="User Avatar"
                   loading="lazy"
                   decoding="async"

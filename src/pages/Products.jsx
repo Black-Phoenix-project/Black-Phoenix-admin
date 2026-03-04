@@ -460,8 +460,8 @@ const Products = () => {
               <div className="flex justify-center gap-2 mt-4">
                 <ActionBtn
                   icon={<MdOutlineRemoveRedEye />}
-                  bg="bg-emerald-100"
-                  color="text-emerald-600"
+                  bg="bg-success/15"
+                  color="text-success"
                   label="Ko'rish"
                   onClick={() => showToast(`Ko'rilmoqda: ${product.name}`)}
                 />
@@ -481,8 +481,8 @@ const Products = () => {
                 />
                 <ActionBtn
                   icon={<RiDeleteBinLine />}
-                  bg="bg-red-100"
-                  color="text-red-500"
+                  bg="bg-error/15"
+                  color="text-error"
                   label="O'chir"
                   onClick={() => deleteProduct(product._id)}
                 />
@@ -551,8 +551,8 @@ const Products = () => {
               <div className="col-span-1 md:col-span-2 flex justify-center md:justify-end gap-2 md:gap-1.5">
                 <ActionBtn
                   icon={<MdOutlineRemoveRedEye />}
-                  bg="bg-emerald-100"
-                  color="text-emerald-600"
+                  bg="bg-success/15"
+                  color="text-success"
                   onClick={() => showToast(`Ko'rilmoqda: ${product.name}`)}
                 />
                 <ActionBtn
@@ -569,8 +569,8 @@ const Products = () => {
                 />
                 <ActionBtn
                   icon={<RiDeleteBinLine />}
-                  bg="bg-red-100"
-                  color="text-red-500"
+                  bg="bg-error/15"
+                  color="text-error"
                   onClick={() => deleteProduct(product._id)}
                 />
               </div>

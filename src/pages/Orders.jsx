@@ -12,18 +12,18 @@ const BASE_URL = import.meta.env.VITE_BACKENT_URL;
 const currencyUZS = (v) => Number(v || 0).toLocaleString("uz-UZ") + " so'm";
 
 const STATUS_CONFIG = {
-  pending:    { label: "Kutilmoqda",    colorClass: "text-orange-400",  bgClass: "bg-orange-500/10",  borderClass: "border-orange-500/30",  dotColor: "bg-orange-400",  icon: <Clock size={12} /> },
-  confirmed:  { label: "Tasdiqlandi",   colorClass: "text-blue-400",    bgClass: "bg-blue-500/10",    borderClass: "border-blue-500/30",    dotColor: "bg-blue-400",    icon: <CheckCircle size={12} /> },
-  processing: { label: "Jarayonda",    colorClass: "text-violet-400",  bgClass: "bg-violet-500/10",  borderClass: "border-violet-500/30",  dotColor: "bg-violet-400",  icon: <RefreshCw size={12} /> },
-  shipped:    { label: "Yuborildi",    colorClass: "text-cyan-400",    bgClass: "bg-cyan-500/10",    borderClass: "border-cyan-500/30",    dotColor: "bg-cyan-400",    icon: <Truck size={12} /> },
-  delivered:  { label: "Yetkazildi",   colorClass: "text-emerald-400", bgClass: "bg-emerald-500/10", borderClass: "border-emerald-500/30", dotColor: "bg-emerald-400", icon: <Package size={12} /> },
-  cancelled:  { label: "Bekor qilindi",colorClass: "text-red-400",    bgClass: "bg-red-500/10",     borderClass: "border-red-500/30",     dotColor: "bg-red-400",     icon: <XCircle size={12} /> },
+  pending:    { label: "Kutilmoqda",    colorClass: "text-warning",   bgClass: "bg-warning/10",   borderClass: "border-warning/30",   dotColor: "bg-warning",   icon: <Clock size={12} /> },
+  confirmed:  { label: "Tasdiqlandi",   colorClass: "text-info",      bgClass: "bg-info/10",      borderClass: "border-info/30",      dotColor: "bg-info",      icon: <CheckCircle size={12} /> },
+  processing: { label: "Jarayonda",     colorClass: "text-secondary", bgClass: "bg-secondary/10", borderClass: "border-secondary/30", dotColor: "bg-secondary", icon: <RefreshCw size={12} /> },
+  shipped:    { label: "Yuborildi",     colorClass: "text-accent",    bgClass: "bg-accent/10",    borderClass: "border-accent/30",    dotColor: "bg-accent",    icon: <Truck size={12} /> },
+  delivered:  { label: "Yetkazildi",    colorClass: "text-success",   bgClass: "bg-success/10",   borderClass: "border-success/30",   dotColor: "bg-success",   icon: <Package size={12} /> },
+  cancelled:  { label: "Bekor qilindi", colorClass: "text-error",     bgClass: "bg-error/10",     borderClass: "border-error/30",     dotColor: "bg-error",     icon: <XCircle size={12} /> },
 };
 
 const PAYMENT_CONFIG = {
-  unpaid:   { label: "To'lanmagan", colorClass: "text-red-400",     bgClass: "bg-red-500/10",     borderClass: "border-red-500/30",     dotColor: "bg-red-400" },
-  paid:     { label: "To'langan",   colorClass: "text-emerald-400", bgClass: "bg-emerald-500/10", borderClass: "border-emerald-500/30", dotColor: "bg-emerald-400" },
-  refunded: { label: "Qaytarildi",  colorClass: "text-amber-400",   bgClass: "bg-amber-400/10",   borderClass: "border-amber-400/30",   dotColor: "bg-amber-400" },
+  unpaid:   { label: "To'lanmagan", colorClass: "text-error",   bgClass: "bg-error/10",   borderClass: "border-error/30",   dotColor: "bg-error" },
+  paid:     { label: "To'langan",   colorClass: "text-success", bgClass: "bg-success/10", borderClass: "border-success/30", dotColor: "bg-success" },
+  refunded: { label: "Qaytarildi",  colorClass: "text-warning", bgClass: "bg-warning/10", borderClass: "border-warning/30", dotColor: "bg-warning" },
 };
 
 const STATUS_ORDER = ["pending", "confirmed", "processing", "shipped", "delivered", "cancelled"];
@@ -56,9 +56,9 @@ function CustomSelect({ value, onChange, options, disabled, className, dropUp })
           w-full flex items-center justify-between gap-2
           bg-base-100 border rounded-xl px-3 py-2
           text-xs font-medium transition-all
-          hover:border-amber-400/50 focus:outline-none
+          hover:border-warning/50 focus:outline-none
           disabled:opacity-60 disabled:cursor-not-allowed
-          ${current?.borderClass || "border-zinc-700"}
+          ${current?.borderClass || "border-base-300"}
           ${current?.colorClass || "text-base-content"}
         `}
       >
@@ -76,8 +76,8 @@ function CustomSelect({ value, onChange, options, disabled, className, dropUp })
         <div
           className={`
             absolute z-50 w-full min-w-[150px]
-            bg-base-300 border border-zinc-700/80
-            rounded-xl shadow-2xl shadow-black/60 overflow-hidden
+            bg-base-300 border border-base-300
+            rounded-xl shadow-2xl shadow-base-content/30 overflow-hidden
             ${dropUp ? "bottom-full mb-2" : "top-full mt-2"}
           `}
         >
@@ -92,9 +92,9 @@ function CustomSelect({ value, onChange, options, disabled, className, dropUp })
               className={`
                 w-full flex items-center justify-between px-3.5 py-2.5 text-xs
                 transition-colors duration-100 cursor-pointer
-                ${opt.disabled ? "opacity-30 cursor-not-allowed" : "cursor-pointer hover:bg-white/5"}
-                ${opt.value === value ? "bg-white/5" : ""}
-                ${opt.colorClass || "text-zinc-300"}
+                ${opt.disabled ? "opacity-30 cursor-not-allowed" : "cursor-pointer hover:bg-base-content/5"}
+                ${opt.value === value ? "bg-base-content/5" : ""}
+                ${opt.colorClass || "text-base-content/80"}
               `}
             >
               <span className="flex items-center gap-2">
@@ -137,8 +137,8 @@ function Toast({ toast }) {
     <div
       className={`fixed bottom-6 right-6 z-[999] flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl border text-sm font-medium
         ${toast.type === "error"
-          ? "bg-red-950 border-red-500/40 text-red-300"
-          : "bg-zinc-900 border-emerald-500/40 text-emerald-300"
+          ? "bg-error/15 border-error/40 text-error"
+          : "bg-success/15 border-success/40 text-success"
         }`}
     >
       {toast.type === "error" ? <AlertCircle size={16} /> : <CheckCircle size={16} />}
@@ -154,14 +154,14 @@ function OrderCard({ order, idx, page, LIMIT, updating, deleting, onView, onDele
       <div className="flex items-center gap-3 flex-wrap lg:flex-nowrap">
 
         
-        <span className="text-zinc-600 font-mono text-xs w-5 shrink-0 hidden sm:block">
+        <span className="text-base-content/40 font-mono text-xs w-5 shrink-0 hidden sm:block">
           {(page - 1) * LIMIT + idx + 1}
         </span>
 
         
         <div className="flex items-center gap-2.5 w-44 shrink-0">
           <div className="w-8 h-8 rounded-xl  flex items-center justify-center shrink-0">
-            <User size={13} className="text-zinc-500" />
+            <User size={13} className="text-base-content/50" />
           </div>
           <div className="min-w-0">
             <p className="text-sm font-semibold text-base-content truncate leading-tight">{order.username}</p>
@@ -178,12 +178,12 @@ function OrderCard({ order, idx, page, LIMIT, updating, deleting, onView, onDele
               alt=""
               loading="lazy"
               decoding="async"
-              className="w-9 h-9 rounded-xl object-cover border border-zinc-700/60 shrink-0"
+              className="w-9 h-9 rounded-xl object-cover border border-base-300 shrink-0"
               onError={e => (e.target.style.display = "none")}
             />
           ) : (
-            <div className="w-9 h-9 rounded-xl bg-zinc-800 flex items-center justify-center shrink-0">
-              <Package size={13} className="text-zinc-500" />
+            <div className="w-9 h-9 rounded-xl bg-base-300 flex items-center justify-center shrink-0">
+              <Package size={13} className="text-base-content/50" />
             </div>
           )}
           <div className="min-w-0">
@@ -236,7 +236,7 @@ function OrderCard({ order, idx, page, LIMIT, updating, deleting, onView, onDele
 
         <div className="hidden lg:block w-px h-8  shrink-0" />
 
-        <div className="items-center gap-1.5 text-zinc-500 text-xs w-24 shrink-0 hidden xl:flex">
+        <div className="items-center gap-1.5 text-base-content/50 text-xs w-24 shrink-0 hidden xl:flex">
           <Calendar size={11} className="shrink-0" />
           <span>
             {new Date(order.createdAt).toLocaleDateString("uz-UZ", {
@@ -247,11 +247,11 @@ function OrderCard({ order, idx, page, LIMIT, updating, deleting, onView, onDele
 
         <div className="flex items-center gap-2 ml-auto shrink-0">
           {(updating[order._id + "_status"] || updating[order._id + "_pay"]) && (
-            <RefreshCw size={12} className="animate-spin text-amber-400" />
+            <RefreshCw size={12} className="animate-spin text-warning" />
           )}
           <button
             onClick={() => onView(order)}
-            className="p-2 rounded-xl bg-blue-500/10 border cursor-pointer border-blue-500/30 text-blue-400 hover:bg-blue-500/20 transition-all active:scale-95"
+            className="p-2 rounded-xl bg-info/10 border cursor-pointer border-info/30 text-info hover:bg-info/20 transition-all active:scale-95"
             title="Ko'rish"
           >
             <SquarePen size={14} />
@@ -259,7 +259,7 @@ function OrderCard({ order, idx, page, LIMIT, updating, deleting, onView, onDele
           <button
             onClick={() => onDelete(order._id)}
             disabled={deleting === order._id}
-            className="p-2 rounded-xl bg-red-500/10 cursor-pointer border border-red-500/30 text-red-400 hover:bg-red-500/20 transition-all active:scale-95 disabled:opacity-50"
+            className="p-2 rounded-xl bg-error/10 cursor-pointer border border-error/30 text-error hover:bg-error/20 transition-all active:scale-95 disabled:opacity-50"
             title="O'chirish"
           >
             {deleting === order._id
@@ -391,23 +391,23 @@ export default function Orders() {
   }, [orders, search]);
 
   return (
-    <div className="min-h-screen bg-base-300 p-4 text-zinc-100 ">
+    <div className="min-h-screen bg-base-300 p-4 text-base-content ">
       <Toast toast={toast} />
 
       
       <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2 text-warning">
-            <ShoppingBag size={22} className="text-amber-400" />
+            <ShoppingBag size={22} className="text-warning" />
             Buyurtmalar
           </h1>
-          <p className="text-zinc-500 text-sm mt-0.5">
-            Jami <span className="text-amber-400 font-semibold">{totalCount}</span> ta buyurtma
+          <p className="text-base-content/50 text-sm mt-0.5">
+            Jami <span className="text-warning font-semibold">{totalCount}</span> ta buyurtma
           </p>
         </div>
         <button
           onClick={fetchOrders}
-          className="flex items-center gap-2 px-4 py-2.5 bg-zinc-800 border border-zinc-700 hover:border-amber-400/40 rounded-2xl text-sm transition-all active:scale-95"
+          className="flex items-center gap-2 px-4 py-2.5 bg-base-200 border border-base-300 hover:border-warning/40 rounded-2xl text-sm transition-all active:scale-95"
         >
           <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
           Yangilash
@@ -417,12 +417,12 @@ export default function Orders() {
       
       <div className="flex flex-wrap gap-3 mb-5">
         <div className="relative flex-1 min-w-[200px]">
-          <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
+          <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-base-content/50 pointer-events-none" />
           <input
             value={search}
             placeholder="Qidirish..."
             onChange={e => setSearch(e.target.value)}
-            className="w-full bg-zinc-900 border border-warning rounded-xl pl-9 pr-4 py-2.5 text-sm focus:border-amber-400 focus:outline-none transition-colors"
+            className="w-full bg-base-200 border border-warning rounded-xl pl-9 pr-4 py-2.5 text-sm focus:border-warning focus:outline-none transition-colors"
           />
         </div>
 
@@ -433,7 +433,7 @@ export default function Orders() {
           options={[
             {
               value: "", label: "Barcha statuslar",
-              colorClass: "text-zinc-400", borderClass: "border-zinc-700",
+              colorClass: "text-base-content/50", borderClass: "border-base-300",
               dotEl: <Filter size={12} className="opacity-50 shrink-0" />,
             },
             ...Object.entries(STATUS_CONFIG).map(([v, c]) => ({
@@ -450,7 +450,7 @@ export default function Orders() {
           options={[
             {
               value: "", label: "Barcha to'lovlar",
-              colorClass: "text-zinc-400", borderClass: "border-zinc-700",
+              colorClass: "text-base-content/50", borderClass: "border-base-300",
               dotEl: <CreditCard size={12} className="opacity-50 shrink-0" />,
             },
             ...Object.entries(PAYMENT_CONFIG).map(([v, c]) => ({
@@ -463,7 +463,7 @@ export default function Orders() {
         {(filterStatus || filterPayment || search) && (
           <button
             onClick={() => { setFilterStatus(""); setFilterPayment(""); setSearch(""); }}
-            className="flex items-center gap-1.5 px-4 py-2.5 bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 text-red-400 rounded-xl text-sm font-medium transition-all active:scale-95"
+            className="flex items-center gap-1.5 px-4 py-2.5 bg-error/10 border border-error/30 hover:bg-error/20 text-error rounded-xl text-sm font-medium transition-all active:scale-95"
           >
             <XCircle size={14} />
             Tozalash
@@ -473,7 +473,7 @@ export default function Orders() {
 
       
       {!loading && filteredOrders.length > 0 && (
-        <div className="hidden lg:flex items-center gap-3 px-4 mb-2 text-xs font-semibold text-zinc-600 uppercase tracking-wider">
+        <div className="hidden lg:flex items-center gap-3 px-4 mb-2 text-xs font-semibold text-base-content/50 uppercase tracking-wider">
           <span className="w-5 shrink-0">#</span>
           <span className="w-44 shrink-0">Mijoz</span>
           <div className="w-px" />
@@ -492,7 +492,7 @@ export default function Orders() {
       {loading ? (
         <LoadingTemplate />
       ) : filteredOrders.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-24 text-zinc-600 gap-3">
+        <div className="flex flex-col items-center justify-center py-24 text-base-content/50 gap-3">
           <ShoppingBag size={48} strokeWidth={1} />
           <p className="text-lg">Buyurtmalar topilmadi</p>
         </div>
@@ -522,7 +522,7 @@ export default function Orders() {
               <button
                 onClick={() => setPage(p => p - 1)}
                 disabled={page === 1}
-                className="p-2.5 rounded-xl border border-zinc-700 text-zinc-400 hover:bg-zinc-800 hover:border-amber-400/30 transition-all active:scale-95 disabled:opacity-40"
+                className="p-2.5 rounded-xl border border-base-300 text-base-content/60 hover:bg-base-200 hover:border-warning/40 transition-all active:scale-95 disabled:opacity-40"
               >
                 <ChevronLeft size={15} />
               </button>
@@ -532,8 +532,8 @@ export default function Orders() {
                   onClick={() => setPage(p)}
                   className={`w-9 h-9 rounded-xl text-sm font-medium border transition-all ${
                     p === page
-                      ? "bg-amber-400 text-zinc-950 border-amber-400 font-bold"
-                      : "border-zinc-700 text-zinc-400 hover:bg-zinc-800 hover:border-amber-400/30"
+                      ? "bg-warning text-warning-content border-warning font-bold"
+                      : "border-base-300 text-base-content/60 hover:bg-base-200 hover:border-warning/40"
                   }`}
                 >
                   {p}
@@ -542,7 +542,7 @@ export default function Orders() {
               <button
                 onClick={() => setPage(p => p + 1)}
                 disabled={page === totalPages}
-                className="p-2.5 rounded-xl border border-zinc-700 text-zinc-400 hover:bg-zinc-800 hover:border-amber-400/30 transition-all active:scale-95 disabled:opacity-40"
+                className="p-2.5 rounded-xl border border-base-300 text-base-content/60 hover:bg-base-200 hover:border-warning/40 transition-all active:scale-95 disabled:opacity-40"
               >
                 <ChevronRight size={15} />
               </button>
@@ -557,17 +557,17 @@ export default function Orders() {
           className="fixed inset-0 z-50 bg-base-300 backdrop-blur-sm flex items-center justify-center p-4"
           onClick={e => e.target === e.currentTarget && setSelectedOrder(null)}
         >
-          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden">
+          <div className="bg-base-100 border border-base-300 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden">
 
             
-            <div className="flex items-center justify-between px-6 py-5 border-b border-zinc-800">
+            <div className="flex items-center justify-between px-6 py-5 border-b border-base-300">
               <h2 className="font-bold text-lg flex items-center gap-2">
-                <FileText size={18} className="text-amber-400" />
+                <FileText size={18} className="text-warning" />
                 Buyurtma tafsiloti
               </h2>
               <button
                 onClick={() => setSelectedOrder(null)}
-                className="w-8 h-8 flex items-center justify-center rounded-xl text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-all"
+                className="w-8 h-8 flex items-center justify-center rounded-xl text-base-content/60 hover:text-error hover:bg-error/10 transition-all"
               >
                 <XCircle size={18} />
               </button>
@@ -576,30 +576,30 @@ export default function Orders() {
             <div className="p-6 space-y-4 overflow-y-auto max-h-[70vh]">
 
               
-              <div className="bg-zinc-800/40 rounded-2xl p-4 space-y-3">
-                <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Mijoz ma'lumotlari</p>
+              <div className="bg-base-300/40 rounded-2xl p-4 space-y-3">
+                <p className="text-xs font-semibold text-base-content/50 uppercase tracking-wider">Mijoz ma'lumotlari</p>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-zinc-700 flex items-center justify-center shrink-0">
-                    <User size={18} className="text-zinc-400" />
+                  <div className="w-10 h-10 rounded-2xl bg-base-300 flex items-center justify-center shrink-0">
+                    <User size={18} className="text-base-content/60" />
                   </div>
                   <div>
-                    <p className="font-semibold text-zinc-100">{selectedOrder.username}</p>
-                    <p className="text-zinc-400 text-sm flex items-center gap-1.5 mt-0.5">
+                    <p className="font-semibold text-base-content">{selectedOrder.username}</p>
+                    <p className="text-base-content/60 text-sm flex items-center gap-1.5 mt-0.5">
                       <Phone size={12} />
                       {selectedOrder.phoneNumber}
                     </p>
                   </div>
                 </div>
                 {selectedOrder.description && (
-                  <p className="text-zinc-400 text-sm bg-zinc-800 rounded-xl px-3 py-2 leading-relaxed">
+                  <p className="text-base-content/60 text-sm bg-base-300 rounded-xl px-3 py-2 leading-relaxed">
                     {selectedOrder.description}
                   </p>
                 )}
               </div>
 
               
-              <div className="bg-zinc-800/40 rounded-2xl p-4">
-                <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">Mahsulot</p>
+              <div className="bg-base-300/40 rounded-2xl p-4">
+                <p className="text-xs font-semibold text-base-content/50 uppercase tracking-wider mb-3">Mahsulot</p>
                 <div className="flex items-center gap-3">
                   {selectedOrder.product?.image ? (
                     <img
@@ -607,28 +607,28 @@ export default function Orders() {
                       alt=""
                       loading="lazy"
                       decoding="async"
-                      className="w-14 h-14 rounded-2xl object-cover border border-zinc-700 shrink-0"
+                      className="w-14 h-14 rounded-2xl object-cover border border-base-300 shrink-0"
                       onError={e => (e.target.style.display = "none")}
                     />
                   ) : (
-                    <div className="w-14 h-14 rounded-2xl bg-zinc-700 flex items-center justify-center shrink-0">
-                      <Package size={22} className="text-zinc-500" />
+                    <div className="w-14 h-14 rounded-2xl bg-base-300 flex items-center justify-center shrink-0">
+                      <Package size={22} className="text-base-content/50" />
                     </div>
                   )}
                   <div className="flex-1">
-                    <p className="font-semibold text-zinc-100">{selectedOrder.product?.productName}</p>
-                    <p className="text-zinc-500 text-sm">
+                    <p className="font-semibold text-base-content">{selectedOrder.product?.productName}</p>
+                    <p className="text-base-content/50 text-sm">
                       {(selectedOrder.product?.quantity || 1)} dona × {currencyUZS(selectedOrder.product?.price)}
                     </p>
-                    <p className="text-amber-400 font-bold mt-1">{currencyUZS(selectedOrder.totalAmount)}</p>
+                    <p className="text-warning font-bold mt-1">{currencyUZS(selectedOrder.totalAmount)}</p>
                   </div>
                 </div>
               </div>
 
               
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-zinc-800/40 rounded-2xl p-4 space-y-2">
-                  <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Holat</p>
+                <div className="bg-base-300/40 rounded-2xl p-4 space-y-2">
+                  <p className="text-xs font-semibold text-base-content/50 uppercase tracking-wider">Holat</p>
                   <CustomSelect
                     value={selectedOrder.status}
                     onChange={v => updateStatus(selectedOrder._id, v, selectedOrder.status)}
@@ -636,13 +636,13 @@ export default function Orders() {
                     dropUp
                   />
                   {!isDeliveredAllowed(selectedOrder.status) && (
-                    <p className="text-xs text-zinc-600 leading-tight">
+                    <p className="text-xs text-base-content/50 leading-tight">
                       ⚠️ "Yetkazildi" faqat "Tasdiqlandi" dan keyin
                     </p>
                   )}
                 </div>
-                <div className="bg-zinc-800/40 rounded-2xl p-4 space-y-2">
-                  <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">To'lov</p>
+                <div className="bg-base-300/40 rounded-2xl p-4 space-y-2">
+                  <p className="text-xs font-semibold text-base-content/50 uppercase tracking-wider">To'lov</p>
                   <CustomSelect
                     value={selectedOrder.paymentStatus}
                     onChange={v => updatePayment(selectedOrder._id, v)}
@@ -653,7 +653,7 @@ export default function Orders() {
               </div>
 
               
-              <p className="text-xs text-center text-zinc-600 flex items-center justify-center gap-1.5">
+              <p className="text-xs text-center text-base-content/50 flex items-center justify-center gap-1.5">
                 <Calendar size={11} />
                 {new Date(selectedOrder.createdAt).toLocaleString("uz-UZ")}
               </p>
@@ -663,14 +663,14 @@ export default function Orders() {
             <div className="flex gap-3 px-6 pb-6">
               <button
                 onClick={() => { deleteOrder(selectedOrder._id); setSelectedOrder(null); }}
-                className="flex-1 flex items-center justify-center gap-2 py-3 bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 text-red-400 rounded-2xl font-semibold text-sm transition-all active:scale-95"
+                className="flex-1 flex items-center justify-center gap-2 py-3 bg-error/10 border border-error/30 hover:bg-error/20 text-error rounded-2xl font-semibold text-sm transition-all active:scale-95"
               >
                 <Trash2 size={15} />
                 O'chirish
               </button>
               <button
                 onClick={() => setSelectedOrder(null)}
-                className="flex-1 flex items-center justify-center gap-2 py-3 bg-amber-400/10 border border-amber-400/30 hover:bg-amber-400/20 text-amber-400 rounded-2xl font-semibold text-sm transition-all active:scale-95"
+                className="flex-1 flex items-center justify-center gap-2 py-3 bg-warning/10 border border-warning/30 hover:bg-warning/20 text-warning rounded-2xl font-semibold text-sm transition-all active:scale-95"
               >
                 Yopish
               </button>
@@ -684,3 +684,4 @@ export default function Orders() {
 
 
  
+

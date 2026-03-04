@@ -73,15 +73,15 @@ const Login = () => {
       <div className="w-full max-w-4xl relative">
         <div className="bg-base-100 rounded-3xl shadow-2xl border border-warning/20 overflow-hidden backdrop-blur-sm">
           
-          <div className=" from-warning to-warning/80 p-8 text-center relative">
+          <div className="bg-gradient-to-r from-warning to-warning/80 p-8 text-center relative">
             <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMC41IiBvcGFjaXR5PSIwLjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30"></div>
             
             <div className="relative">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl mb-4 shadow-lg">
-                <Sparkles className="w-8 h-8 text-white" />
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-warning-content/20 backdrop-blur-sm rounded-2xl mb-4 shadow-lg">
+                <Sparkles className="w-8 h-8 text-warning-content" />
               </div>
-              <h1 className="text-3xl font-bold text-white mb-2">Qaytganingiz bilan</h1>
-              <p className="text-white/80 text-sm">Ishingizga omad tilaymiz</p>
+              <h1 className="text-3xl font-bold text-base-300 mb-2">Qaytganingiz bilan</h1>
+              <p className="text-base-content text-sm">Ishingizga omad tilaymiz</p>
             </div>
           </div>
 
@@ -146,11 +146,11 @@ const Login = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-warning to-warning/90 hover:from-warning/90 hover:to-warning text-white font-semibold py-3.5 rounded-xl shadow-lg shadow-warning/30 hover:shadow-xl hover:shadow-warning/40 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 group"
+                className="w-full bg-gradient-to-r from-warning to-warning/90 hover:from-warning/90 hover:to-warning text-warning-content font-semibold py-3.5 rounded-xl shadow-lg shadow-warning/30 hover:shadow-xl hover:shadow-warning/40 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 group"
               >
                 {loading ? (
                   <>
-                    <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    <div className="w-5 h-5 border-3 border-warning-content/30 border-t-warning-content rounded-full animate-spin"></div>
                     <span>Kirilmoqda...</span>
                   </>
                 ) : (

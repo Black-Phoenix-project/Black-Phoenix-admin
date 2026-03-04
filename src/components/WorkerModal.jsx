@@ -43,14 +43,14 @@ const WorkerModal = ({
                 <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAwIDEwIEwgNDAgMTAgTSAxMCAwIEwgMTAgNDAgTSAwIDIwIEwgNDAgMjAgTSAyMCAwIEwgMjAgNDAgTSAwIDMwIEwgNDAgMzAgTSAzMCAwIEwgMzAgNDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjEpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30"></div>
                 <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
-                      <TbUserCircle className="text-white text-3xl" />
+                    <div className="w-14 h-14 bg-warning-content/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+                      <TbUserCircle className="text-warning-content text-3xl" />
                     </div>
                     <div>
-                      <h2 className="text-xl sm:text-2xl font-bold text-white">
+                      <h2 className="text-xl sm:text-2xl font-bold text-warning-content">
                         {editWorker ? "Ishchini Tahrirlash" : "Yangi Ishchi Qo'shish"}
                       </h2>
-                      <p className="text-white/80 text-sm mt-1">
+                      <p className="text-warning-content/80 text-sm mt-1">
                         {editWorker
                           ? "Ishchi ma'lumotlarini yangilash"
                           : "Quyidagi ma'lumotlarni to'ldiring"}
@@ -60,7 +60,7 @@ const WorkerModal = ({
                   <button
                     type="button"
                     onClick={closeModal}
-                    className="w-10 h-10 rounded-xl bg-white/20 hover:bg-white/30 backdrop-blur-sm flex items-center justify-center text-white transition-all duration-200 hover:rotate-90 shrink-0"
+                    className="w-10 h-10 rounded-xl bg-warning-content/20 hover:bg-warning-content/30 backdrop-blur-sm flex items-center justify-center text-warning-content transition-all duration-200 hover:rotate-90 shrink-0"
                   >
                     <FiX className="text-xl" />
                   </button>
@@ -211,7 +211,7 @@ const WorkerModal = ({
                   </button>
                   <button
                     type="submit"
-                    className="btn btn-warning text-base-300 h-12 px-6 sm:px-8 shadow-lg shadow-warning/30 hover:shadow-xl hover:shadow-warning/40 transition-all duration-200 order-1 sm:order-2"
+                    className="btn btn-warning text-warning-content h-12 px-6 sm:px-8 shadow-lg shadow-warning/30 hover:shadow-xl hover:shadow-warning/40 transition-all duration-200 order-1 sm:order-2"
                   >
                     {editWorker ? (
                       <>

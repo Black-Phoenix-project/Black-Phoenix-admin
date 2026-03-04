@@ -16,8 +16,8 @@ function Toast({ toast }) {
         rounded-2xl shadow-2xl border text-sm font-medium
         animate-[slideUp_0.3s_ease-out]
         ${toast.type === "error"
-          ? "bg-red-950/95 border-red-500/40 text-red-300"
-          : "bg-zinc-900/95 border-amber-500/40 text-amber-300"
+          ? "bg-error/15 border-error/40 text-error"
+          : "bg-success/15 border-success/40 text-success"
         }`}
     >
       {toast.type === "error"
@@ -33,37 +33,37 @@ function ConfirmDialog({ open, onConfirm, onCancel, name }) {
   if (!open) return null;
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 bg-base-content/70 backdrop-blur-md flex items-center justify-center p-4"
       onClick={onCancel}
     >
       <div
-        className="bg-zinc-900 border border-zinc-700/60 rounded-3xl p-8 w-full max-w-sm shadow-2xl
+        className="bg-base-100 border border-base-300 rounded-3xl p-8 w-full max-w-sm shadow-2xl
           animate-[scaleIn_0.2s_ease-out]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 mx-auto mb-5">
-          <Trash2 size={26} className="text-red-400" />
+        <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-error/10 border border-error/20 mx-auto mb-5">
+          <Trash2 size={26} className="text-error" />
         </div>
-        <h3 className="text-center font-bold text-zinc-100 text-xl mb-2">
+        <h3 className="text-center font-bold text-base-content text-xl mb-2">
           O'chirishni tasdiqlang
         </h3>
-        <p className="text-center text-zinc-400 text-sm mb-7 leading-relaxed">
-          <span className="text-amber-300 font-semibold">{name}</span>
+        <p className="text-center text-base-content/60 text-sm mb-7 leading-relaxed">
+          <span className="text-warning font-semibold">{name}</span>
           {" "}ni o'chirishga ishonchingiz komilmi?
         </p>
         <div className="flex gap-3">
           <button
             onClick={onCancel}
-            className="flex-1 py-3 rounded-2xl border border-zinc-700 text-zinc-400
-              hover:bg-zinc-800 hover:text-zinc-200 text-sm font-medium transition-all
+            className="flex-1 py-3 rounded-2xl border border-base-300 text-base-content/70
+              hover:bg-base-200 hover:text-base-content text-sm font-medium transition-all
               active:scale-95"
           >
             Bekor qilish
           </button>
           <button
             onClick={onConfirm}
-            className="flex-1 py-3 rounded-2xl bg-red-500/10 border border-red-500/30
-              hover:bg-red-500/20 text-red-400 text-sm font-semibold transition-all
+            className="flex-1 py-3 rounded-2xl bg-error/10 border border-error/30
+              hover:bg-error/20 text-error text-sm font-semibold transition-all
               active:scale-95"
           >
             O'chirish
@@ -79,18 +79,18 @@ function WorkerRow({ worker, index, onEdit, onDelete, deleting, confirmId }) {
   const isDeleting = deleting && confirmId === worker._id;
   const initials = `${worker.firstname?.[0] ?? ""}${worker.lastname?.[0] ?? ""}`.toUpperCase();
   const colors = [
-    "bg-amber-500/20 text-amber-300",
-    "bg-sky-500/20 text-sky-300",
-    "bg-emerald-500/20 text-emerald-300",
-    "bg-violet-500/20 text-violet-300",
-    "bg-rose-500/20 text-rose-300",
-    "bg-orange-500/20 text-orange-300",
+    "bg-warning/20 text-warning",
+    "bg-info/20 text-info",
+    "bg-success/20 text-success",
+    "bg-secondary/20 text-secondary",
+    "bg-error/20 text-error",
+    "bg-accent/20 text-accent",
   ];
   const color = colors[index % colors.length];
 
   return (
-    <tr className="group border-b border-zinc-800/60 hover:bg-zinc-800/40 transition-colors duration-150">
-      <td className="px-5 py-4 text-zinc-500 text-sm font-mono w-12">{index + 1}</td>
+    <tr className="group border-b border-base-300/60 hover:bg-base-300/40 transition-colors duration-150">
+      <td className="px-5 py-4 text-base-content/50 text-sm font-mono w-12">{index + 1}</td>
 
       {/* Avatar + Name */}
       <td className="px-5 py-4">
@@ -99,7 +99,7 @@ function WorkerRow({ worker, index, onEdit, onDelete, deleting, confirmId }) {
             {initials}
           </div>
           <div>
-            <p className="font-semibold text-zinc-100 text-sm leading-tight">
+            <p className="font-semibold text-base-content text-sm leading-tight">
               {worker.firstname} {worker.lastname}
             </p>
           </div>
@@ -108,12 +108,12 @@ function WorkerRow({ worker, index, onEdit, onDelete, deleting, confirmId }) {
 
       {/* Position */}
       <td className="px-5 py-4">
-        <span className="text-zinc-300 text-sm">{worker.position}</span>
+        <span className="text-base-content/70 text-sm">{worker.position}</span>
       </td>
 
       {/* Phone */}
       <td className="px-5 py-4">
-        <span className="text-zinc-400 text-sm font-mono tracking-wide">
+        <span className="text-base-content/60 text-sm font-mono tracking-wide">
           {worker.phone || "—"}
         </span>
       </td>
@@ -121,8 +121,8 @@ function WorkerRow({ worker, index, onEdit, onDelete, deleting, confirmId }) {
       {/* Status */}
       <td className="px-5 py-4">
         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold
-          bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          bg-success/10 text-success border border-success/20">
+          <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
           {worker.status || "Faol"}
         </span>
       </td>
@@ -134,8 +134,8 @@ function WorkerRow({ worker, index, onEdit, onDelete, deleting, confirmId }) {
             onClick={() => onEdit(worker)}
             title="Tahrirlash"
             className="w-8 h-8 rounded-xl flex items-center justify-center
-              text-amber-400/70 hover:text-amber-300 hover:bg-amber-500/10
-              border border-transparent hover:border-amber-500/20
+              text-warning/70 hover:text-warning hover:bg-warning/10
+              border border-transparent hover:border-warning/20
               transition-all duration-150 active:scale-90"
           >
             <FiEdit size={14} />
@@ -145,8 +145,8 @@ function WorkerRow({ worker, index, onEdit, onDelete, deleting, confirmId }) {
             title="O'chirish"
             disabled={isDeleting}
             className="w-8 h-8 rounded-xl flex items-center justify-center
-              text-red-400/70 hover:text-red-300 hover:bg-red-500/10
-              border border-transparent hover:border-red-500/20
+              text-error/70 hover:text-error hover:bg-error/10
+              border border-transparent hover:border-error/20
               transition-all duration-150 active:scale-90 disabled:opacity-50"
           >
             {isDeleting
@@ -299,8 +299,8 @@ const Workers = () => {
   if (error)
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="flex items-center gap-3 bg-red-500/10 border border-red-500/20
-          text-red-400 px-6 py-4 rounded-2xl text-sm">
+        <div className="flex items-center gap-3 bg-error/10 border border-error/20
+          text-error px-6 py-4 rounded-2xl text-sm">
           <AlertCircle size={18} />
           {error}
         </div>
@@ -340,15 +340,15 @@ const Workers = () => {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5">
           {/* Title */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-amber-500/15 border border-amber-500/25
+            <div className="w-10 h-10 rounded-2xl bg-warning/15 border border-warning/25
               flex items-center justify-center">
-              <Users size={20} className="text-amber-400" />
+              <Users size={20} className="text-warning" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-zinc-100 leading-tight">
+              <h1 className="text-2xl font-bold text-base-content leading-tight">
                 Ishchilarimiz
               </h1>
-              <p className="text-zinc-500 text-xs mt-0.5">
+              <p className="text-base-content/50 text-xs mt-0.5">
                 {workers.length} ta xodim ro'yxatda
               </p>
             </div>
@@ -359,7 +359,7 @@ const Workers = () => {
             <div className="relative">
               <FiSearch
                 size={14}
-                className="absolute top-1/2 left-3.5 -translate-y-1/2 text-zinc-500 pointer-events-none"
+                className="absolute top-1/2 left-3.5 -translate-y-1/2 text-base-content/50 pointer-events-none"
               />
               <input
                 type="text"
@@ -367,9 +367,9 @@ const Workers = () => {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full sm:w-60 h-10 pl-9 pr-4 rounded-xl text-sm
-                  bg-zinc-800/60 border border-zinc-700/60 text-zinc-200
-                  placeholder-zinc-500 outline-none
-                  focus:border-amber-500/50 focus:bg-zinc-800
+                  bg-base-200/70 border border-base-300 text-base-content
+                  placeholder-base-content/50 outline-none
+                  focus:border-warning/50 focus:bg-base-200
                   transition-all duration-200"
               />
             </div>
@@ -377,9 +377,9 @@ const Workers = () => {
             <button
               onClick={() => openModal()}
               className="h-10 px-4 rounded-xl flex items-center justify-center gap-2
-                bg-amber-500 hover:bg-amber-400 active:bg-amber-600
-                text-zinc-900 text-sm font-semibold
-                transition-all duration-150 active:scale-95 shadow-lg shadow-amber-500/20"
+                bg-warning hover:bg-warning/90 active:bg-warning/80
+                text-warning-content text-sm font-semibold
+                transition-all duration-150 active:scale-95 shadow-lg shadow-warning/20"
             >
               <TbUsersPlus size={17} />
               Qo'shish
@@ -390,50 +390,50 @@ const Workers = () => {
         {/* ── Stats bar ────────────────────────────────────── */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {[
-            { label: "Jami xodimlar", value: workers.length, accent: "text-amber-400" },
+            { label: "Jami xodimlar", value: workers.length, accent: "text-warning" },
             {
               label: "Faol xodimlar",
               value: workers.filter((w) => w.status === "Faol").length,
-              accent: "text-emerald-400",
+              accent: "text-success",
             },
             {
               label: "Qidiruv natijasi",
               value: filteredWorkers.length,
-              accent: "text-sky-400",
+              accent: "text-info",
             },
           ].map((stat) => (
             <div
               key={stat.label}
-              className="bg-zinc-900/60 border border-zinc-800/60 rounded-2xl px-5 py-4"
+              className="bg-base-100 border border-base-300/60 rounded-2xl px-5 py-4"
             >
-              <p className="text-zinc-500 text-xs mb-1">{stat.label}</p>
+              <p className="text-base-content/50 text-xs mb-1">{stat.label}</p>
               <p className={`text-2xl font-bold ${stat.accent}`}>{stat.value}</p>
             </div>
           ))}
         </div>
 
         {/* ── Table ────────────────────────────────────────── */}
-        <div className="bg-zinc-900/60 border border-zinc-800/60 rounded-2xl overflow-hidden">
+        <div className="bg-base-100 border border-base-300/60 rounded-2xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full ">
               <thead>
-                <tr className="border-b border-zinc-800">
-                  <th className="px-5 py-3.5 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider w-12">
+                <tr className="border-b border-base-300">
+                  <th className="px-5 py-3.5 text-left text-xs font-semibold text-base-content/50 uppercase tracking-wider w-12">
                     #
                   </th>
-                  <th className="px-5 py-3.5 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+                  <th className="px-5 py-3.5 text-left text-xs font-semibold text-base-content/50 uppercase tracking-wider">
                     Xodim
                   </th>
-                  <th className="px-5 py-3.5 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+                  <th className="px-5 py-3.5 text-left text-xs font-semibold text-base-content/50 uppercase tracking-wider">
                     Kasb
                   </th>
-                  <th className="px-5 py-3.5 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+                  <th className="px-5 py-3.5 text-left text-xs font-semibold text-base-content/50 uppercase tracking-wider">
                     Telefon
                   </th>
-                  <th className="px-5 py-3.5 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+                  <th className="px-5 py-3.5 text-left text-xs font-semibold text-base-content/50 uppercase tracking-wider">
                     Holat
                   </th>
-                  <th className="px-5 py-3.5 text-right text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+                  <th className="px-5 py-3.5 text-right text-xs font-semibold text-base-content/50 uppercase tracking-wider">
                     Amallar
                   </th>
                 </tr>
@@ -456,16 +456,16 @@ const Workers = () => {
 
           {filteredWorkers.length === 0 && (
             <div className="flex flex-col items-center justify-center py-16 gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-zinc-800 flex items-center justify-center">
-                <Users size={22} className="text-zinc-600" />
+              <div className="w-12 h-12 rounded-2xl bg-base-300 flex items-center justify-center">
+                <Users size={22} className="text-base-content/50" />
               </div>
-              <p className="text-zinc-500 text-sm">
+              <p className="text-base-content/50 text-sm">
                 {searchTerm ? "Hech qanday ishchi topilmadi" : "Ishchilar mavjud emas"}
               </p>
               {!searchTerm && (
                 <button
                   onClick={() => openModal()}
-                  className="mt-1 text-amber-400 text-sm hover:text-amber-300 underline underline-offset-2 transition-colors"
+                  className="mt-1 text-warning text-sm hover:text-warning underline underline-offset-2 transition-colors"
                 >
                   Birinchi xodimni qo'shing
                 </button>
@@ -489,3 +489,4 @@ const Workers = () => {
 };
 
 export default Workers;
+

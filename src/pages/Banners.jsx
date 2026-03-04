@@ -61,7 +61,7 @@ const GalleryModal = ({ onSelect, onClose, showToast }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-base-content/60 backdrop-blur-sm"
         onClick={onClose}
       />
 
@@ -126,7 +126,7 @@ const GalleryModal = ({ onSelect, onClose, showToast }) => {
                       className={`absolute inset-0 transition-opacity duration-200 ${
                         isSelected
                           ? "bg-warning/20 opacity-100"
-                          : "bg-black/0 group-hover:bg-black/10"
+                          : "bg-base-content/0 group-hover:bg-base-content/10"
                       }`}
                     />
                     {isSelected && (
@@ -135,8 +135,8 @@ const GalleryModal = ({ onSelect, onClose, showToast }) => {
                       </div>
                     )}
                     {img.title && (
-                      <div className="absolute bottom-0 inset-x-0  from-black/70 to-transparent px-2 py-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <p className="text-white text-xs truncate">{img.title}</p>
+                      <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-base-content/70 to-transparent px-2 py-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <p className="text-base-100 text-xs truncate">{img.title}</p>
                       </div>
                     )}
                   </button>
@@ -478,8 +478,8 @@ const Banners = () => {
                         "https://placehold.co/800x420?text=Preview";
                     }}
                   />
-                  <div className="absolute inset-0  from-black/65 via-transparent to-transparent" />
-                  <p className="absolute left-3 bottom-2 text-xs text-white/90 font-semibold truncate max-w-[90%] drop-shadow">
+                  <div className="absolute inset-0 bg-gradient-to-t from-base-content/65 via-transparent to-transparent" />
+                  <p className="absolute left-3 bottom-2 text-xs text-base-100/90 font-semibold truncate max-w-[90%] drop-shadow">
                     {formData.title || "Sarlavha preview"}
                   </p>
                 </div>
@@ -519,12 +519,12 @@ const Banners = () => {
                               "https://placehold.co/800x420?text=Swiper";
                           }}
                         />
-                        <div className="absolute inset-0 from-black/75 via-black/20 to-transparent" />
-                        <div className="absolute left-0 right-0 bottom-0 p-5 text-white">
+                        <div className="absolute inset-0 bg-gradient-to-t from-base-content/75 via-base-content/20 to-transparent" />
+                        <div className="absolute left-0 right-0 bottom-0 p-5 text-base-100">
                           <p className="text-xl md:text-2xl font-bold leading-tight">
                             {item.title}
                           </p>
-                          <p className="mt-1 text-sm text-white/80 line-clamp-2 max-w-2xl">
+                          <p className="mt-1 text-sm text-base-100/80 line-clamp-2 max-w-2xl">
                             {item.description}
                           </p>
                         </div>
@@ -577,7 +577,7 @@ const Banners = () => {
                           <button
                             type="button"
                             onClick={() => deleteSwiper(item._id)}
-                            className="mt-2 btn btn-xs border-none bg-red-500/90 text-white hover:bg-red-600 gap-1"
+                            className="mt-2 btn btn-xs border-none bg-error/90 text-error-content hover:bg-error gap-1"
                           >
                             <FiTrash2 className="text-xs" />
                             O'chirish

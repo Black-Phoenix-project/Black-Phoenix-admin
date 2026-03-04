@@ -15,9 +15,9 @@ const BASE_URL = import.meta.env.VITE_BACKENT_URL;
 const asUZS = (v) => Number(v || 0).toLocaleString("uz-UZ") + " so'm";
 
 const paymentStyle = {
-  paid: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
-  unpaid: "bg-rose-500/15 text-rose-400 border-rose-500/30",
-  refunded: "bg-amber-500/15 text-amber-400 border-amber-500/30",
+  paid: "bg-success/15 text-success border-success/35",
+  unpaid: "bg-error/15 text-error border-error/35",
+  refunded: "bg-info/15 text-info border-info/35",
 };
 
 const paymentLabel = {
@@ -180,7 +180,7 @@ const Wallet = () => {
                     <div className="text-[10px] text-base-content/50">{day.amount > 0 ? `${Math.round((day.amount / incomeMax) * 100)}%` : "0%"}</div>
                     <div className="w-full rounded-xl bg-base-200 h-36 flex items-end overflow-hidden border border-base-content/10">
                       <div
-                        className="w-full  from-warning to-warning/50 rounded-xl transition-all duration-500"
+                        className="w-full bg-gradient-to-t from-warning to-warning/50 rounded-xl transition-all duration-500"
                         style={{ height: `${h}%` }}
                       />
                     </div>

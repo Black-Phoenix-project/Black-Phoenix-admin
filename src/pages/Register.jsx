@@ -58,40 +58,40 @@ const Register = () => {
   ];
 
   return (
-    <div className="min-h-screen from-cyan-900 via-blue-900 to-cyan-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-base-300 via-base-200 to-base-300 flex items-center justify-center p-4">
       <AppToast toast={toast} />
       <div className="w-full max-w-3/6 relative">
         <div className="bg-base-300/10 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-base-300/20">
           <div className="text-center mb-8">
-            <div className="w-16 h-16 from-cyan-500 to-blue-500 rounded-2xl mx-auto mb-4 flex items-center justify-center">
-              <User className="w-8 h-8 text-base-300" />
+            <div className="w-16 h-16 bg-gradient-to-br from-warning to-primary rounded-2xl mx-auto mb-4 flex items-center justify-center">
+              <User className="w-8 h-8 text-warning-content" />
             </div>
-            <h2 className="text-3xl font-bold text-base-300 mb-2">
+            <h2 className="text-3xl font-bold text-base-content mb-2">
               Hisob yaratish
             </h2>
-            <p className="text-cyan-200">Bugun admin panelga qo'shiling</p>
+            <p className="text-base-content/70">Bugun admin panelga qo'shiling</p>
           </div>
 
           <div className="space-y-5">
             
             <div className="flex gap-4">
               <div className="flex-1">
-                <label className="text-sm text-cyan-100">To'liq ism</label>
+                <label className="text-sm text-base-content/70">To'liq ism</label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => handleChange("name", e.target.value)}
-                  className="w-full bg-base-300/10 border border-base-300/20 rounded-xl py-3 px-4 text-base-300"
+                  className="w-full bg-base-300/10 border border-base-300/20 rounded-xl py-3 px-4 text-base-content placeholder:text-base-content/40"
                 />
               </div>
 
               <div className="flex-1">
-                <label className="text-sm text-cyan-100">Email</label>
+                <label className="text-sm text-base-content/70">Email</label>
                 <input
                   type="email"
                   value={formData.email}
                   onChange={(e) => handleChange("email", e.target.value)}
-                  className="w-full bg-base-300/10 border border-base-300/20 rounded-xl py-3 px-4 text-base-300"
+                  className="w-full bg-base-300/10 border border-base-300/20 rounded-xl py-3 px-4 text-base-content placeholder:text-base-content/40"
                 />
               </div>
             </div>
@@ -99,7 +99,7 @@ const Register = () => {
             
             <div className="flex gap-4">
               <div className="flex-1">
-                <label className="text-sm text-cyan-100">Parol</label>
+                <label className="text-sm text-base-content/70">Parol</label>
                 <div className="relative">
                   <input
                     type={showPassword ? "text" : "password"}
@@ -107,12 +107,12 @@ const Register = () => {
                     onChange={(e) =>
                       handleChange("password", e.target.value)
                     }
-                    className="w-full bg-base-300/10 border border-base-300/20 rounded-xl py-3 px-4 text-base-300"
+                    className="w-full bg-base-300/10 border border-base-300/20 rounded-xl py-3 px-4 text-base-content placeholder:text-base-content/40"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-3 text-cyan-300"
+                    className="absolute right-3 top-3 text-base-content/50 hover:text-base-content/80"
                   >
                     {showPassword ? <EyeOff /> : <Eye />}
                   </button>
@@ -120,7 +120,7 @@ const Register = () => {
               </div>
 
               <div className="flex-1">
-                <label className="text-sm text-cyan-100">
+                <label className="text-sm text-base-content/70">
                   Parolni tasdiqlang
                 </label>
                 <div className="relative">
@@ -130,14 +130,14 @@ const Register = () => {
                     onChange={(e) =>
                       handleChange("confirmPassword", e.target.value)
                     }
-                    className="w-full bg-base-300/10 border border-base-300/20 rounded-xl py-3 px-4 text-base-300"
+                    className="w-full bg-base-300/10 border border-base-300/20 rounded-xl py-3 px-4 text-base-content placeholder:text-base-content/40"
                   />
                   <button
                     type="button"
                     onClick={() =>
                       setShowConfirmPassword(!showConfirmPassword)
                     }
-                    className="absolute right-3 top-3 text-cyan-300"
+                    className="absolute right-3 top-3 text-base-content/50 hover:text-base-content/80"
                   >
                     {showConfirmPassword ? <EyeOff /> : <Eye />}
                   </button>
@@ -151,14 +151,14 @@ const Register = () => {
                 {passwordRequirements.map((req, i) => (
                   <div key={i} className="flex items-center gap-2">
                     <div
-                      className={`w-4 h-4 rounded-full ${req.met ? "bg-green-500" : "bg-base-300/20"
+                      className={`w-4 h-4 rounded-full ${req.met ? "bg-success" : "bg-base-300/40"
                         }`}
                     >
                       {req.met && (
-                        <Check className="w-3 h-3 text-base-300 mx-auto" />
+                        <Check className="w-3 h-3 text-success-content mx-auto" />
                       )}
                     </div>
-                    <span className="text-xs text-cyan-200">{req.text}</span>
+                    <span className="text-xs text-base-content/60">{req.text}</span>
                   </div>
                 ))}
               </div>
@@ -167,16 +167,16 @@ const Register = () => {
             
             <button
               onClick={handleSubmit}
-              className="w-full from-cyan-500 to-blue-500 text-base-300 font-semibold py-3 rounded-xl flex items-center justify-center gap-2"
+              className="w-full bg-gradient-to-r from-warning to-primary text-warning-content font-semibold py-3 rounded-xl flex items-center justify-center gap-2 hover:opacity-90 transition"
             >
               Hisob yaratish <ArrowRight />
             </button>
           </div>
 
           <div className="mt-6 text-center">
-            <p className="text-cyan-200">
+            <p className="text-base-content/70">
               Akkauntingiz bormi?{" "}
-              <Link to="/login" className="text-cyan-300 font-semibold">
+              <Link to="/login" className="text-primary font-semibold">
                 Kirish
               </Link>
             </p>

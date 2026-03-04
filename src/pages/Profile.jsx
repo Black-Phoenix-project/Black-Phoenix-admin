@@ -12,16 +12,16 @@ const variants = [
     ring: "ring-warning/40",
   },
   {
-    glow: "shadow-amber-400/25",
-    border: "border-amber-300/30",
-    soft: "bg-amber-300/10",
-    ring: "ring-amber-300/40",
+    glow: "shadow-primary/25",
+    border: "border-primary/30",
+    soft: "bg-primary/10",
+    ring: "ring-primary/40",
   },
   {
-    glow: "shadow-yellow-300/25",
-    border: "border-yellow-300/30",
-    soft: "bg-yellow-300/10",
-    ring: "ring-yellow-300/40",
+    glow: "shadow-accent/25",
+    border: "border-accent/30",
+    soft: "bg-accent/10",
+    ring: "ring-accent/40",
   },
 ];
 
@@ -69,7 +69,7 @@ const Profile = () => {
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
                   <div className={`relative p-1 rounded-full ring-4 ${accent.ring}`}>
                     <img
-                      src={avatar}
+                      src={'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSgF2suM5kFwk9AdFjesEr8EP1qcyUvah8G7w&s'}
                       alt={displayName}
                       className="w-24 h-24 md:w-28 md:h-28 rounded-full object-cover border-4 border-base-300"
                       onError={(e) => {
@@ -88,7 +88,7 @@ const Profile = () => {
                     </div>
                   </div>
 
-                  <button onClick={handleLogout} className={`btn bg-error text-black border-none hover:bg-warning/80 shadow-lg ${accent.glow}`}>
+                  <button onClick={handleLogout} className={`btn bg-error text-error-content border-none hover:bg-error/80 shadow-lg ${accent.glow}`}>
                     <LogOut size={16} />
                     Chiqish
                   </button>
