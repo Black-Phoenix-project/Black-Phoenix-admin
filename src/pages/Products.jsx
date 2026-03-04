@@ -6,9 +6,8 @@ import { IoMdReorder } from "react-icons/io";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { RiDeleteBinLine } from "react-icons/ri";
 import { FiPlusCircle } from "react-icons/fi";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import LoadingTemplate from "../components/LoadingTemplate";
+import AppToast from "../components/AppToast";
 
 const BASE_URL = import.meta.env.VITE_BACKENT_URL;
 
@@ -44,12 +43,18 @@ const Products = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [editingProductId, setEditingProductId] = useState(null);
+  const [toast, setToast] = useState(null);
   const [newProduct, setNewProduct] = useState({
     name: "",
     images: ["", "", ""],
     description: "",
     price: "",
   });
+
+  const showToast = (msg, type = "success") => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   const resetProductForm = () => {
     setNewProduct({
@@ -79,7 +84,7 @@ const Products = () => {
         : [];
       setProducts(list);
     } catch (err) {
-      toast.error("Mahsulotlarni yuklashda xatolik.");
+      showToast("Mahsulotlarni yuklashda xatolik.", "error");
       console.error(err);
     } finally {
       setLoading(false);
@@ -100,11 +105,11 @@ const Products = () => {
     const { name, images, description, price } = newProduct;
     const validImages = (images || []).map((img) => img.trim()).filter(Boolean);
     if (!name || !description || !price) {
-      toast.error("Barcha maydonlar to'ldirilishi shart!");
+      showToast("Barcha maydonlar to'ldirilishi shart!", "error");
       return false;
     }
     if (validImages.length < 1 || validImages.length > 3) {
-      toast.error("Kamida 1 ta, ko'pi bilan 3 ta rasm kiriting!");
+      showToast("Kamida 1 ta, ko'pi bilan 3 ta rasm kiriting!", "error");
       return false;
     }
     return true;
@@ -159,11 +164,11 @@ const Products = () => {
       const added = await res.json();
       const createdProduct = added?.data || added;
       setProducts((prev) => [...prev, createdProduct]);
-      toast.success("Mahsulot muvaffaqiyatli qo'shildi!");
+      showToast("Mahsulot muvaffaqiyatli qo'shildi!");
       setNewProduct({ name: "", images: ["", "", ""], description: "", price: "" });
       document.getElementById("product_modal").close();
     } catch (err) {
-      toast.error(err.message || "Mahsulot qo'shishda xatolik.");
+      showToast(err.message || "Mahsulot qo'shishda xatolik.", "error");
       console.error(err);
     }
   };
@@ -206,11 +211,11 @@ const Products = () => {
       setProducts((prev) =>
         prev.map((item) => (item._id === editingProductId ? updatedProduct : item))
       );
-      toast.success("Mahsulot muvaffaqiyatli yangilandi!");
+      showToast("Mahsulot muvaffaqiyatli yangilandi!");
       resetProductForm();
       document.getElementById("product_modal").close();
     } catch (err) {
-      toast.error(err.message || "Mahsulotni yangilashda xatolik.");
+      showToast(err.message || "Mahsulotni yangilashda xatolik.", "error");
       console.error(err);
     }
   };
@@ -221,9 +226,9 @@ const Products = () => {
       });
       if (!res.ok) throw new Error("O'chirishda xatolik");
       setProducts((prev) => prev.filter((p) => p._id !== id));
-      toast.success("Mahsulot o'chirildi.");
+      showToast("Mahsulot o'chirildi.");
     } catch {
-      toast.error("Mahsulotni o'chirishda xatolik.");
+      showToast("Mahsulotni o'chirishda xatolik.", "error");
     }
   };
   const duplicateProduct = async (item) => {
@@ -264,9 +269,9 @@ const Products = () => {
       const added = await res.json();
       const duplicatedProduct = added?.data || added;
       setProducts((prev) => [...prev, duplicatedProduct]);
-      toast.success("Mahsulot nusxalandi!");
+      showToast("Mahsulot nusxalandi!");
     } catch (err) {
-      toast.error(err.message || "Mahsulotni nusxalashda xatolik.");
+      showToast(err.message || "Mahsulotni nusxalashda xatolik.", "error");
     }
   };
 
@@ -280,6 +285,7 @@ const Products = () => {
 
   return (
     <div className="min-h-screen bg-base-300 p-6">
+      <AppToast toast={toast} />
       
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
@@ -457,7 +463,7 @@ const Products = () => {
                   bg="bg-emerald-100"
                   color="text-emerald-600"
                   label="Ko'rish"
-                  onClick={() => toast.info(`Ko'rilmoqda: ${product.name}`)}
+                  onClick={() => showToast(`Ko'rilmoqda: ${product.name}`)}
                 />
                 <ActionBtn
                   icon={<FiPlusCircle />}
@@ -547,7 +553,7 @@ const Products = () => {
                   icon={<MdOutlineRemoveRedEye />}
                   bg="bg-emerald-100"
                   color="text-emerald-600"
-                  onClick={() => toast.info(`Ko'rilmoqda: ${product.name}`)}
+                  onClick={() => showToast(`Ko'rilmoqda: ${product.name}`)}
                 />
                 <ActionBtn
                   icon={<FiPlusCircle />}
@@ -573,24 +579,6 @@ const Products = () => {
         </div>
       )}
 
-      
-      <ToastContainer
-        position="bottom-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop
-        closeOnClick
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="dark"
-        toastStyle={{
-          background: "#1d1d1d",
-          color: "#f5c518",
-          border: "1px solid rgba(245,197,24,0.3)",
-          borderRadius: "12px",
-        }}
-      />
     </div>
   );
 };

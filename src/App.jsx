@@ -3,14 +3,21 @@ import "./App.css";
 import Sidebar from "./components/Sidebar";
 import Navbar from "./components/Navbar";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { Home, Wallet, Coffee, BriefcaseBusiness, PanelsTopLeft } from "lucide-react";
+import {
+  Home,
+  Wallet,
+  BriefcaseBusiness,
+  PanelsTopLeft,
+  ClipboardList,
+  ToolCase,
+} from "lucide-react";
 
 const menuItems = [
   { label: "Bosh sahifa", path: "/", icon: <Home size={20} /> },
-  { label: "Mahsulotlar", path: "/products", icon: <Coffee size={18} /> },
+  { label: "Mahsulotlar", path: "/products", icon: <ToolCase size={18} /> },
+  { label: "Buyurtma", path: "/orders", icon: <ClipboardList size={20} /> },
   { label: "Hamyon", path: "/wallet", icon: <Wallet size={20} /> },
   { label: "Swiper", path: "/swiper", icon: <PanelsTopLeft size={20} /> },
-  { label: "Ishchilar", path: "/workers", icon: <BriefcaseBusiness size={20} /> },
 ];
 
 function App() {

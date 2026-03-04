@@ -19,7 +19,7 @@ const Navbar = () => {
       <div className="hidden md:flex justify-between items-center px-6 py-3">
         <div>
           <span className="text-sm font-bold">
-            Xush kelibsiz, <span className="text-warning font-bold">{user?.username || 'admin'}</span>
+            Xush kelibsiz, <span className="text-warning font-bold ">{user?.username || 'admin'}</span>
           </span>
         </div>
 
@@ -56,20 +56,38 @@ const Navbar = () => {
       </div>
 
       <div className="flex md:hidden justify-between w-full items-center px-4 py-3">
-        <span className="text-sm italic">
-          Salom, <span className="text-warning font-bold">{user?.username}</span>
-        </span>
+        <u className="text-sm font-medium underline-offset-4">
+          Black Phoenix
+        </u>
 
-        <div tabIndex={0} className="btn btn-ghost btn-circle avatar">
-              <div className="w-10 rounded-full">
-                <img
-                  src={user?.image}
-                  alt="User Avatar"
-                  loading="lazy"
-                  decoding="async"
-                />
-              </div>
+        <div className="dropdown dropdown-end">
+          <div tabIndex={0} className="btn btn-ghost btn-circle avatar">
+            <div className="w-10 rounded-full">
+              <img
+                src={user?.image}
+                alt="User Avatar"
+                loading="lazy"
+                decoding="async"
+              />
             </div>
+          </div>
+          <ul
+            tabIndex="-1"
+            className="menu menu-sm dropdown-content bg-base-100 rounded-box z-10 mt-3 w-52 p-2 shadow"
+          >
+            <li>
+              <Link className="justify-between" to={`/profile`}>
+                Profil
+                <span className="badge">Yangi</span>
+              </Link>
+            </li>
+            <li>
+              <button className="text-error font-bold" onClick={handleLogout}>
+                Chiqish
+              </button>
+            </li>
+          </ul>
+        </div>
       </div>
 
       

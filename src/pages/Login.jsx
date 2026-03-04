@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import { loginSuccess } from "../redux/slices/authSlice";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { toast } from "react-toastify";
+import AppToast from "../components/AppToast";
 
 const BASE_URL = import.meta.env.VITE_BACKENT_URL;
 
@@ -18,6 +18,12 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [toast, setToast] = useState(null);
+
+  const showToast = (msg, type = "success") => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -39,11 +45,11 @@ const Login = () => {
 
       dispatch(loginSuccess({ user: res.data.user, token: res.data.token }));
       navigate("/");
-      toast.success("Muvaffaqiyatli kirildi");
+      showToast("Muvaffaqiyatli kirildi");
     } catch (err) {
       console.error(err.response?.data); 
       setError(err.response?.data?.message || "Kirish amalga oshmadi");
-      toast.error("Kirish amalga oshmadi");
+      showToast("Kirish amalga oshmadi", "error");
     } finally {
       setLoading(false);
     }
@@ -51,6 +57,7 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-warning/5 via-base-100 to-warning/10 p-4 relative overflow-hidden">
+      <AppToast toast={toast} />
       
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-warning/10 rounded-full blur-3xl animate-pulse"></div>

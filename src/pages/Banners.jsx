@@ -1,11 +1,11 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
-import { toast } from "react-toastify";
 import { FiImage, FiPlus, FiRefreshCw, FiTrash2, FiX, FiCheck, FiGrid, FiLink } from "react-icons/fi";
 import { MdOutlineSlideshow } from "react-icons/md";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
+import AppToast from "../components/AppToast";
 
 const BASE_URL = import.meta.env.VITE_BACKENT_URL;
 
@@ -30,7 +30,7 @@ const getImageUrl = (item) =>
   item?.url || item?.imageUrl || item?.image || item?.src || "";
 
 /* ─── Gallery Picker Modal ─── */
-const GalleryModal = ({ onSelect, onClose }) => {
+const GalleryModal = ({ onSelect, onClose, showToast }) => {
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
@@ -43,7 +43,7 @@ const GalleryModal = ({ onSelect, onClose }) => {
         const data = await res.json();
         setImages(normalizeGalleryData(data));
       } catch {
-        toast.error("Galereyani yuklab bo'lmadi");
+        showToast("Galereyani yuklab bo'lmadi", "error");
       } finally {
         setLoading(false);
       }
@@ -187,6 +187,12 @@ const Banners = () => {
   const [formData, setFormData] = useState(initialForm);
   const [showGallery, setShowGallery] = useState(false);
   const [imageMode, setImageMode] = useState("gallery"); // "gallery" | "url"
+  const [toast, setToast] = useState(null);
+
+  const showToast = useCallback((msg, type = "success") => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3000);
+  }, []);
 
   const hasItems = useMemo(() => items.length > 0, [items]);
   const previewImage =
@@ -201,11 +207,11 @@ const Banners = () => {
       const data = await res.json();
       setItems(normalizeSwiperData(data));
     } catch {
-      toast.error("Swiper ma'lumotlarini yuklab bo'lmadi");
+      showToast("Swiper ma'lumotlarini yuklab bo'lmadi", "error");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [showToast]);
 
   useEffect(() => {
     fetchSwipers();
@@ -223,7 +229,7 @@ const Banners = () => {
   const validate = () => {
     const { title, image, description } = formData;
     if (!title.trim() || !image.trim() || !description.trim()) {
-      toast.error("Barcha maydonlarni to'ldiring");
+      showToast("Barcha maydonlarni to'ldiring", "error");
       return false;
     }
     return true;
@@ -243,9 +249,9 @@ const Banners = () => {
       if (!res.ok) throw new Error(data?.message || "Create failed");
       setItems((prev) => [data?.data || data, ...prev]);
       setFormData(initialForm);
-      toast.success("Swiper muvaffaqiyatli qo'shildi");
+      showToast("Swiper muvaffaqiyatli qo'shildi");
     } catch (error) {
-      toast.error(error.message || "Swiper yaratishda xatolik");
+      showToast(error.message || "Swiper yaratishda xatolik", "error");
     } finally {
       setSubmitting(false);
     }
@@ -258,18 +264,20 @@ const Banners = () => {
       });
       if (!res.ok) throw new Error();
       setItems((prev) => prev.filter((item) => item._id !== id));
-      toast.success("Swiper o'chirildi");
+      showToast("Swiper o'chirildi");
     } catch {
-      toast.error("Swiper o'chirishda xatolik");
+      showToast("Swiper o'chirishda xatolik", "error");
     }
   };
 
   return (
     <>
+      <AppToast toast={toast} />
       {showGallery && (
         <GalleryModal
           onSelect={handleGallerySelect}
           onClose={() => setShowGallery(false)}
+          showToast={showToast}
         />
       )}
 

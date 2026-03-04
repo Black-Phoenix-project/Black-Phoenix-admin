@@ -201,7 +201,7 @@ function OrderCard({ order, idx, page, LIMIT, updating, deleting, onView, onDele
 
         <div className="hidden lg:block w-px h-8  shrink-0" />
 
-        <div className="w-36 shrink-0">
+        <div className="hidden lg:block w-36 shrink-0">
           <CustomSelect
             value={order.status}
             onChange={v => onStatusChange(order._id, v, order.status)}
@@ -210,7 +210,22 @@ function OrderCard({ order, idx, page, LIMIT, updating, deleting, onView, onDele
           />
         </div>
 
-        <div className="w-32 shrink-0">
+        <div className="hidden lg:block w-32 shrink-0">
+          <CustomSelect
+            value={order.paymentStatus}
+            onChange={v => onPaymentChange(order._id, v)}
+            disabled={updating[order._id + "_pay"]}
+            options={buildPaymentOptions()}
+          />
+        </div>
+
+        <div className="w-full lg:hidden grid grid-cols-2 gap-2 mt-1">
+          <CustomSelect
+            value={order.status}
+            onChange={v => onStatusChange(order._id, v, order.status)}
+            disabled={updating[order._id + "_status"]}
+            options={buildStatusOptions(order.status)}
+          />
           <CustomSelect
             value={order.paymentStatus}
             onChange={v => onPaymentChange(order._id, v)}

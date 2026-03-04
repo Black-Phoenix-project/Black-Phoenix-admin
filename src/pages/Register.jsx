@@ -3,7 +3,7 @@ import { Eye, EyeOff, Mail, Lock, User, ArrowRight, Check } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { registerSuccess } from "../redux/slices/authSlice";
-import { toast } from "react-toastify";
+import AppToast from "../components/AppToast";
 
 const Register = () => {
   const dispatch = useDispatch();
@@ -11,6 +11,7 @@ const Register = () => {
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [toast, setToast] = useState(null);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -23,14 +24,19 @@ const Register = () => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  const showToast = (msg, type = "success") => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3000);
+  };
+
   const handleSubmit = () => {
     if (!formData.name || !formData.email || !formData.password) {
-      toast.error("Barcha maydonlar to'ldirilishi shart");
+      showToast("Barcha maydonlar to'ldirilishi shart", "error");
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      toast.error("Parollar mos kelmadi");
+      showToast("Parollar mos kelmadi", "error");
       return;
     }
 
@@ -53,6 +59,7 @@ const Register = () => {
 
   return (
     <div className="min-h-screen from-cyan-900 via-blue-900 to-cyan-900 flex items-center justify-center p-4">
+      <AppToast toast={toast} />
       <div className="w-full max-w-3/6 relative">
         <div className="bg-base-300/10 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-base-300/20">
           <div className="text-center mb-8">
