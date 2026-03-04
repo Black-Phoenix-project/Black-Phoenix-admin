@@ -27,7 +27,10 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!phoneNumber || !password) {
+    const normalizedPhone = String(phoneNumber || "").trim();
+    const normalizedPassword = String(password || "");
+
+    if (!normalizedPhone || !normalizedPassword) {
       setError("Barcha maydonlarni to'ldiring");
       return;
     }
@@ -38,7 +41,7 @@ const Login = () => {
     try {
       const res = await axios.post(
         `${BASE_URL}/api/auth/login`,
-        { phoneNumber, password }
+        { phoneNumber: normalizedPhone, password: normalizedPassword }
       );
 
       console.log("Login response:", res.data); 
@@ -47,9 +50,10 @@ const Login = () => {
       navigate("/");
       showToast("Muvaffaqiyatli kirildi");
     } catch (err) {
+      const serverMessage = err.response?.data?.message || "Kirish amalga oshmadi";
       console.error(err.response?.data); 
-      setError(err.response?.data?.message || "Kirish amalga oshmadi");
-      showToast("Kirish amalga oshmadi", "error");
+      setError(serverMessage);
+      showToast(serverMessage, "error");
     } finally {
       setLoading(false);
     }
@@ -101,7 +105,7 @@ const Login = () => {
                     <Mail className="w-5 h-5 text-warning group-focus-within:text-warning transition-colors" />
                   </div>
                   <input
-                    type="number"
+                    type="tel"
                     placeholder="telefon raqamingizni kiriting"
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
