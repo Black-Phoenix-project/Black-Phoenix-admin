@@ -480,7 +480,7 @@ const Products = () => {
           )})}
         </div>
       )}
-
+  
       
       {!loading && !showGrid && (
         <div className="space-y-2 mt-4">
@@ -498,13 +498,13 @@ const Products = () => {
             return (
             <div
               key={product._id}
-              className={`grid grid-cols-12 gap-4 items-center px-5 py-3 rounded-xl border transition-all hover:border-warning/40 ${
+              className={`grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-4 items-center px-5 py-4 md:py-3 rounded-2xl md:rounded-xl border transition-all hover:border-warning/40 ${
                 index % 2 === 0
                   ? "bg-base-100 border-base-content/10"
                   : "bg-base-200 border-base-content/5"
               }`}
             >
-              <div className="col-span-1">
+              <div className="col-span-1 flex justify-center md:justify-start">
                 <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-warning/30 bg-base-300">
                   <img
                     src={productImage || "https://placehold.co/40x40?text=P"}
@@ -535,7 +535,7 @@ const Products = () => {
                 </p>
               </div>
 
-              <div className="col-span-2 flex justify-end gap-1.5">
+              <div className="col-span-1 md:col-span-2 flex justify-center md:justify-end gap-2 md:gap-1.5">
                 <ActionBtn
                   icon={<MdOutlineRemoveRedEye />}
                   bg="bg-emerald-100"

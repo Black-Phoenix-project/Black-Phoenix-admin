@@ -168,7 +168,6 @@ export default function DentistChartsDashboard() {
         <div className="flex items-center gap-2">
           <BarChart2 className="text-warning" size={20} />
           <h1 className="text-base md:text-xl font-bold">Boshqaruv paneli</h1>
-          <span className="badge badge-warning badge-xs md:badge-sm">Foyda faqat tasdiqlangan va to'langan mijozlardan keladi</span>
         </div>
         <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3">
           {lastUpdated && (

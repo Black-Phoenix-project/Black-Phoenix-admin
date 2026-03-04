@@ -119,15 +119,15 @@ const Sidebar = () => {
   }
 
   return (
-    <nav className="fixed bottom-0 left-0 w-full z-50 bg-base-300 border-t-2 border-warning shadow-xl flex justify-around items-center h-16">
+    <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] w-[90%] max-w-[380px] bg-base-100/95 backdrop-blur-2xl shadow-2xl border border-warning/20 rounded-full px-3 py-2 flex justify-around items-center">
       {menuItems.map(({ path, icon }) => (
         <Link
           key={path}
           to={path}
-          className={`h-11 w-11 rounded-xl flex items-center justify-center transition-all
+          className={`h-11 w-11 rounded-2xl flex items-center justify-center transition-all
             ${
               isActive(path)
-                ? "bg-warning text-warning-content"
+                ? "bg-warning text-warning-content shadow-inner"
                 : "text-base-content/50 hover:bg-base-200"
             }`}
         >
