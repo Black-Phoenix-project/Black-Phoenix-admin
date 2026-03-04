@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from "react";
+import React, { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import LoadingTemplate from "../components/LoadingTemplate";
 import {
   Clock, CheckCircle, XCircle, Truck, Package, RefreshCw,
@@ -176,6 +176,8 @@ function OrderCard({ order, idx, page, LIMIT, updating, deleting, onView, onDele
             <img
               src={order.product.image}
               alt=""
+              loading="lazy"
+              decoding="async"
               className="w-9 h-9 rounded-xl object-cover border border-zinc-700/60 shrink-0"
               onError={e => (e.target.style.display = "none")}
             />
@@ -363,15 +365,15 @@ export default function Orders() {
     }
   };
 
-  const filteredOrders = orders.filter(o => {
-    if (!search) return true;
+  const filteredOrders = useMemo(() => {
+    if (!search) return orders;
     const q = search.toLowerCase();
-    return (
+    return orders.filter((o) => (
       o.username?.toLowerCase().includes(q) ||
       o.phoneNumber?.toLowerCase().includes(q) ||
       o.product?.productName?.toLowerCase().includes(q)
-    );
-  });
+    ));
+  }, [orders, search]);
 
   return (
     <div className="min-h-screen bg-base-300 p-4 text-zinc-100 ">
@@ -588,6 +590,8 @@ export default function Orders() {
                     <img
                       src={selectedOrder.product.image}
                       alt=""
+                      loading="lazy"
+                      decoding="async"
                       className="w-14 h-14 rounded-2xl object-cover border border-zinc-700 shrink-0"
                       onError={e => (e.target.style.display = "none")}
                     />

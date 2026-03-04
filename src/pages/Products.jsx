@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { TiThLarge } from "react-icons/ti";
 import { FaRegPenToSquare, FaPlus } from "react-icons/fa6";
 import { LiaSearchSolid } from "react-icons/lia";
@@ -51,7 +51,6 @@ const Products = () => {
     price: "",
   });
 
-  console.log('products: ', products);
   const resetProductForm = () => {
     setNewProduct({
       name: "",
@@ -271,8 +270,12 @@ const Products = () => {
     }
   };
 
-  const filteredProducts = products.filter((p) =>
-    p.name?.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredProducts = useMemo(
+    () =>
+      products.filter((p) =>
+        p.name?.toLowerCase().includes(searchQuery.toLowerCase())
+      ),
+    [products, searchQuery]
   );
 
   return (
@@ -428,6 +431,8 @@ const Products = () => {
                 <img
                   src={productImage || "https://placehold.co/80x80?text=P"}
                   alt={product.name}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     e.target.src = "https://placehold.co/80x80?text=P";
@@ -509,6 +514,8 @@ const Products = () => {
                   <img
                     src={productImage || "https://placehold.co/40x40?text=P"}
                     alt={product.name}
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-cover"
                     onError={(e) => {
                       e.target.src = "https://placehold.co/40x40?text=P";

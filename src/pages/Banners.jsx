@@ -396,7 +396,7 @@ const Banners = () => {
                             <p className="text-xs font-semibold text-warning">
                               Rasm tanlandi
                             </p>
-                            <p className="text-xs text-base-content/50 truncate max-w-[160px]">
+                            <p className="text-xs text-base-content/50 truncate">
                               {formData.image}
                             </p>
                           </div>
@@ -470,7 +470,7 @@ const Banners = () => {
                         "https://placehold.co/800x420?text=Preview";
                     }}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-transparent" />
+                  <div className="absolute inset-0  from-black/65 via-transparent to-transparent" />
                   <p className="absolute left-3 bottom-2 text-xs text-white/90 font-semibold truncate max-w-[90%] drop-shadow">
                     {formData.title || "Sarlavha preview"}
                   </p>
@@ -488,7 +488,7 @@ const Banners = () => {
               </div>
 
               {loading ? (
-                <div className="flex justify-center items-center min-h-[280px]">
+                <div className="flex justify-center items-center">
                   <span className="loading loading-spinner loading-lg text-warning" />
                 </div>
               ) : hasItems ? (
@@ -501,7 +501,7 @@ const Banners = () => {
                 >
                   {items.map((item) => (
                     <SwiperSlide key={item._id || item.image}>
-                      <div className="relative h-[240px] md:h-[320px]">
+                      <div className="relative">
                         <img
                           src={item.image}
                           alt={item.title}
@@ -511,7 +511,7 @@ const Banners = () => {
                               "https://placehold.co/800x420?text=Swiper";
                           }}
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
+                        <div className="absolute inset-0 from-black/75 via-black/20 to-transparent" />
                         <div className="absolute left-0 right-0 bottom-0 p-5 text-white">
                           <p className="text-xl md:text-2xl font-bold leading-tight">
                             {item.title}
@@ -525,7 +525,7 @@ const Banners = () => {
                   ))}
                 </Swiper>
               ) : (
-                <div className="min-h-[280px] rounded-2xl border-2 border-dashed border-warning/25 bg-base-200/40 flex flex-col items-center justify-center text-center px-4 gap-3">
+                <div className=" rounded-2xl border-2 border-dashed border-warning/25 bg-base-200/40 flex flex-col items-center justify-center text-center px-4 gap-3">
                   <div className="w-14 h-14 rounded-2xl bg-warning/10 flex items-center justify-center">
                     <FiImage className="text-2xl text-warning" />
                   </div>
@@ -544,7 +544,7 @@ const Banners = () => {
                   <h3 className="text-xs font-semibold text-base-content/50 uppercase tracking-wider mb-3">
                     Barcha slaydlar
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 overflow-y-auto pr-1 custom-scrollbar">
                     {items.map((item) => (
                       <article
                         key={item._id}

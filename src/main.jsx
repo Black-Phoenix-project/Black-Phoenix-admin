@@ -1,24 +1,30 @@
-import React from "react";
+import React, { Suspense, lazy } from "react";
 import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Provider } from "react-redux";
-import { PersistGate } from "redux-persist/integration/react";
-import { ToastContainer } from "react-toastify";
 import "./index.css";
 import App from "./App";
-import { store, persistor } from "./redux/store";
+import { store } from "./redux/store";
+import LoadingTemplate from "./components/LoadingTemplate";
 
-import Dashboard from "./pages/Dashboard";
-import Orders from "./pages/Orders";
-import Products from "./pages/Products";
-import Wallet from "./pages/Wallet";
-import Workers from "./pages/Workers";
-import Register from "./pages/Register";
-import Login from "./pages/Login";
 import AuthRoute from "./components/AuthRoute";
 import ProtectedRoute from "./components/ProtectedRoute";
-import Profile from "./pages/Profile";
-import Banners from "./pages/Banners";
+
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Orders = lazy(() => import("./pages/Orders"));
+const Products = lazy(() => import("./pages/Products"));
+const Wallet = lazy(() => import("./pages/Wallet"));
+const Workers = lazy(() => import("./pages/Workers"));
+const Register = lazy(() => import("./pages/Register"));
+const Login = lazy(() => import("./pages/Login"));
+const Profile = lazy(() => import("./pages/Profile"));
+const Banners = lazy(() => import("./pages/Banners"));
+
+const withSuspense = (element) => (
+  <Suspense fallback={<LoadingTemplate />}>
+    {element}
+  </Suspense>
+);
 
 export const router = createBrowserRouter([
   {
@@ -28,13 +34,13 @@ export const router = createBrowserRouter([
         path: "/",
         element: <App />,
         children: [
-          { path: "/", element: <Dashboard /> },
-          { path: "orders", element: <Orders /> },
-          { path: "products", element: <Products /> },
-          { path: "workers", element: <Workers /> },
-          { path: "wallet", element: <Wallet /> },
-          { path: "profile", element: <Profile /> },
-          { path: "swiper", element: <Banners /> },
+          { path: "/", element: withSuspense(<Dashboard />) },
+          { path: "orders", element: withSuspense(<Orders />) },
+          { path: "products", element: withSuspense(<Products />) },
+          { path: "workers", element: withSuspense(<Workers />) },
+          { path: "wallet", element: withSuspense(<Wallet />) },
+          { path: "profile", element: withSuspense(<Profile />) },
+          { path: "swiper", element: withSuspense(<Banners />) },
         ],
       },
     ],
@@ -42,17 +48,14 @@ export const router = createBrowserRouter([
   {
     element: <AuthRoute />,
     children: [
-      { path: "/login", element: <Login /> },
-      { path: "/register", element: <Register /> },
+      { path: "/login", element: withSuspense(<Login />) },
+      { path: "/register", element: withSuspense(<Register />) },
     ],
   },
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <Provider store={store}>
-    <PersistGate loading={null} persistor={persistor}>
-      <ToastContainer />
-      <RouterProvider router={router} />
-    </PersistGate>
+    <RouterProvider router={router} />
   </Provider>
 );

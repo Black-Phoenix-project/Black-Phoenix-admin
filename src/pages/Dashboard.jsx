@@ -1,15 +1,14 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { Line, Doughnut } from "react-chartjs-2";
-import "chart.js/auto";
+import React, { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import LoadingTemplate from "../components/LoadingTemplate";
 import {
-  TrendingUp, ShoppingBag, CheckCircle, Clock,
-  XCircle, Package, RefreshCw, DollarSign,
-  BarChart2, PieChart, AlertCircle
+  ShoppingBag, CheckCircle, Clock,
+  XCircle, Package, RefreshCw,
+  BarChart2
 } from "lucide-react";
 
 const BASE_URL = import.meta.env.VITE_BACKENT_URL;
 const currencyUZS = (v) => Number(v || 0).toLocaleString("uz-UZ") + " so'm";
+const DashboardCharts = lazy(() => import("../components/dashboard/DashboardCharts"));
 
 function KpiCard({ icon, label, value, colorClass, sub }) {
   return (
@@ -38,35 +37,109 @@ function KpiCard({ icon, label, value, colorClass, sub }) {
   );
 }
 
+function ChartsSectionSkeleton() {
+  return (
+    <div className="flex flex-col lg:flex-row gap-4 md:gap-6 px-3 md:px-6">
+      <div className="card bg-base-200 flex-1 p-3 md:p-4">
+        <div className="h-[200px] animate-pulse rounded-xl bg-base-300/70" />
+      </div>
+      <div className="card bg-base-200 w-full lg:w-72 p-3 md:p-4">
+        <div className="h-[200px] animate-pulse rounded-xl bg-base-300/70" />
+      </div>
+    </div>
+  );
+}
+
 export default function DentistChartsDashboard() {
   const [orders, setOrders] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [ordersLoading, setOrdersLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [showCharts, setShowCharts] = useState(false);
+  const chartsGateRef = useRef(null);
 
-  const fetchData = async (isRefresh = false) => {
-    if (isRefresh) setRefreshing(true);
-    else setLoading(true);
+  const fetchStats = useCallback(async () => {
+    setLoading(true);
     try {
-      const [ordersRes, statsRes] = await Promise.all([
-        fetch(`${BASE_URL}/api/orders?status=confirmed&paymentStatus=paid&limit=1000`),
-        fetch(`${BASE_URL}/api/orders/stats`),
-      ]);
-      const ordersJson = await ordersRes.json();
+      const statsRes = await fetch(`${BASE_URL}/api/orders/stats`);
       const statsJson = await statsRes.json();
-      if (ordersJson.success) setOrders(Array.isArray(ordersJson.data) ? ordersJson.data : []);
       if (statsJson.success) setStats(statsJson.data);
       setLastUpdated(new Date());
     } catch (err) {
-      console.error("Dashboard fetch error:", err);
+      console.error("Dashboard stats fetch error:", err);
     } finally {
       setLoading(false);
+    }
+  }, []);
+
+  const fetchOrdersData = useCallback(async () => {
+    setOrdersLoading(true);
+    try {
+      const ordersRes = await fetch(
+        `${BASE_URL}/api/orders?status=confirmed&paymentStatus=paid&limit=300`
+      );
+      const ordersJson = await ordersRes.json();
+      if (ordersJson.success) {
+        setOrders(Array.isArray(ordersJson.data) ? ordersJson.data : []);
+      }
+    } catch (err) {
+      console.error("Dashboard orders fetch error:", err);
+    } finally {
+      setOrdersLoading(false);
+    }
+  }, []);
+
+  const refreshAll = async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([fetchStats(), showCharts ? fetchOrdersData() : Promise.resolve()]);
+    } finally {
       setRefreshing(false);
     }
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => {
+    fetchStats();
+  }, [fetchStats]);
+
+  useEffect(() => {
+    let timeoutId;
+    let idleId;
+    let observer;
+    const start = () => setShowCharts(true);
+
+    if (typeof window !== "undefined" && chartsGateRef.current) {
+      observer = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((e) => e.isIntersecting)) {
+            start();
+            observer.disconnect();
+          }
+        },
+        { rootMargin: "160px 0px" }
+      );
+      observer.observe(chartsGateRef.current);
+    }
+
+    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+      idleId = window.requestIdleCallback(start, { timeout: 6000 });
+    } else {
+      timeoutId = window.setTimeout(start, 3500);
+    }
+
+    return () => {
+      if (timeoutId) window.clearTimeout(timeoutId);
+      if (idleId && "cancelIdleCallback" in window) window.cancelIdleCallback(idleId);
+      if (observer) observer.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!showCharts) return;
+    fetchOrdersData();
+  }, [showCharts, fetchOrdersData]);
 
   const totalRevenue = useMemo(
     () => orders.reduce((sum, o) => sum + (Number(o.totalAmount) || 0), 0),
@@ -74,18 +147,21 @@ export default function DentistChartsDashboard() {
   );
 
   const last7DaysRevenue = useMemo(() => {
+    const byDate = new Map();
+    for (const o of orders) {
+      const key = new Date(o.createdAt).toDateString();
+      byDate.set(key, (byDate.get(key) || 0) + (Number(o.totalAmount) || 0));
+    }
     return Array.from({ length: 7 }).map((_, i) => {
       const date = new Date();
       date.setDate(date.getDate() - (6 - i));
-      const label = date.toLocaleDateString("uz-UZ", { weekday: "short" });
-      const amt = orders
-        .filter((o) => new Date(o.createdAt).toDateString() === date.toDateString())
-        .reduce((s, o) => s + (Number(o.totalAmount) || 0), 0);
-      return { d: label, amt };
+      const key = date.toDateString();
+      return {
+        d: date.toLocaleDateString("uz-UZ", { weekday: "short" }),
+        amt: byDate.get(key) || 0,
+      };
     });
   }, [orders]);
-
-  const last7Total = last7DaysRevenue.reduce((s, d) => s + d.amt, 0);
 
   const productRevenueMap = useMemo(() => {
     const map = {};
@@ -96,9 +172,23 @@ export default function DentistChartsDashboard() {
     return map;
   }, [orders]);
 
-  const topProducts = Object.entries(productRevenueMap).sort((a, b) => b[1] - a[1]);
+  const sortedProducts = useMemo(
+    () => Object.entries(productRevenueMap).sort((a, b) => b[1] - a[1]),
+    [productRevenueMap]
+  );
 
-  const lineData = {
+  const topProducts = useMemo(() => sortedProducts.slice(0, 10), [sortedProducts]);
+
+  const chartProducts = useMemo(() => {
+    if (sortedProducts.length <= 8) return sortedProducts;
+    const top = sortedProducts.slice(0, 8);
+    const otherAmount = sortedProducts
+      .slice(8)
+      .reduce((sum, [, value]) => sum + value, 0);
+    return [...top, ["Boshqalar", otherAmount]];
+  }, [sortedProducts]);
+
+  const lineData = useMemo(() => ({
     labels: last7DaysRevenue.map((x) => x.d),
     datasets: [{
       label: "Sof foyda",
@@ -113,9 +203,9 @@ export default function DentistChartsDashboard() {
       pointRadius: 6,
       pointHoverRadius: 9,
     }],
-  };
+  }), [last7DaysRevenue]);
 
-  const lineOpts = {
+  const lineOpts = useMemo(() => ({
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -133,22 +223,22 @@ export default function DentistChartsDashboard() {
       },
       x: { grid: { display: false }, ticks: { color: "#94a3b8" } },
     },
-  };
+  }), []);
 
   const doughnutColors = ["#eab308","#f59e0b","#f97316","#fbbf24","#ca8a04","#fde68a"];
 
-  const doughnutData = {
-    labels: Object.keys(productRevenueMap),
+  const doughnutData = useMemo(() => ({
+    labels: chartProducts.map(([name]) => name),
     datasets: [{
-      data: Object.values(productRevenueMap),
+      data: chartProducts.map(([, value]) => value),
       backgroundColor: doughnutColors,
       borderWidth: 3,
       borderColor: "hsl(var(--b1))",
       hoverOffset: 10,
     }],
-  };
+  }), [chartProducts]);
 
-  const doughnutOpts = {
+  const doughnutOpts = useMemo(() => ({
     responsive: true,
     maintainAspectRatio: false,
     cutout: "68%",
@@ -156,9 +246,9 @@ export default function DentistChartsDashboard() {
       legend: { display: false },
       tooltip: { callbacks: { label: (c) => ` ${c.label}: ${currencyUZS(c.raw)}` } },
     },
-  };
+  }), []);
 
-  if (loading) return <LoadingTemplate />;
+  if (loading && !stats) return <LoadingTemplate />;
 
   return (
     <div className="min-h-screen flex flex-col gap-5 md:gap-6 pb-8">
@@ -176,7 +266,7 @@ export default function DentistChartsDashboard() {
             </span>
           )}
           <button
-            onClick={() => fetchData(true)}
+            onClick={refreshAll}
             disabled={refreshing}
             className="btn btn-warning btn-outline btn-xs md:btn-sm gap-1"
           >
@@ -221,56 +311,24 @@ export default function DentistChartsDashboard() {
       </div>
 
       
-      <div className="flex flex-col lg:flex-row gap-4 md:gap-6 px-3 md:px-6">
-
-        
-        <div className="card bg-base-200 flex-1 flex flex-col p-3 md:p-4">
-          <div className="flex items-start justify-between mb-2 md:mb-3">
-            <div>
-              <div className="font-semibold text-xs md:text-sm flex items-center gap-2">
-                <TrendingUp size={13} className="text-warning" />
-                So'nggi 7 kun tushum
-              </div>
-              <div className="text-[10px] md:text-xs text-base-content/50 mt-0.5">
-                Faqat yakunlangan buyurtmalar
-              </div>
-            </div>
-          </div>
-          <div className="flex-1" style={{ height: "clamp(160px, 30vw, 240px)" }}>
-            <Line data={lineData} options={lineOpts} />
-          </div>
-        </div>
-
-        
-        <div className="card bg-base-200 w-full lg:w-72 flex flex-col p-3 md:p-4">
-          <div className="flex items-start justify-between mb-2 md:mb-3">
-            <div>
-              <div className="font-semibold text-xs md:text-sm flex items-center gap-2">
-                <PieChart size={13} className="text-warning" />
-                Mahsulotlar bo'yicha
-              </div>
-              <div className="text-[10px] md:text-xs text-base-content/50 mt-0.5">
-                Har mahsulotdan tushgan foyda
-              </div>
-            </div>
-          </div>
-          <div className="flex-1" style={{ height: "clamp(150px, 28vw, 210px)" }}>
-            {topProducts.length > 0 ? (
-              <Doughnut data={doughnutData} options={doughnutOpts} />
-            ) : (
-              <div className="h-full flex items-center justify-center">
-                <div className="text-center text-base-content/30">
-                  <AlertCircle size={28} className="mx-auto mb-2" />
-                  <p className="text-xs">Ma'lumot yo'q</p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
+      <div ref={chartsGateRef}>
+        {!showCharts || ordersLoading ? (
+          <ChartsSectionSkeleton />
+        ) : (
+          <Suspense fallback={<ChartsSectionSkeleton />}>
+            <DashboardCharts
+              lineData={lineData}
+              lineOpts={lineOpts}
+              topProducts={topProducts}
+              doughnutData={doughnutData}
+              doughnutOpts={doughnutOpts}
+            />
+          </Suspense>
+        )}
       </div>
 
       
-      {topProducts.length > 0 && (
+      {!ordersLoading && topProducts.length > 0 && (
         <div className="px-3 md:px-6">
           <div className="font-semibold text-sm md:text-base flex items-center gap-2 mb-2 md:mb-3">
             <ShoppingBag size={15} className="text-warning" />

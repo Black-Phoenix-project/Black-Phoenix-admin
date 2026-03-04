@@ -180,7 +180,7 @@ const Wallet = () => {
                     <div className="text-[10px] text-base-content/50">{day.amount > 0 ? `${Math.round((day.amount / incomeMax) * 100)}%` : "0%"}</div>
                     <div className="w-full rounded-xl bg-base-200 h-36 flex items-end overflow-hidden border border-base-content/10">
                       <div
-                        className="w-full bg-gradient-to-t from-warning to-warning/50 rounded-xl transition-all duration-500"
+                        className="w-full  from-warning to-warning/50 rounded-xl transition-all duration-500"
                         style={{ height: `${h}%` }}
                       />
                     </div>

@@ -12,7 +12,7 @@ function Toast({ toast }) {
   if (!toast) return null;
   return (
     <div
-      className={`fixed bottom-6 right-6 z-[999] flex items-center gap-3 px-5 py-3.5
+      className={`fixed bottom-6 right-6  flex items-center gap-3 px-5 py-3.5
         rounded-2xl shadow-2xl border text-sm font-medium
         animate-[slideUp_0.3s_ease-out]
         ${toast.type === "error"
@@ -415,7 +415,7 @@ const Workers = () => {
         {/* ── Table ────────────────────────────────────────── */}
         <div className="bg-zinc-900/60 border border-zinc-800/60 rounded-2xl overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[600px]">
+            <table className="w-full ">
               <thead>
                 <tr className="border-b border-zinc-800">
                   <th className="px-5 py-3.5 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider w-12">

@@ -14,8 +14,6 @@ const Navbar = () => {
 
   const user = useSelector(state => state.auth.user)
 
-  console.log("user: ", user)
-
   return (
     <nav className="bg-base-300 border-b-2 border-warning shadow-sm rounded-r-2xl relative">
       <div className="hidden md:flex justify-between items-center px-6 py-3">
@@ -32,6 +30,8 @@ const Navbar = () => {
                 <img
                   src={user?.image}
                   alt="User Avatar"
+                  loading="lazy"
+                  decoding="async"
                 />
               </div>
             </div>
@@ -65,6 +65,8 @@ const Navbar = () => {
                 <img
                   src={user?.image}
                   alt="User Avatar"
+                  loading="lazy"
+                  decoding="async"
                 />
               </div>
             </div>
