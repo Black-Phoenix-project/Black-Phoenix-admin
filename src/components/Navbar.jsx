@@ -8,7 +8,7 @@ const Navbar = () => {
   const dispatch = useDispatch()
 
   const handleLogout = () => {
-    dispatch(logout());      
+    dispatch(logout());
     navigate("/login");
   }
 
@@ -66,7 +66,10 @@ const Navbar = () => {
           <div tabIndex={0} className="btn btn-ghost btn-circle avatar">
             <div className="w-10 rounded-full">
               <img
-                src={user?.image}
+                src={
+                  user?.image || "https://cdn-icons-png.flaticon.com/512/219/219983.png"
+
+                }
                 alt="User Avatar"
                 loading="lazy"
                 decoding="async"
@@ -92,7 +95,7 @@ const Navbar = () => {
         </div>
       </div>
 
-      
+
     </nav>
   )
 }
