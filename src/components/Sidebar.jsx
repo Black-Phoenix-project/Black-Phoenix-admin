@@ -16,26 +16,26 @@ const Sidebar = () => {
   }, []);
 
   const menuItems = [
-    { label: "Dashboard", path: "/", icon: <LayoutDashboard size={20} /> },
-    { label: "Products", path: "/products", icon: <Coffee size={18} /> },
-    { label: "Orders", path: "/orders", icon: <ClipboardList size={20} /> },
-    { label: "Workers", path: "/workers", icon: <BriefcaseBusiness size={20} /> },
-    { label: "Wallet", path: "/wallet", icon: <Wallet size={20} /> },
-    { label: "Swiper", path: "/swiper", icon: <PanelsTopLeft size={20} /> },
+    { label: "Дашборд", path: "/", icon: <LayoutDashboard size={20} /> },
+    { label: "Товары", path: "/products", icon: <Coffee size={18} /> },
+    { label: "Заказы", path: "/orders", icon: <ClipboardList size={20} /> },
+    { label: "Сотрудники", path: "/workers", icon: <BriefcaseBusiness size={20} /> },
+    { label: "Кошелёк", path: "/wallet", icon: <Wallet size={20} /> },
+    { label: "Баннеры", path: "/swiper", icon: <PanelsTopLeft size={20} /> },
   ];
 
   const promoSlides = [
     {
-      description: "Organize your menu by adding new products.",
+      description: "Добавляйте новые товары в каталог.",
       image: "https://cdn-icons-png.flaticon.com/128/745/745449.png",
       link: "/products",
-      buttonLabel: "Add Product",
+      buttonLabel: "Добавить товар",
     },
     {
-      description: "Add slider content to keep your dashboard dynamic.",
+      description: "Обновляйте баннеры для главной страницы.",
       image: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
       link: "/swiper",
-      buttonLabel: "Add Swiper",
+      buttonLabel: "Добавить баннер",
     },
   ];
 

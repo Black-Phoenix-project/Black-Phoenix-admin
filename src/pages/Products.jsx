@@ -11,6 +11,19 @@ import AppToast from "../components/AppToast";
 
 const BASE_URL = import.meta.env.VITE_BACKENT_URL;
 
+const CATEGORIES = [
+  { value: 'spetsodezhda', label: 'Спецодежда' },
+  { value: 'spetsobov', label: 'Спецобувь' },
+  { value: 'sredstva-zashchity', label: 'Средства защиты' },
+  { value: 'trikotazh', label: 'Трикотаж' },
+  { value: 'khoztovary', label: 'Хозяйственные товары' },
+  { value: 'uniforma', label: 'Униформа' },
+  { value: 'novinki', label: 'Новинки' },
+];
+
+const getCategoryLabel = (value) =>
+  CATEGORIES.find((c) => c.value === value)?.label || value || '—';
+
 /* ─── Kichik tugma ─── */
 const ActionBtn = ({ icon, bg, color, label, onClick }) => (
   <button
@@ -25,14 +38,14 @@ const ActionBtn = ({ icon, bg, color, label, onClick }) => (
   </button>
 );
 
-/* ─── Bitta rasm yuklovchi slot ─── */
+/* ─── Слот загрузки изображения ─── */
 const ImageSlot = ({ index, url, uploading, onChange, onRemove }) => {
   const inputRef = useRef(null);
 
   return (
     <div className="flex flex-col gap-1">
       <label className="text-xs font-semibold text-base-content/50">
-        Rasm {index + 1} {index === 0 ? "(majburiy)" : "(ixtiyoriy)"}
+        Фото {index + 1} {index === 0 ? "(обязательно)" : "(необязательно)"}
       </label>
 
       {url ? (
@@ -60,7 +73,7 @@ const ImageSlot = ({ index, url, uploading, onChange, onRemove }) => {
           ) : (
             <>
               <FiUploadCloud className="text-2xl text-warning/60" />
-              <span className="text-xs text-base-content/50">Fayl tanlash</span>
+              <span className="text-xs text-base-content/50">Выбрать файл</span>
             </>
           )}
         </button>
@@ -87,6 +100,7 @@ const Products = () => {
   const [showGrid, setShowGrid] = useState(false);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
   const [editingProductId, setEditingProductId] = useState(null);
   const [toast, setToast] = useState(null);
   const [uploading, setUploading] = useState([false, false, false]);
@@ -97,6 +111,7 @@ const Products = () => {
     images: ["", "", ""],
     description: "",
     price: "",
+    category: "",
   });
 
   const showToast = (msg, type = "success") => {
@@ -105,7 +120,7 @@ const Products = () => {
   };
 
   const resetProductForm = () => {
-    setNewProduct({ name: "", images: ["", "", ""], description: "", price: "" });
+    setNewProduct({ name: "", images: ["", "", ""], description: "", price: "", category: "" });
     setEditingProductId(null);
   };
 
@@ -120,11 +135,11 @@ const Products = () => {
       const list = Array.isArray(data)
         ? data
         : Array.isArray(data.products) ? data.products
-        : Array.isArray(data.data) ? data.data
-        : [];
+          : Array.isArray(data.data) ? data.data
+            : [];
       setProducts(list);
     } catch {
-      showToast("Mahsulotlarni yuklashda xatolik.", "error");
+      showToast("Ошибка загрузки товаров.", "error");
     } finally {
       setLoading(false);
     }
@@ -148,7 +163,7 @@ const Products = () => {
         return { ...prev, images: next };
       });
     } catch (err) {
-      showToast(err.message || "Rasm yuklanmadi", "error");
+      showToast(err.message || "Фото не загружено", "error");
     } finally {
       setUploading((prev) => { const next = [...prev]; next[index] = false; return next; });
     }
@@ -171,11 +186,11 @@ const Products = () => {
     const { name, images, description, price } = newProduct;
     const validImages = images.filter(Boolean);
     if (!name || !description || !price) {
-      showToast("Barcha maydonlar to'ldirilishi shart!", "error");
+      showToast("Заполните все обязательные поля!", "error");
       return false;
     }
     if (validImages.length < 1) {
-      showToast("Kamida 1 ta rasm yuklanishi shart!", "error");
+      showToast("Загрузите минимум 1 фото!", "error");
       return false;
     }
     return true;
@@ -190,6 +205,7 @@ const Products = () => {
       name: product.name || "",
       description: product.description || "",
       price: product.price ?? "",
+      category: product.category || "",
       images: filledImages,
     });
     document.getElementById("product_modal").showModal();
@@ -205,6 +221,7 @@ const Products = () => {
         description: newProduct.description,
         price: Number(newProduct.price),
         image: validImages,
+        category: newProduct.category || null,
       };
       const res = await fetch(`${BASE_URL}/api/product`, {
         method: "POST",
@@ -213,15 +230,15 @@ const Products = () => {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.message || "Mahsulot qo'shilmadi");
+        throw new Error(data.message || "Товар не добавлен");
       }
       const added = await res.json();
       setProducts((prev) => [...prev, added?.data || added]);
-      showToast("Mahsulot muvaffaqiyatli qo'shildi!");
+      showToast("Товар успешно добавлен!");
       resetProductForm();
       document.getElementById("product_modal").close();
     } catch (err) {
-      showToast(err.message || "Mahsulot qo'shishda xatolik.", "error");
+      showToast(err.message || "Ошибка добавления товара.", "error");
     } finally {
       setSaving(false);
     }
@@ -237,6 +254,7 @@ const Products = () => {
         description: newProduct.description,
         price: Number(newProduct.price),
         image: validImages,
+        category: newProduct.category || null,
       };
       const res = await fetch(`${BASE_URL}/api/product/${editingProductId}`, {
         method: "PUT",
@@ -245,17 +263,17 @@ const Products = () => {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.message || "Mahsulot yangilanmadi");
+        throw new Error(data.message || "Товар не обновлён");
       }
       const updated = await res.json();
       setProducts((prev) =>
         prev.map((item) => (item._id === editingProductId ? (updated?.data || updated) : item))
       );
-      showToast("Mahsulot muvaffaqiyatli yangilandi!");
+      showToast("Товар успешно обновлён!");
       resetProductForm();
       document.getElementById("product_modal").close();
     } catch (err) {
-      showToast(err.message || "Mahsulotni yangilashda xatolik.", "error");
+      showToast(err.message || "Ошибка обновления товара.", "error");
     } finally {
       setSaving(false);
     }
@@ -266,9 +284,9 @@ const Products = () => {
       const res = await fetch(`${BASE_URL}/api/product/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error();
       setProducts((prev) => prev.filter((p) => p._id !== id));
-      showToast("Mahsulot o'chirildi.");
+      showToast("Товар удалён.");
     } catch {
-      showToast("Mahsulotni o'chirishda xatolik.", "error");
+      showToast("Ошибка удаления товара.", "error");
     }
   };
 
@@ -287,15 +305,19 @@ const Products = () => {
       if (!res.ok) throw new Error();
       const added = await res.json();
       setProducts((prev) => [...prev, added?.data || added]);
-      showToast("Mahsulot nusxalandi!");
+      showToast("Товар скопирован!");
     } catch {
-      showToast("Mahsulotni nusxalashda xatolik.", "error");
+      showToast("Ошибка копирования товара.", "error");
     }
   };
 
   const filteredProducts = useMemo(
-    () => products.filter((p) => p.name?.toLowerCase().includes(searchQuery.toLowerCase())),
-    [products, searchQuery]
+    () => products.filter((p) => {
+      const matchSearch = p.name?.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchCategory = !categoryFilter || p.category === categoryFilter;
+      return matchSearch && matchCategory;
+    }),
+    [products, searchQuery, categoryFilter]
   );
 
   const isAnyUploading = uploading.some(Boolean);
@@ -311,7 +333,7 @@ const Products = () => {
             <LiaSearchSolid className="text-xl text-warning" />
             <input
               type="text"
-              placeholder="Mahsulot qidirish..."
+              placeholder="Поиск товара..."
               className="ml-2 w-full bg-transparent text-base-content border-none outline-none text-sm"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -322,40 +344,64 @@ const Products = () => {
             <button
               className={`p-2.5 rounded-xl border transition-all ${!showGrid ? "bg-warning text-warning-content border-warning" : "bg-base-100 border-base-content/20 text-base-content/50"}`}
               onClick={() => setShowGrid(false)}
-              title="Ro'yxat ko'rinishi"
+              title="Список"
             >
               <IoMdReorder className="text-2xl" />
             </button>
             <button
               className={`p-2.5 rounded-xl border transition-all ${showGrid ? "bg-warning text-warning-content border-warning" : "bg-base-100 border-base-content/20 text-base-content/50"}`}
               onClick={() => setShowGrid(true)}
-              title="Katak ko'rinishi"
+              title="Сетка"
             >
               <TiThLarge className="text-2xl" />
             </button>
           </div>
 
-          <button
-            className="btn bg-warning text-warning-content border-none hover:bg-warning/80 shadow-md gap-2 rounded-xl"
-            onClick={() => { resetProductForm(); document.getElementById("product_modal").showModal(); }}
-          >
-            <FaPlus />
-            Yangi mahsulot
-          </button>
+
         </div>
+
+        <div>   
+          <button
+          className="btn bg-warning text-warning-content border-none hover:bg-warning/80 shadow-md gap-2 rounded-xl"
+          onClick={() => { resetProductForm(); document.getElementById("product_modal").showModal(); }}
+        >
+          <FaPlus />
+          Новый товар
+        </button>
+        </div>
+
+      </div>
+
+      {/* Category filter tabs */}
+      <div className="flex flex-wrap gap-2 mb-6">
+        <button
+          onClick={() => setCategoryFilter("")}
+          className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${!categoryFilter ? "bg-warning text-warning-content border-warning" : "bg-base-100 border-base-content/20 text-base-content/60 hover:border-warning/50"}`}
+        >
+          Все
+        </button>
+        {CATEGORIES.map((cat) => (
+          <button
+            key={cat.value}
+            onClick={() => setCategoryFilter(cat.value)}
+            className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${categoryFilter === cat.value ? "bg-warning text-warning-content border-warning" : "bg-base-100 border-base-content/20 text-base-content/60 hover:border-warning/50"}`}
+          >
+            {cat.label}
+          </button>
+        ))}
       </div>
 
       {/* Modal */}
       <dialog id="product_modal" className="modal modal-bottom sm:modal-middle">
         <div className="modal-box bg-base-100 border border-warning/30 shadow-2xl rounded-2xl max-w-lg">
           <h3 className="text-2xl font-bold text-warning text-center mb-6">
-            {editingProductId ? "Mahsulotni tahrirlash" : "Yangi mahsulot qo'shish"}
+            {editingProductId ? "Редактировать товар" : "Добавить новый товар"}
           </h3>
           <div className="flex flex-col gap-3">
             {[
-              { name: "name", placeholder: "Mahsulot nomi" },
-              { name: "description", placeholder: "Tavsif" },
-              { name: "price", placeholder: "Narx (masalan: 29.99)" },
+              { name: "name", placeholder: "Название товара" },
+              { name: "description", placeholder: "Описание" },
+              { name: "price", placeholder: "Цена (например: 29900)" },
             ].map((field) => (
               <input
                 key={field.name}
@@ -367,6 +413,18 @@ const Products = () => {
                 onChange={handleInputChange}
               />
             ))}
+
+            <select
+              name="category"
+              value={newProduct.category}
+              onChange={handleInputChange}
+              className="select select-bordered border-warning/40 focus:border-warning bg-base-200 w-full rounded-xl"
+            >
+              <option value="">Категория (необязательно)</option>
+              {CATEGORIES.map((cat) => (
+                <option key={cat.value} value={cat.value}>{cat.label}</option>
+              ))}
+            </select>
 
             {/* Rasmlar */}
             <div className="grid grid-cols-3 gap-2 mt-1">
@@ -394,17 +452,17 @@ const Products = () => {
               ) : (
                 <FaPlus className="mr-1" />
               )}
-              {editingProductId ? "Saqlash" : "Qo'shish"}
+              {editingProductId ? "Сохранить" : "Добавить"}
             </button>
             <form method="dialog" className="flex-1">
               <button className="btn w-full bg-base-300 border-none rounded-xl">
-                Bekor qilish
+                Отмена
               </button>
             </form>
           </div>
         </div>
         <form method="dialog" className="modal-backdrop">
-          <button>yopish</button>
+          <button>закрыть</button>
         </form>
       </dialog>
 
@@ -419,8 +477,8 @@ const Products = () => {
       {!loading && filteredProducts.length === 0 && (
         <div className="flex flex-col items-center justify-center py-20 opacity-50">
           <div className="text-6xl mb-4">📦</div>
-          <p className="text-xl font-semibold text-base-content">Mahsulot topilmadi</p>
-          <p className="text-sm text-base-content/50 mt-1">Boshqa so'z bilan qidiring yoki yangi mahsulot qo'shing.</p>
+          <p className="text-xl font-semibold text-base-content">Товары не найдены</p>
+          <p className="text-sm text-base-content/50 mt-1">Попробуйте другой запрос или добавьте новый товар.</p>
         </div>
       )}
 
@@ -444,13 +502,20 @@ const Products = () => {
                   />
                 </div>
                 <h3 className="text-base font-bold text-center text-warning truncate">{product.name}</h3>
+                {product.category && (
+                  <div className="flex justify-center mt-1">
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-warning/15 text-warning border border-warning/20 font-medium">
+                      {getCategoryLabel(product.category)}
+                    </span>
+                  </div>
+                )}
                 <p className="text-sm text-center font-semibold text-base-content mt-1">sum{product.price}</p>
                 <p className="text-xs text-center text-base-content/40 mt-1 line-clamp-2">{product.description}</p>
                 <div className="flex justify-center gap-2 mt-4">
-                  <ActionBtn icon={<MdOutlineRemoveRedEye />} bg="bg-success/15" color="text-success" label="Ko'rish" onClick={() => showToast(`Ko'rilmoqda: ${product.name}`)} />
-                  <ActionBtn icon={<FiPlusCircle />} bg="bg-base-200" color="text-base-content/60" label="Nusxa" onClick={() => duplicateProduct(product)} />
-                  <ActionBtn icon={<FaRegPenToSquare />} bg="bg-warning/20" color="text-warning" label="Tahrir" onClick={() => openEditModal(product)} />
-                  <ActionBtn icon={<RiDeleteBinLine />} bg="bg-error/15" color="text-error" label="O'chir" onClick={() => deleteProduct(product._id)} />
+                  <ActionBtn icon={<MdOutlineRemoveRedEye />} bg="bg-success/15" color="text-success" label="Просмотр" onClick={() => showToast(`Просмотр: ${product.name}`)} />
+                  <ActionBtn icon={<FiPlusCircle />} bg="bg-base-200" color="text-base-content/60" label="Копия" onClick={() => duplicateProduct(product)} />
+                  <ActionBtn icon={<FaRegPenToSquare />} bg="bg-warning/20" color="text-warning" label="Редакт." onClick={() => openEditModal(product)} />
+                  <ActionBtn icon={<RiDeleteBinLine />} bg="bg-error/15" color="text-error" label="Удалить" onClick={() => deleteProduct(product._id)} />
                 </div>
               </div>
             );
@@ -462,11 +527,12 @@ const Products = () => {
       {!loading && !showGrid && (
         <div className="space-y-2 mt-4">
           <div className="hidden md:grid grid-cols-12 gap-4 px-5 py-2 text-xs font-bold uppercase tracking-widest text-warning/70 bg-base-100 rounded-xl border border-warning/10">
-            <div className="col-span-1">Rasm</div>
-            <div className="col-span-3">Nomi</div>
-            <div className="col-span-2">Narx</div>
-            <div className="col-span-4">Tavsif</div>
-            <div className="col-span-2 text-right">Amallar</div>
+            <div className="col-span-1">Фото</div>
+            <div className="col-span-2">Название</div>
+            <div className="col-span-2">Категория</div>
+            <div className="col-span-2">Цена</div>
+            <div className="col-span-3">Описание</div>
+            <div className="col-span-2 text-right">Действия</div>
           </div>
 
           {filteredProducts.map((product, index) => {
@@ -487,13 +553,22 @@ const Products = () => {
                     />
                   </div>
                 </div>
-                <div className="col-span-3">
+                <div className="col-span-2">
                   <span className="font-semibold text-sm text-warning truncate block">{product.name}</span>
+                </div>
+                <div className="col-span-2">
+                  {product.category ? (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-warning/15 text-warning border border-warning/20 font-medium">
+                      {getCategoryLabel(product.category)}
+                    </span>
+                  ) : (
+                    <span className="text-xs text-base-content/30">—</span>
+                  )}
                 </div>
                 <div className="col-span-2">
                   <span className="font-bold text-success text-sm">{product.price} S</span>
                 </div>
-                <div className="col-span-4">
+                <div className="col-span-3">
                   <p className="text-xs text-base-content/50 truncate">{product.description || "—"}</p>
                 </div>
                 <div className="col-span-1 md:col-span-2 flex justify-center md:justify-end gap-2 md:gap-1.5">

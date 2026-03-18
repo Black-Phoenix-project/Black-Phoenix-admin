@@ -12,18 +12,18 @@ const BASE_URL = import.meta.env.VITE_BACKENT_URL;
 const currencyUZS = (v) => Number(v || 0).toLocaleString("uz-UZ") + " so'm";
 
 const STATUS_CONFIG = {
-  pending:    { label: "Kutilmoqda",    colorClass: "text-warning",   bgClass: "bg-warning/10",   borderClass: "border-warning/30",   dotColor: "bg-warning",   icon: <Clock size={12} /> },
-  confirmed:  { label: "Tasdiqlandi",   colorClass: "text-info",      bgClass: "bg-info/10",      borderClass: "border-info/30",      dotColor: "bg-info",      icon: <CheckCircle size={12} /> },
-  processing: { label: "Jarayonda",     colorClass: "text-secondary", bgClass: "bg-secondary/10", borderClass: "border-secondary/30", dotColor: "bg-secondary", icon: <RefreshCw size={12} /> },
-  shipped:    { label: "Yuborildi",     colorClass: "text-accent",    bgClass: "bg-accent/10",    borderClass: "border-accent/30",    dotColor: "bg-accent",    icon: <Truck size={12} /> },
-  delivered:  { label: "Yetkazildi",    colorClass: "text-success",   bgClass: "bg-success/10",   borderClass: "border-success/30",   dotColor: "bg-success",   icon: <Package size={12} /> },
-  cancelled:  { label: "Bekor qilindi", colorClass: "text-error",     bgClass: "bg-error/10",     borderClass: "border-error/30",     dotColor: "bg-error",     icon: <XCircle size={12} /> },
+  pending:    { label: "Ожидает",    colorClass: "text-warning",   bgClass: "bg-warning/10",   borderClass: "border-warning/30",   dotColor: "bg-warning",   icon: <Clock size={12} /> },
+  confirmed:  { label: "Подтверждён",   colorClass: "text-info",      bgClass: "bg-info/10",      borderClass: "border-info/30",      dotColor: "bg-info",      icon: <CheckCircle size={12} /> },
+  processing: { label: "В обработке",     colorClass: "text-secondary", bgClass: "bg-secondary/10", borderClass: "border-secondary/30", dotColor: "bg-secondary", icon: <RefreshCw size={12} /> },
+  shipped:    { label: "Отправлен",     colorClass: "text-accent",    bgClass: "bg-accent/10",    borderClass: "border-accent/30",    dotColor: "bg-accent",    icon: <Truck size={12} /> },
+  delivered:  { label: "Доставлен",    colorClass: "text-success",   bgClass: "bg-success/10",   borderClass: "border-success/30",   dotColor: "bg-success",   icon: <Package size={12} /> },
+  cancelled:  { label: "Отменён", colorClass: "text-error",     bgClass: "bg-error/10",     borderClass: "border-error/30",     dotColor: "bg-error",     icon: <XCircle size={12} /> },
 };
 
 const PAYMENT_CONFIG = {
-  unpaid:   { label: "To'lanmagan", colorClass: "text-error",   bgClass: "bg-error/10",   borderClass: "border-error/30",   dotColor: "bg-error" },
-  paid:     { label: "To'langan",   colorClass: "text-success", bgClass: "bg-success/10", borderClass: "border-success/30", dotColor: "bg-success" },
-  refunded: { label: "Qaytarildi",  colorClass: "text-warning", bgClass: "bg-warning/10", borderClass: "border-warning/30", dotColor: "bg-warning" },
+  unpaid:   { label: "Не оплачен", colorClass: "text-error",   bgClass: "bg-error/10",   borderClass: "border-error/30",   dotColor: "bg-error" },
+  paid:     { label: "Оплачен",   colorClass: "text-success", bgClass: "bg-success/10", borderClass: "border-success/30", dotColor: "bg-success" },
+  refunded: { label: "Возврат",  colorClass: "text-warning", bgClass: "bg-warning/10", borderClass: "border-warning/30", dotColor: "bg-warning" },
 };
 
 const STATUS_ORDER = ["pending", "confirmed", "processing", "shipped", "delivered", "cancelled"];
@@ -190,13 +190,13 @@ function OrderCard({ order, idx, page, LIMIT, updating, deleting, onView, onDele
             <p className="text-sm font-medium text-base-content truncate leading-tight max-w-[180px]">
               {order.product?.productName || "—"}
             </p>
-            <p className="text-xs text-base-content/50">{order.product?.quantity || 1} dona</p>
+            <p className="text-xs text-base-content/50">{order.product?.quantity || 1} шт.</p>
           </div>
         </div>
 
         <div className="w-36 shrink-0 text-right hidden md:block">
           <p className="text-sm font-bold text-warning">{currencyUZS(order.totalAmount)}</p>
-          <p className="text-xs text-base-content/50">{currencyUZS(order.product?.price)} / dona</p>
+          <p className="text-xs text-base-content/50">{currencyUZS(order.product?.price)} / шт.</p>
         </div>
 
         <div className="hidden lg:block w-px h-8  shrink-0" />
@@ -239,7 +239,7 @@ function OrderCard({ order, idx, page, LIMIT, updating, deleting, onView, onDele
         <div className="items-center gap-1.5 text-base-content/50 text-xs w-24 shrink-0 hidden xl:flex">
           <Calendar size={11} className="shrink-0" />
           <span>
-            {new Date(order.createdAt).toLocaleDateString("uz-UZ", {
+            {new Date(order.createdAt).toLocaleDateString("ru-RU", {
               day: "2-digit", month: "short", year: "numeric",
             })}
           </span>
@@ -252,7 +252,7 @@ function OrderCard({ order, idx, page, LIMIT, updating, deleting, onView, onDele
           <button
             onClick={() => onView(order)}
             className="p-2 rounded-xl bg-info/10 border cursor-pointer border-info/30 text-info hover:bg-info/20 transition-all active:scale-95"
-            title="Ko'rish"
+            title="Просмотр"
           >
             <SquarePen size={14} />
           </button>
@@ -260,7 +260,7 @@ function OrderCard({ order, idx, page, LIMIT, updating, deleting, onView, onDele
             onClick={() => onDelete(order._id)}
             disabled={deleting === order._id}
             className="p-2 rounded-xl bg-error/10 cursor-pointer border border-error/30 text-error hover:bg-error/20 transition-all active:scale-95 disabled:opacity-50"
-            title="O'chirish"
+            title="Удалить"
           >
             {deleting === order._id
               ? <RefreshCw size={14} className="animate-spin" />
@@ -308,7 +308,7 @@ export default function Orders() {
         setTotalCount(json.count || json.data?.length || 0);
       }
     } catch {
-      showToast("Ma'lumotlarni yuklashda xatolik", "error");
+      showToast("Ошибка загрузки данных", "error");
     } finally {
       setLoading(false);
     }
@@ -319,7 +319,7 @@ export default function Orders() {
 
   const updateStatus = async (orderId, newStatus, currentStatus) => {
     if (newStatus === "delivered" && !isDeliveredAllowed(currentStatus)) {
-      showToast(" Yetkazildi faqat Tasdiqlandi dan keyin belgilanadi", "error");
+      showToast("«Доставлен» можно выбрать только после «Подтверждён»", "error");
       return;
     }
     setUpdating(p => ({ ...p, [orderId + "_status"]: true }));
@@ -333,10 +333,10 @@ export default function Orders() {
       if (json.success) {
         setOrders(prev => prev.map(o => o._id === orderId ? { ...o, status: newStatus } : o));
         if (selectedOrder?._id === orderId) setSelectedOrder(p => ({ ...p, status: newStatus }));
-        showToast(` Holat: "${STATUS_CONFIG[newStatus]?.label}" ga o'zgartirildi`);
-      } else showToast(json.message || "Xatolik", "error");
+        showToast(`Статус изменён на "${STATUS_CONFIG[newStatus]?.label}"`);
+      } else showToast(json.message || "Ошибка", "error");
     } catch {
-      showToast("Server xatosi", "error");
+      showToast("Ошибка сервера", "error");
     } finally {
       setUpdating(p => ({ ...p, [orderId + "_status"]: false }));
     }
@@ -354,10 +354,10 @@ export default function Orders() {
       if (json.success) {
         setOrders(prev => prev.map(o => o._id === orderId ? { ...o, paymentStatus: newPayment } : o));
         if (selectedOrder?._id === orderId) setSelectedOrder(p => ({ ...p, paymentStatus: newPayment }));
-        showToast(` To'lov: "${PAYMENT_CONFIG[newPayment]?.label}" ga o'zgartirildi`);
-      } else showToast(json.message || "Xatolik", "error");
+        showToast(`Оплата изменена на "${PAYMENT_CONFIG[newPayment]?.label}"`);
+      } else showToast(json.message || "Ошибка", "error");
     } catch {
-      showToast("Server xatosi", "error");
+      showToast("Ошибка сервера", "error");
     } finally {
       setUpdating(p => ({ ...p, [orderId + "_pay"]: false }));
     }
@@ -371,10 +371,10 @@ export default function Orders() {
       if (json.success) {
         setOrders(prev => prev.filter(o => o._id !== orderId));
         if (selectedOrder?._id === orderId) setSelectedOrder(null);
-        showToast(" Buyurtma o'chirildi");
-      } else showToast(json.message || "Xatolik", "error");
+        showToast("Заказ удалён");
+      } else showToast(json.message || "Ошибка", "error");
     } catch {
-      showToast("Server xatosi", "error");
+      showToast("Ошибка сервера", "error");
     } finally {
       setDeleting(null);
     }
@@ -399,10 +399,10 @@ export default function Orders() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2 text-warning">
             <ShoppingBag size={22} className="text-warning" />
-            Buyurtmalar
+            Заказы
           </h1>
           <p className="text-base-content/50 text-sm mt-0.5">
-            Jami <span className="text-warning font-semibold">{totalCount}</span> ta buyurtma
+            Всего <span className="text-warning font-semibold">{totalCount}</span> заказов
           </p>
         </div>
         <button
@@ -410,7 +410,7 @@ export default function Orders() {
           className="flex items-center gap-2 px-4 py-2.5 bg-base-200 border border-base-300 hover:border-warning/40 rounded-2xl text-sm transition-all active:scale-95"
         >
           <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
-          Yangilash
+          Обновить
         </button>
       </div>
 
@@ -420,7 +420,7 @@ export default function Orders() {
           <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-base-content/50 pointer-events-none" />
           <input
             value={search}
-            placeholder="Qidirish..."
+            placeholder="Поиск..."
             onChange={e => setSearch(e.target.value)}
             className="w-full bg-base-200 border border-warning rounded-xl pl-9 pr-4 py-2.5 text-sm focus:border-warning focus:outline-none transition-colors"
           />
@@ -432,7 +432,7 @@ export default function Orders() {
           className="w-44"
           options={[
             {
-              value: "", label: "Barcha statuslar",
+              value: "", label: "Все статусы",
               colorClass: "text-base-content/50", borderClass: "border-base-300",
               dotEl: <Filter size={12} className="opacity-50 shrink-0" />,
             },
@@ -449,7 +449,7 @@ export default function Orders() {
           className="w-40"
           options={[
             {
-              value: "", label: "Barcha to'lovlar",
+              value: "", label: "Все платежи",
               colorClass: "text-base-content/50", borderClass: "border-base-300",
               dotEl: <CreditCard size={12} className="opacity-50 shrink-0" />,
             },
@@ -466,7 +466,7 @@ export default function Orders() {
             className="flex items-center gap-1.5 px-4 py-2.5 bg-error/10 border border-error/30 hover:bg-error/20 text-error rounded-xl text-sm font-medium transition-all active:scale-95"
           >
             <XCircle size={14} />
-            Tozalash
+            Сбросить
           </button>
         )}
       </div>
@@ -475,16 +475,16 @@ export default function Orders() {
       {!loading && filteredOrders.length > 0 && (
         <div className="hidden lg:flex items-center gap-3 px-4 mb-2 text-xs font-semibold text-base-content/50 uppercase tracking-wider">
           <span className="w-5 shrink-0">#</span>
-          <span className="w-44 shrink-0">Mijoz</span>
+          <span className="w-44 shrink-0">Клиент</span>
           <div className="w-px" />
-          <span className="flex-1 min-w-[180px]">Mahsulot</span>
-          <span className="w-36 shrink-0 text-right hidden md:block">Narx</span>
+          <span className="flex-1 min-w-[180px]">Товар</span>
+          <span className="w-36 shrink-0 text-right hidden md:block">Сумма</span>
           <div className="w-px" />
-          <span className="w-36 shrink-0">Holat</span>
-          <span className="w-32 shrink-0">To'lov</span>
+          <span className="w-36 shrink-0">Статус</span>
+          <span className="w-32 shrink-0">Оплата</span>
           <div className="w-px" />
-          <span className="w-24 shrink-0 hidden xl:block">Sana</span>
-          <span className="ml-auto w-20 text-right">Amallar</span>
+          <span className="w-24 shrink-0 hidden xl:block">Дата</span>
+          <span className="ml-auto w-20 text-right">Действия</span>
         </div>
       )}
 
@@ -494,7 +494,7 @@ export default function Orders() {
       ) : filteredOrders.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 text-base-content/50 gap-3">
           <ShoppingBag size={48} strokeWidth={1} />
-          <p className="text-lg">Buyurtmalar topilmadi</p>
+          <p className="text-lg">Заказы не найдены</p>
         </div>
       ) : (
         <>
@@ -563,7 +563,7 @@ export default function Orders() {
             <div className="flex items-center justify-between px-6 py-5 border-b border-base-300">
               <h2 className="font-bold text-lg flex items-center gap-2">
                 <FileText size={18} className="text-warning" />
-                Buyurtma tafsiloti
+                Детали заказа
               </h2>
               <button
                 onClick={() => setSelectedOrder(null)}
@@ -577,7 +577,7 @@ export default function Orders() {
 
               
               <div className="bg-base-300/40 rounded-2xl p-4 space-y-3">
-                <p className="text-xs font-semibold text-base-content/50 uppercase tracking-wider">Mijoz ma'lumotlari</p>
+                <p className="text-xs font-semibold text-base-content/50 uppercase tracking-wider">Данные клиента</p>
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-2xl bg-base-300 flex items-center justify-center shrink-0">
                     <User size={18} className="text-base-content/60" />
@@ -599,7 +599,7 @@ export default function Orders() {
 
               
               <div className="bg-base-300/40 rounded-2xl p-4">
-                <p className="text-xs font-semibold text-base-content/50 uppercase tracking-wider mb-3">Mahsulot</p>
+                <p className="text-xs font-semibold text-base-content/50 uppercase tracking-wider mb-3">Товар</p>
                 <div className="flex items-center gap-3">
                   {selectedOrder.product?.image ? (
                     <img
@@ -618,7 +618,7 @@ export default function Orders() {
                   <div className="flex-1">
                     <p className="font-semibold text-base-content">{selectedOrder.product?.productName}</p>
                     <p className="text-base-content/50 text-sm">
-                      {(selectedOrder.product?.quantity || 1)} dona × {currencyUZS(selectedOrder.product?.price)}
+                      {(selectedOrder.product?.quantity || 1)} шт. × {currencyUZS(selectedOrder.product?.price)}
                     </p>
                     <p className="text-warning font-bold mt-1">{currencyUZS(selectedOrder.totalAmount)}</p>
                   </div>
@@ -628,7 +628,7 @@ export default function Orders() {
               
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-base-300/40 rounded-2xl p-4 space-y-2">
-                  <p className="text-xs font-semibold text-base-content/50 uppercase tracking-wider">Holat</p>
+                  <p className="text-xs font-semibold text-base-content/50 uppercase tracking-wider">Статус</p>
                   <CustomSelect
                     value={selectedOrder.status}
                     onChange={v => updateStatus(selectedOrder._id, v, selectedOrder.status)}
@@ -637,12 +637,12 @@ export default function Orders() {
                   />
                   {!isDeliveredAllowed(selectedOrder.status) && (
                     <p className="text-xs text-base-content/50 leading-tight">
-                      ⚠️ "Yetkazildi" faqat "Tasdiqlandi" dan keyin
+                      ⚠️ «Доставлен» доступен только после «Подтверждён»
                     </p>
                   )}
                 </div>
                 <div className="bg-base-300/40 rounded-2xl p-4 space-y-2">
-                  <p className="text-xs font-semibold text-base-content/50 uppercase tracking-wider">To'lov</p>
+                  <p className="text-xs font-semibold text-base-content/50 uppercase tracking-wider">Оплата</p>
                   <CustomSelect
                     value={selectedOrder.paymentStatus}
                     onChange={v => updatePayment(selectedOrder._id, v)}
@@ -655,7 +655,7 @@ export default function Orders() {
               
               <p className="text-xs text-center text-base-content/50 flex items-center justify-center gap-1.5">
                 <Calendar size={11} />
-                {new Date(selectedOrder.createdAt).toLocaleString("uz-UZ")}
+                {new Date(selectedOrder.createdAt).toLocaleString("ru-RU")}
               </p>
             </div>
 
@@ -666,13 +666,13 @@ export default function Orders() {
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-error/10 border border-error/30 hover:bg-error/20 text-error rounded-2xl font-semibold text-sm transition-all active:scale-95"
               >
                 <Trash2 size={15} />
-                O'chirish
+                Удалить
               </button>
               <button
                 onClick={() => setSelectedOrder(null)}
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-warning/10 border border-warning/30 hover:bg-warning/20 text-warning rounded-2xl font-semibold text-sm transition-all active:scale-95"
               >
-                Yopish
+                Закрыть
               </button>
             </div>
           </div>

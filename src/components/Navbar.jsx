@@ -21,7 +21,7 @@ const Navbar = () => {
       <div className="hidden md:flex justify-between items-center px-6 py-3">
         <div>
           <span className="text-sm font-bold">
-            Xush kelibsiz, <span className="text-warning font-bold ">{user?.username || 'admin'}</span>
+            Добро пожаловать, <span className="text-warning font-bold ">{user?.username || 'admin'}</span>
           </span>
         </div>
 
@@ -43,13 +43,13 @@ const Navbar = () => {
             >
               <li>
                 <Link className="justify-between" to={`/profile`}>
-                  Profil
-                  <span className="badge">Yangi</span>
+                  Профиль
+                  <span className="badge">Новый</span>
                 </Link>
               </li>
               <li>
                 <button className="text-error font-bold" onClick={handleLogout}>
-                  Chiqish
+                  Выйти
                 </button>
               </li>
             </ul>

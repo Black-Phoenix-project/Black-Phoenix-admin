@@ -17,7 +17,7 @@ function KpiCard({ icon, label, value, colorClass, sub }) {
       <div className="flex items-center justify-between">
         <span className="text-[10px] md:text-xs text-base-content/50 font-medium uppercase tracking-wide">
           {label}
-        </span>
+        </span> 
         <span className={`hidden md:flex items-center justify-center ${colorClass}`}>
           {icon}
         </span>
@@ -157,7 +157,7 @@ export default function DentistChartsDashboard() {
       date.setDate(date.getDate() - (6 - i));
       const key = date.toDateString();
       return {
-        d: date.toLocaleDateString("uz-UZ", { weekday: "short" }),
+        d: date.toLocaleDateString("ru-RU", { weekday: "short" }),
         amt: byDate.get(key) || 0,
       };
     });
@@ -166,7 +166,7 @@ export default function DentistChartsDashboard() {
   const productRevenueMap = useMemo(() => {
     const map = {};
     orders.forEach((o) => {
-      const name = o.product?.productName || "Noma'lum";
+      const name = o.product?.productName || "Неизвестно";
       map[name] = (map[name] || 0) + (Number(o.totalAmount) || 0);
     });
     return map;
@@ -185,13 +185,13 @@ export default function DentistChartsDashboard() {
     const otherAmount = sortedProducts
       .slice(8)
       .reduce((sum, [, value]) => sum + value, 0);
-    return [...top, ["Boshqalar", otherAmount]];
+    return [...top, ["Остальные", otherAmount]];
   }, [sortedProducts]);
 
   const lineData = useMemo(() => ({
     labels: last7DaysRevenue.map((x) => x.d),
     datasets: [{
-      label: "Sof foyda",
+      label: "Выручка",
       data: last7DaysRevenue.map((x) => x.amt),
       fill: true,
       tension: 0.4,
@@ -257,7 +257,7 @@ export default function DentistChartsDashboard() {
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between px-3 md:px-6 py-3 md:py-4 border-b border-base-300">
         <div className="flex items-center gap-2">
           <BarChart2 className="text-warning" size={20} />
-          <h1 className="text-base md:text-xl font-bold">Boshqaruv paneli</h1>
+          <h1 className="text-base md:text-xl font-bold">Панель управления</h1>
         </div>
         <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3">
           {lastUpdated && (
@@ -271,7 +271,7 @@ export default function DentistChartsDashboard() {
             className="btn btn-warning btn-outline btn-xs md:btn-sm gap-1"
           >
             <RefreshCw size={12} className={refreshing ? "animate-spin" : ""} />
-            {refreshing ? "..." : "Yangilash"}
+            {refreshing ? "..." : "Обновить"}
           </button>
         </div>
       </div>
@@ -282,31 +282,31 @@ export default function DentistChartsDashboard() {
        
         <KpiCard
           icon={<CheckCircle size={20} />}
-          label="Yetkazildi"
+          label="Доставлено"
           value={stats?.completedOrders ?? orders.length}
           colorClass="text-info"
-          sub="yetkazilgan"
+          sub="доставлено"
         />
         <KpiCard
           icon={<Clock size={20} />}
-          label="Kutilmoqda"
+          label="В ожидании"
           value={stats?.pendingOrders ?? "—"}
           colorClass="text-orange-400"
-          sub="kutilmoqda"
+          sub="ожидает"
         />
         <KpiCard
           icon={<Package size={20} />}
-          label="Jami"
+          label="Всего"
           value={stats?.totalOrders ?? "—"}
           colorClass="text-primary"
-          sub="barcha buyurtmalar"
+          sub="все заказы"
         />
         <KpiCard
           icon={<XCircle size={20} />}
-          label="Bekor"
+          label="Отменено"
           value={stats?.cancelledOrders ?? "—"}
           colorClass="text-error"
-          sub="bekor qilingan"
+          sub="отменено"
         />
       </div>
 
@@ -332,16 +332,16 @@ export default function DentistChartsDashboard() {
         <div className="px-3 md:px-6">
           <div className="font-semibold text-sm md:text-base flex items-center gap-2 mb-2 md:mb-3">
             <ShoppingBag size={15} className="text-warning" />
-            Mahsulotlar reytingi
+            Рейтинг товаров
           </div>
           <div className="overflow-x-auto rounded-xl">
             <table className="table table-zebra w-full">
               <thead>
                 <tr className="text-[10px] md:text-xs">
                   <th>#</th>
-                  <th>Mahsulot</th>
-                  <th>Tushum</th>
-                  <th className="hidden sm:table-cell">Ulush</th>
+                  <th>Товар</th>
+                  <th>Выручка</th>
+                  <th className="hidden sm:table-cell">Доля</th>
                 </tr>
               </thead>
               <tbody>
@@ -375,10 +375,10 @@ export default function DentistChartsDashboard() {
         <div className="px-3 md:px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
             {[
-              { label: "Jami buyurtmalar", value: stats.totalOrders, color: "text-warning" },
-              { label: "Kutilmoqda", value: stats.pendingOrders, color: "text-orange-400" },
-              { label: "Yetkazildi", value: stats.completedOrders, color: "text-success" },
-              { label: "Bekor qilindi", value: stats.cancelledOrders, color: "text-error" },
+              { label: "Всего заказов", value: stats.totalOrders, color: "text-warning" },
+              { label: "В ожидании", value: stats.pendingOrders, color: "text-orange-400" },
+              { label: "Доставлено", value: stats.completedOrders, color: "text-success" },
+              { label: "Отменено", value: stats.cancelledOrders, color: "text-error" },
             ].map((s) => (
               <div
                 key={s.label}
