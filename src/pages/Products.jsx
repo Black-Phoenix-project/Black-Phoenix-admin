@@ -8,6 +8,7 @@ import { RiDeleteBinLine } from "react-icons/ri";
 import { FiPlusCircle, FiUploadCloud, FiX } from "react-icons/fi";
 import LoadingTemplate from "../components/LoadingTemplate";
 import AppToast from "../components/AppToast";
+import { authFetch } from "../lib/authFetch";
 
 const BASE_URL = import.meta.env.VITE_BACKENT_URL;
 
@@ -151,7 +152,7 @@ const Products = () => {
     try {
       const formData = new FormData();
       formData.append("image", file);
-      const res = await fetch(`${BASE_URL}/api/upload/single`, {
+      const res = await authFetch(`${BASE_URL}/api/upload/single`, {
         method: "POST",
         body: formData,
       });
@@ -223,7 +224,7 @@ const Products = () => {
         image: validImages,
         category: newProduct.category || null,
       };
-      const res = await fetch(`${BASE_URL}/api/product`, {
+      const res = await authFetch(`${BASE_URL}/api/product`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -256,7 +257,7 @@ const Products = () => {
         image: validImages,
         category: newProduct.category || null,
       };
-      const res = await fetch(`${BASE_URL}/api/product/${editingProductId}`, {
+      const res = await authFetch(`${BASE_URL}/api/product/${editingProductId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -281,7 +282,7 @@ const Products = () => {
 
   const deleteProduct = async (id) => {
     try {
-      const res = await fetch(`${BASE_URL}/api/product/${id}`, { method: "DELETE" });
+      const res = await authFetch(`${BASE_URL}/api/product/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error();
       setProducts((prev) => prev.filter((p) => p._id !== id));
       showToast("Товар удалён.");
@@ -297,7 +298,7 @@ const Products = () => {
         ? rest.image.filter(Boolean).slice(0, 3)
         : [rest.image].filter(Boolean);
       const payload = { ...rest, price: Number(rest.price), image: normalizedImages };
-      const res = await fetch(`${BASE_URL}/api/product`, {
+      const res = await authFetch(`${BASE_URL}/api/product`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

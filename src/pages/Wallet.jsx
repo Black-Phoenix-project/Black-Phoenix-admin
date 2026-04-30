@@ -10,6 +10,7 @@ import {
   ReceiptText,
 } from "lucide-react";
 import LoadingTemplate from "../components/LoadingTemplate";
+import { authFetch } from "../lib/authFetch";
 
 const BASE_URL = import.meta.env.VITE_BACKENT_URL;
 const asUZS = (v) => Number(v || 0).toLocaleString("uz-UZ") + " so'm";
@@ -51,8 +52,8 @@ const Wallet = () => {
     else setLoading(true);
     try {
       const [statsRes, ordersRes] = await Promise.all([
-        fetch(`${BASE_URL}/api/orders/stats`),
-        fetch(`${BASE_URL}/api/orders?page=1&limit=200`),
+        authFetch(`${BASE_URL}/api/orders/stats`),
+        authFetch(`${BASE_URL}/api/orders?page=1&limit=200`),
       ]);
       const statsJson = await statsRes.json();
       const ordersJson = await ordersRes.json();

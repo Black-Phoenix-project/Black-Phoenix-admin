@@ -5,6 +5,7 @@ import {
   XCircle, Package, RefreshCw,
   BarChart2
 } from "lucide-react";
+import { authFetch } from "../lib/authFetch";
 
 const BASE_URL = import.meta.env.VITE_BACKENT_URL;
 const currencyUZS = (v) => Number(v || 0).toLocaleString("uz-UZ") + " so'm";
@@ -63,7 +64,7 @@ export default function DentistChartsDashboard() {
   const fetchStats = useCallback(async () => {
     setLoading(true);
     try {
-      const statsRes = await fetch(`${BASE_URL}/api/orders/stats`);
+      const statsRes = await authFetch(`${BASE_URL}/api/orders/stats`);
       const statsJson = await statsRes.json();
       if (statsJson.success) setStats(statsJson.data);
       setLastUpdated(new Date());
@@ -77,7 +78,7 @@ export default function DentistChartsDashboard() {
   const fetchOrdersData = useCallback(async () => {
     setOrdersLoading(true);
     try {
-      const ordersRes = await fetch(
+      const ordersRes = await authFetch(
         `${BASE_URL}/api/orders?status=confirmed&paymentStatus=paid&limit=300`
       );
       const ordersJson = await ordersRes.json();

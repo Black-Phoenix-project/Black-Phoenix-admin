@@ -7,6 +7,7 @@ import {
   FileText, ChevronDown, Check, Calendar,
   SquarePen,
 } from "lucide-react";
+import { authFetch } from "../lib/authFetch";
 
 const BASE_URL = import.meta.env.VITE_BACKENT_URL;
 const currencyUZS = (v) => Number(v || 0).toLocaleString("uz-UZ") + " so'm";
@@ -300,7 +301,7 @@ export default function Orders() {
       const params = new URLSearchParams({ page, limit: LIMIT });
       if (filterStatus) params.append("status", filterStatus);
       if (filterPayment) params.append("paymentStatus", filterPayment);
-      const res = await fetch(`${BASE_URL}/api/orders?${params}`);
+      const res = await authFetch(`${BASE_URL}/api/orders?${params}`);
       const json = await res.json();
       if (json.success) {
         setOrders(Array.isArray(json.data) ? json.data : []);
@@ -324,7 +325,7 @@ export default function Orders() {
     }
     setUpdating(p => ({ ...p, [orderId + "_status"]: true }));
     try {
-      const res = await fetch(`${BASE_URL}/api/orders/${orderId}/status`, {
+      const res = await authFetch(`${BASE_URL}/api/orders/${orderId}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),
@@ -345,7 +346,7 @@ export default function Orders() {
   const updatePayment = async (orderId, newPayment) => {
     setUpdating(p => ({ ...p, [orderId + "_pay"]: true }));
     try {
-      const res = await fetch(`${BASE_URL}/api/orders/${orderId}/payment`, {
+      const res = await authFetch(`${BASE_URL}/api/orders/${orderId}/payment`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ paymentStatus: newPayment }),
@@ -366,7 +367,7 @@ export default function Orders() {
   const deleteOrder = async (orderId) => {
     setDeleting(orderId);
     try {
-      const res = await fetch(`${BASE_URL}/api/orders/${orderId}`, { method: "DELETE" });
+      const res = await authFetch(`${BASE_URL}/api/orders/${orderId}`, { method: "DELETE" });
       const json = await res.json();
       if (json.success) {
         setOrders(prev => prev.filter(o => o._id !== orderId));

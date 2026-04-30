@@ -8,6 +8,7 @@ import { Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 import AppToast from "../components/AppToast";
+import { authFetch } from "../lib/authFetch";
 
 const BASE_URL = import.meta.env.VITE_BACKENT_URL;
 
@@ -130,7 +131,7 @@ const Banners = () => {
     try {
       const fd = new FormData();
       fd.append("image", file);
-      const res = await fetch(`${BASE_URL}/api/upload/single`, {
+      const res = await authFetch(`${BASE_URL}/api/upload/single`, {
         method: "POST",
         body: fd,
       });
@@ -162,7 +163,7 @@ const Banners = () => {
     if (!validate()) return;
     setSubmitting(true);
     try {
-      const res = await fetch(`${BASE_URL}/api/swiper`, {
+      const res = await authFetch(`${BASE_URL}/api/swiper`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -181,7 +182,7 @@ const Banners = () => {
 
   const deleteSwiper = async (id) => {
     try {
-      const res = await fetch(`${BASE_URL}/api/swiper/${id}`, { method: "DELETE" });
+      const res = await authFetch(`${BASE_URL}/api/swiper/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error();
       setItems((prev) => prev.filter((item) => item._id !== id));
       showToast("Swiper o'chirildi");

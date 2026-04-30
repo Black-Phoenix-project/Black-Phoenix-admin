@@ -4,6 +4,7 @@ import { FiEdit, FiTrash2, FiSearch } from "react-icons/fi";
 import LoadingTemplate from "../components/LoadingTemplate";
 import WorkerModal from "../components/WorkerModal";
 import { CheckCircle, AlertCircle, Trash2, RefreshCw, Users } from "lucide-react";
+import { authFetch } from "../lib/authFetch";
 
 const API_URL = `${import.meta.env.VITE_BACKENT_URL}/api/workers`;
 
@@ -188,7 +189,7 @@ const Workers = () => {
   const fetchWorkers = async () => {
     try {
       setLoading(true);
-      const response = await fetch(API_URL);
+      const response = await authFetch(API_URL);
       if (!response.ok) throw new Error("Ishchilarni yuklashda xatolik");
       const data = await response.json();
       setWorkers(data.data || []);
@@ -223,7 +224,7 @@ const Workers = () => {
     const { id, name } = confirmDialog;
     setDeleting(true);
     try {
-      const response = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+      const response = await authFetch(`${API_URL}/${id}`, { method: "DELETE" });
       if (!response.ok) throw new Error("Ishchini o'chirishda xatolik");
       setWorkers((prev) => prev.filter((w) => w._id !== id));
       setConfirmDialog({ open: false, id: null, name: "" });
@@ -271,7 +272,7 @@ const Workers = () => {
     };
     try {
       if (editWorker) {
-        const response = await fetch(`${API_URL}/${editWorker._id}`, {
+        const response = await authFetch(`${API_URL}/${editWorker._id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(submitData),
@@ -279,7 +280,7 @@ const Workers = () => {
         if (!response.ok) throw new Error("Ishchini yangilashda xatolik");
         showToast(`${submitData.firstname} ${submitData.lastname} yangilandi`);
       } else {
-        const response = await fetch(API_URL, {
+        const response = await authFetch(API_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(submitData),
