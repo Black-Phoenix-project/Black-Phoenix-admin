@@ -12,6 +12,7 @@ import {
 } from "chart.js";
 import { Line, Doughnut } from "react-chartjs-2";
 import { TrendingUp, PieChart, AlertCircle } from "lucide-react";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Tooltip, Legend, Filler);
 
@@ -22,6 +23,8 @@ export default function DashboardCharts({
   doughnutData,
   doughnutOpts,
 }) {
+  const { t } = useLanguage();
+
   return (
     <div className="flex flex-col lg:flex-row gap-4 md:gap-6 px-3 md:px-6">
       <div className="card bg-base-200 flex-1 flex flex-col p-3 md:p-4">
@@ -29,10 +32,10 @@ export default function DashboardCharts({
           <div>
             <div className="font-semibold text-xs md:text-sm flex items-center gap-2">
               <TrendingUp size={13} className="text-warning" />
-              So'nggi 7 kun tushum
+              {t("charts.last7Days")}
             </div>
             <div className="text-[10px] md:text-xs text-base-content/50 mt-0.5">
-              Faqat yakunlangan buyurtmalar
+              {t("charts.completedOnly")}
             </div>
           </div>
         </div>
@@ -46,10 +49,10 @@ export default function DashboardCharts({
           <div>
             <div className="font-semibold text-xs md:text-sm flex items-center gap-2">
               <PieChart size={13} className="text-warning" />
-              Mahsulotlar bo'yicha
+              {t("charts.byProduct")}
             </div>
             <div className="text-[10px] md:text-xs text-base-content/50 mt-0.5">
-              Har mahsulotdan tushgan foyda
+              {t("charts.perProductProfit")}
             </div>
           </div>
         </div>
@@ -60,7 +63,7 @@ export default function DashboardCharts({
             <div className="h-full flex items-center justify-center">
               <div className="text-center text-base-content/30">
                 <AlertCircle size={28} className="mx-auto mb-2" />
-                <p className="text-xs">Ma'lumot yo'q</p>
+                <p className="text-xs">{t("charts.noData")}</p>
               </div>
             </div>
           )}

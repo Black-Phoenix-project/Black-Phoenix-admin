@@ -9,5 +9,14 @@ export function authFetch(url, options = {}) {
   return fetch(url, {
     ...options,
     headers,
+  }).then((res) => {
+    if (res.status === 401 && typeof window !== "undefined") {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      if (window.location.pathname !== "/login") {
+        window.location.assign("/login");
+      }
+    }
+    return res;
   });
 }

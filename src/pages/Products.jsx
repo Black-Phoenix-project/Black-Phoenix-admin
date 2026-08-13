@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { TiThLarge } from "react-icons/ti";
 import { FaRegPenToSquare, FaPlus } from "react-icons/fa6";
 import { LiaSearchSolid } from "react-icons/lia";
@@ -9,21 +9,24 @@ import { FiPlusCircle, FiUploadCloud, FiX } from "react-icons/fi";
 import LoadingTemplate from "../components/LoadingTemplate";
 import AppToast from "../components/AppToast";
 import { authFetch } from "../lib/authFetch";
+import { useLanguage } from "../i18n/LanguageContext";
 
 const BASE_URL = import.meta.env.VITE_BACKENT_URL;
 
 const CATEGORIES = [
-  { value: 'spetsodezhda', label: 'Спецодежда' },
-  { value: 'spetsobov', label: 'Спецобувь' },
-  { value: 'sredstva-zashchity', label: 'Средства защиты' },
-  { value: 'trikotazh', label: 'Трикотаж' },
-  { value: 'khoztovary', label: 'Хозяйственные товары' },
-  { value: 'uniforma', label: 'Униформа' },
-  { value: 'novinki', label: 'Новинки' },
+  { value: 'spetsodezhda', key: 'products.cat.spetsodezhda' },
+  { value: 'spetsobov', key: 'products.cat.spetsobov' },
+  { value: 'sredstva-zashchity', key: 'products.cat.sredstva-zashchity' },
+  { value: 'trikotazh', key: 'products.cat.trikotazh' },
+  { value: 'khoztovary', key: 'products.cat.khoztovary' },
+  { value: 'uniforma', key: 'products.cat.uniforma' },
+  { value: 'novinki', key: 'products.cat.novinki' },
 ];
 
-const getCategoryLabel = (value) =>
-  CATEGORIES.find((c) => c.value === value)?.label || value || '—';
+const getCategoryLabel = (value, t) => {
+  const cat = CATEGORIES.find((c) => c.value === value);
+  return cat ? t(cat.key) : value || '—';
+};
 
 /* ─── Kichik tugma ─── */
 const ActionBtn = ({ icon, bg, color, label, onClick }) => (
@@ -42,11 +45,12 @@ const ActionBtn = ({ icon, bg, color, label, onClick }) => (
 /* ─── Слот загрузки изображения ─── */
 const ImageSlot = ({ index, url, uploading, onChange, onRemove }) => {
   const inputRef = useRef(null);
+  const { t } = useLanguage();
 
   return (
     <div className="flex flex-col gap-1">
       <label className="text-xs font-semibold text-base-content/50">
-        Фото {index + 1} {index === 0 ? "(обязательно)" : "(необязательно)"}
+        {t("products.photo", { n: index + 1 })} {index === 0 ? t("products.photoRequired") : t("products.photoOptional")}
       </label>
 
       {url ? (
@@ -74,7 +78,7 @@ const ImageSlot = ({ index, url, uploading, onChange, onRemove }) => {
           ) : (
             <>
               <FiUploadCloud className="text-2xl text-warning/60" />
-              <span className="text-xs text-base-content/50">Выбрать файл</span>
+              <span className="text-xs text-base-content/50">{t("products.selectFile")}</span>
             </>
           )}
         </button>
@@ -97,6 +101,7 @@ const ImageSlot = ({ index, url, uploading, onChange, onRemove }) => {
 
 /* ─── Asosiy komponent ─── */
 const Products = () => {
+  const { t } = useLanguage();
   const [products, setProducts] = useState([]);
   const [showGrid, setShowGrid] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -115,19 +120,17 @@ const Products = () => {
     category: "",
   });
 
-  const showToast = (msg, type = "success") => {
+  const showToast = useCallback((msg, type = "success") => {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3000);
-  };
+  }, []);
 
   const resetProductForm = () => {
     setNewProduct({ name: "", images: ["", "", ""], description: "", price: "", category: "" });
     setEditingProductId(null);
   };
 
-  useEffect(() => { fetchProducts(); }, []);
-
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch(`${BASE_URL}/api/product`);
@@ -140,14 +143,25 @@ const Products = () => {
             : [];
       setProducts(list);
     } catch {
-      showToast("Ошибка загрузки товаров.", "error");
+      showToast(t("products.loadError"), "error");
     } finally {
       setLoading(false);
     }
-  };
+  }, [showToast, t]);
+
+  useEffect(() => { fetchProducts(); }, [fetchProducts]);
 
   /* Fayl tanlanganda — cloudinaryga yuklash */
   const handleFileChange = async (index, file) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      showToast(t("products.imageOnly"), "error");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      showToast(t("products.fileTooBig"), "error");
+      return;
+    }
     setUploading((prev) => { const next = [...prev]; next[index] = true; return next; });
     try {
       const formData = new FormData();
@@ -157,14 +171,14 @@ const Products = () => {
         body: formData,
       });
       const data = await res.json();
-      if (!res.ok || !data.url) throw new Error(data.message || "Yuklash xatosi");
+      if (!res.ok || !data.url) throw new Error(data.message || t("products.uploadError"));
       setNewProduct((prev) => {
         const next = [...prev.images];
         next[index] = data.url;
         return { ...prev, images: next };
       });
     } catch (err) {
-      showToast(err.message || "Фото не загружено", "error");
+      showToast(err.message || t("products.photoNotUploaded"), "error");
     } finally {
       setUploading((prev) => { const next = [...prev]; next[index] = false; return next; });
     }
@@ -187,11 +201,11 @@ const Products = () => {
     const { name, images, description, price } = newProduct;
     const validImages = images.filter(Boolean);
     if (!name || !description || !price) {
-      showToast("Заполните все обязательные поля!", "error");
+      showToast(t("products.fillRequired"), "error");
       return false;
     }
     if (validImages.length < 1) {
-      showToast("Загрузите минимум 1 фото!", "error");
+      showToast(t("products.minOnePhoto"), "error");
       return false;
     }
     return true;
@@ -231,15 +245,15 @@ const Products = () => {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.message || "Товар не добавлен");
+        throw new Error(data.message || t("products.notAdded"));
       }
       const added = await res.json();
       setProducts((prev) => [...prev, added?.data || added]);
-      showToast("Товар успешно добавлен!");
+      showToast(t("products.addedSuccess"));
       resetProductForm();
       document.getElementById("product_modal").close();
     } catch (err) {
-      showToast(err.message || "Ошибка добавления товара.", "error");
+      showToast(err.message || t("products.addError"), "error");
     } finally {
       setSaving(false);
     }
@@ -264,30 +278,33 @@ const Products = () => {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.message || "Товар не обновлён");
+        throw new Error(data.message || t("products.notUpdated"));
       }
       const updated = await res.json();
       setProducts((prev) =>
         prev.map((item) => (item._id === editingProductId ? (updated?.data || updated) : item))
       );
-      showToast("Товар успешно обновлён!");
+      showToast(t("products.updatedSuccess"));
       resetProductForm();
       document.getElementById("product_modal").close();
     } catch (err) {
-      showToast(err.message || "Ошибка обновления товара.", "error");
+      showToast(err.message || t("products.updateError"), "error");
     } finally {
       setSaving(false);
     }
   };
 
   const deleteProduct = async (id) => {
+    const product = products.find((p) => p._id === id);
+    const name = product?.name || "";
+    if (!window.confirm(t("products.deleteConfirm", { name }))) return;
     try {
       const res = await authFetch(`${BASE_URL}/api/product/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error();
       setProducts((prev) => prev.filter((p) => p._id !== id));
-      showToast("Товар удалён.");
+      showToast(t("products.deleted"));
     } catch {
-      showToast("Ошибка удаления товара.", "error");
+      showToast(t("products.deleteError"), "error");
     }
   };
 
@@ -306,9 +323,9 @@ const Products = () => {
       if (!res.ok) throw new Error();
       const added = await res.json();
       setProducts((prev) => [...prev, added?.data || added]);
-      showToast("Товар скопирован!");
+      showToast(t("products.copied"));
     } catch {
-      showToast("Ошибка копирования товара.", "error");
+      showToast(t("products.copyError"), "error");
     }
   };
 
@@ -334,7 +351,7 @@ const Products = () => {
             <LiaSearchSolid className="text-xl text-warning" />
             <input
               type="text"
-              placeholder="Поиск товара..."
+              placeholder={t("products.searchPlaceholder")}
               className="ml-2 w-full bg-transparent text-base-content border-none outline-none text-sm"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -345,14 +362,14 @@ const Products = () => {
             <button
               className={`p-2.5 rounded-xl border transition-all ${!showGrid ? "bg-warning text-warning-content border-warning" : "bg-base-100 border-base-content/20 text-base-content/50"}`}
               onClick={() => setShowGrid(false)}
-              title="Список"
+              title={t("products.listView")}
             >
               <IoMdReorder className="text-2xl" />
             </button>
             <button
               className={`p-2.5 rounded-xl border transition-all ${showGrid ? "bg-warning text-warning-content border-warning" : "bg-base-100 border-base-content/20 text-base-content/50"}`}
               onClick={() => setShowGrid(true)}
-              title="Сетка"
+              title={t("products.gridView")}
             >
               <TiThLarge className="text-2xl" />
             </button>
@@ -367,7 +384,7 @@ const Products = () => {
           onClick={() => { resetProductForm(); document.getElementById("product_modal").showModal(); }}
         >
           <FaPlus />
-          Новый товар
+          {t("products.newProduct")}
         </button>
         </div>
 
@@ -379,7 +396,7 @@ const Products = () => {
           onClick={() => setCategoryFilter("")}
           className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${!categoryFilter ? "bg-warning text-warning-content border-warning" : "bg-base-100 border-base-content/20 text-base-content/60 hover:border-warning/50"}`}
         >
-          Все
+          {t("products.all")}
         </button>
         {CATEGORIES.map((cat) => (
           <button
@@ -387,7 +404,7 @@ const Products = () => {
             onClick={() => setCategoryFilter(cat.value)}
             className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${categoryFilter === cat.value ? "bg-warning text-warning-content border-warning" : "bg-base-100 border-base-content/20 text-base-content/60 hover:border-warning/50"}`}
           >
-            {cat.label}
+            {t(cat.key)}
           </button>
         ))}
       </div>
@@ -396,13 +413,13 @@ const Products = () => {
       <dialog id="product_modal" className="modal modal-bottom sm:modal-middle">
         <div className="modal-box bg-base-100 border border-warning/30 shadow-2xl rounded-2xl max-w-lg">
           <h3 className="text-2xl font-bold text-warning text-center mb-6">
-            {editingProductId ? "Редактировать товар" : "Добавить новый товар"}
+            {editingProductId ? t("products.editTitle") : t("products.addTitle")}
           </h3>
           <div className="flex flex-col gap-3">
             {[
-              { name: "name", placeholder: "Название товара" },
-              { name: "description", placeholder: "Описание" },
-              { name: "price", placeholder: "Цена (например: 29900)" },
+              { name: "name", placeholder: t("products.namePlaceholder") },
+              { name: "description", placeholder: t("products.description") },
+              { name: "price", placeholder: t("products.pricePlaceholder") },
             ].map((field) => (
               <input
                 key={field.name}
@@ -421,9 +438,9 @@ const Products = () => {
               onChange={handleInputChange}
               className="select select-bordered border-warning/40 focus:border-warning bg-base-200 w-full rounded-xl"
             >
-              <option value="">Категория (необязательно)</option>
+              <option value="">{t("products.categoryOptional")}</option>
               {CATEGORIES.map((cat) => (
-                <option key={cat.value} value={cat.value}>{cat.label}</option>
+                <option key={cat.value} value={cat.value}>{t(cat.key)}</option>
               ))}
             </select>
 
@@ -453,17 +470,17 @@ const Products = () => {
               ) : (
                 <FaPlus className="mr-1" />
               )}
-              {editingProductId ? "Сохранить" : "Добавить"}
+              {editingProductId ? t("products.save") : t("products.add")}
             </button>
             <form method="dialog" className="flex-1">
               <button className="btn w-full bg-base-300 border-none rounded-xl">
-                Отмена
+                {t("products.cancel")}
               </button>
             </form>
           </div>
         </div>
         <form method="dialog" className="modal-backdrop">
-          <button>закрыть</button>
+          <button>{t("products.close")}</button>
         </form>
       </dialog>
 
@@ -478,8 +495,8 @@ const Products = () => {
       {!loading && filteredProducts.length === 0 && (
         <div className="flex flex-col items-center justify-center py-20 opacity-50">
           <div className="text-6xl mb-4">📦</div>
-          <p className="text-xl font-semibold text-base-content">Товары не найдены</p>
-          <p className="text-sm text-base-content/50 mt-1">Попробуйте другой запрос или добавьте новый товар.</p>
+          <p className="text-xl font-semibold text-base-content">{t("products.notFound")}</p>
+          <p className="text-sm text-base-content/50 mt-1">{t("products.notFoundHint")}</p>
         </div>
       )}
 
@@ -506,17 +523,17 @@ const Products = () => {
                 {product.category && (
                   <div className="flex justify-center mt-1">
                     <span className="text-[10px] px-2 py-0.5 rounded-full bg-warning/15 text-warning border border-warning/20 font-medium">
-                      {getCategoryLabel(product.category)}
+                      {getCategoryLabel(product.category, t)}
                     </span>
                   </div>
                 )}
                 <p className="text-sm text-center font-semibold text-base-content mt-1">sum{product.price}</p>
                 <p className="text-xs text-center text-base-content/40 mt-1 line-clamp-2">{product.description}</p>
                 <div className="flex justify-center gap-2 mt-4">
-                  <ActionBtn icon={<MdOutlineRemoveRedEye />} bg="bg-success/15" color="text-success" label="Просмотр" onClick={() => showToast(`Просмотр: ${product.name}`)} />
-                  <ActionBtn icon={<FiPlusCircle />} bg="bg-base-200" color="text-base-content/60" label="Копия" onClick={() => duplicateProduct(product)} />
-                  <ActionBtn icon={<FaRegPenToSquare />} bg="bg-warning/20" color="text-warning" label="Редакт." onClick={() => openEditModal(product)} />
-                  <ActionBtn icon={<RiDeleteBinLine />} bg="bg-error/15" color="text-error" label="Удалить" onClick={() => deleteProduct(product._id)} />
+                  <ActionBtn icon={<MdOutlineRemoveRedEye />} bg="bg-success/15" color="text-success" label={t("products.view")} onClick={() => showToast(t("products.viewing", { name: product.name }))} />
+                  <ActionBtn icon={<FiPlusCircle />} bg="bg-base-200" color="text-base-content/60" label={t("products.copy")} onClick={() => duplicateProduct(product)} />
+                  <ActionBtn icon={<FaRegPenToSquare />} bg="bg-warning/20" color="text-warning" label={t("products.editShort")} onClick={() => openEditModal(product)} />
+                  <ActionBtn icon={<RiDeleteBinLine />} bg="bg-error/15" color="text-error" label={t("products.delete")} onClick={() => deleteProduct(product._id)} />
                 </div>
               </div>
             );
@@ -528,12 +545,12 @@ const Products = () => {
       {!loading && !showGrid && (
         <div className="space-y-2 mt-4">
           <div className="hidden md:grid grid-cols-12 gap-4 px-5 py-2 text-xs font-bold uppercase tracking-widest text-warning/70 bg-base-100 rounded-xl border border-warning/10">
-            <div className="col-span-1">Фото</div>
-            <div className="col-span-2">Название</div>
-            <div className="col-span-2">Категория</div>
-            <div className="col-span-2">Цена</div>
-            <div className="col-span-3">Описание</div>
-            <div className="col-span-2 text-right">Действия</div>
+            <div className="col-span-1">{t("products.colPhoto")}</div>
+            <div className="col-span-2">{t("products.colName")}</div>
+            <div className="col-span-2">{t("products.colCategory")}</div>
+            <div className="col-span-2">{t("products.colPrice")}</div>
+            <div className="col-span-3">{t("products.colDescription")}</div>
+            <div className="col-span-2 text-right">{t("products.colActions")}</div>
           </div>
 
           {filteredProducts.map((product, index) => {
@@ -560,7 +577,7 @@ const Products = () => {
                 <div className="col-span-2">
                   {product.category ? (
                     <span className="text-xs px-2 py-0.5 rounded-full bg-warning/15 text-warning border border-warning/20 font-medium">
-                      {getCategoryLabel(product.category)}
+                      {getCategoryLabel(product.category, t)}
                     </span>
                   ) : (
                     <span className="text-xs text-base-content/30">—</span>
@@ -573,7 +590,7 @@ const Products = () => {
                   <p className="text-xs text-base-content/50 truncate">{product.description || "—"}</p>
                 </div>
                 <div className="col-span-1 md:col-span-2 flex justify-center md:justify-end gap-2 md:gap-1.5">
-                  <ActionBtn icon={<MdOutlineRemoveRedEye />} bg="bg-success/15" color="text-success" onClick={() => showToast(`Ko'rilmoqda: ${product.name}`)} />
+                  <ActionBtn icon={<MdOutlineRemoveRedEye />} bg="bg-success/15" color="text-success" onClick={() => showToast(t("products.viewing", { name: product.name }))} />
                   <ActionBtn icon={<FiPlusCircle />} bg="bg-base-300" color="text-base-content/60" onClick={() => duplicateProduct(product)} />
                   <ActionBtn icon={<FaRegPenToSquare />} bg="bg-warning/20" color="text-warning" onClick={() => openEditModal(product)} />
                   <ActionBtn icon={<RiDeleteBinLine />} bg="bg-error/15" color="text-error" onClick={() => deleteProduct(product._id)} />

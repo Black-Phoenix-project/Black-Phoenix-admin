@@ -5,6 +5,7 @@ import LoadingTemplate from "../components/LoadingTemplate";
 import WorkerModal from "../components/WorkerModal";
 import { CheckCircle, AlertCircle, Trash2, RefreshCw, Users } from "lucide-react";
 import { authFetch } from "../lib/authFetch";
+import { useLanguage } from "../i18n/LanguageContext";
 
 const API_URL = `${import.meta.env.VITE_BACKENT_URL}/api/workers`;
 
@@ -31,6 +32,7 @@ function Toast({ toast }) {
 
 /* ── Confirm Dialog ─────────────────────────────────────────────── */
 function ConfirmDialog({ open, onConfirm, onCancel, name }) {
+  const { t } = useLanguage();
   if (!open) return null;
   return (
     <div
@@ -46,11 +48,10 @@ function ConfirmDialog({ open, onConfirm, onCancel, name }) {
           <Trash2 size={26} className="text-error" />
         </div>
         <h3 className="text-center font-bold text-base-content text-xl mb-2">
-          O'chirishni tasdiqlang
+          {t("workers.confirmTitle")}
         </h3>
         <p className="text-center text-base-content/60 text-sm mb-7 leading-relaxed">
-          <span className="text-warning font-semibold">{name}</span>
-          {" "}ni o'chirishga ishonchingiz komilmi?
+          {t("workers.confirmBody", { name })}
         </p>
         <div className="flex gap-3">
           <button
@@ -59,7 +60,7 @@ function ConfirmDialog({ open, onConfirm, onCancel, name }) {
               hover:bg-base-200 hover:text-base-content text-sm font-medium transition-all
               active:scale-95"
           >
-            Bekor qilish
+            {t("workers.cancel")}
           </button>
           <button
             onClick={onConfirm}
@@ -67,7 +68,7 @@ function ConfirmDialog({ open, onConfirm, onCancel, name }) {
               hover:bg-error/20 text-error text-sm font-semibold transition-all
               active:scale-95"
           >
-            O'chirish
+            {t("workers.delete")}
           </button>
         </div>
       </div>
@@ -77,6 +78,7 @@ function ConfirmDialog({ open, onConfirm, onCancel, name }) {
 
 /* ── Worker Row ─────────────────────────────────────────────────── */
 function WorkerRow({ worker, index, onEdit, onDelete, deleting, confirmId }) {
+  const { t } = useLanguage();
   const isDeleting = deleting && confirmId === worker._id;
   const initials = `${worker.firstname?.[0] ?? ""}${worker.lastname?.[0] ?? ""}`.toUpperCase();
   const colors = [
@@ -88,6 +90,7 @@ function WorkerRow({ worker, index, onEdit, onDelete, deleting, confirmId }) {
     "bg-accent/20 text-accent",
   ];
   const color = colors[index % colors.length];
+  const isOnLeave = worker.status === "Dam olishda";
 
   return (
     <tr className="group border-b border-base-300/60 hover:bg-base-300/40 transition-colors duration-150">
@@ -121,10 +124,15 @@ function WorkerRow({ worker, index, onEdit, onDelete, deleting, confirmId }) {
 
       {/* Status */}
       <td className="px-5 py-4">
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold
-          bg-success/10 text-success border border-success/20">
-          <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-          {worker.status || "Faol"}
+        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
+          isOnLeave
+            ? "bg-warning/10 text-warning border border-warning/25"
+            : "bg-success/10 text-success border border-success/20"
+        }`}>
+          <span className={`w-1.5 h-1.5 rounded-full ${
+            isOnLeave ? "bg-warning" : "bg-success animate-pulse"
+          }`} />
+          {isOnLeave ? t("workers.onLeave") : t("workers.active")}
         </span>
       </td>
 
@@ -133,7 +141,7 @@ function WorkerRow({ worker, index, onEdit, onDelete, deleting, confirmId }) {
         <div className="flex items-center justify-end gap-2">
           <button
             onClick={() => onEdit(worker)}
-            title="Tahrirlash"
+            title={t("wm.editTitle")}
             className="w-8 h-8 rounded-xl flex items-center justify-center
               text-warning/70 hover:text-warning hover:bg-warning/10
               border border-transparent hover:border-warning/20
@@ -143,7 +151,7 @@ function WorkerRow({ worker, index, onEdit, onDelete, deleting, confirmId }) {
           </button>
           <button
             onClick={() => onDelete(worker)}
-            title="O'chirish"
+            title={t("workers.delete")}
             disabled={isDeleting}
             className="w-8 h-8 rounded-xl flex items-center justify-center
               text-error/70 hover:text-error hover:bg-error/10
@@ -162,6 +170,7 @@ function WorkerRow({ worker, index, onEdit, onDelete, deleting, confirmId }) {
 
 /* ── Main Page ─────────────────────────────────────────────────── */
 const Workers = () => {
+  const { t } = useLanguage();
   const [workers, setWorkers] = useState([]);
   const [filteredWorkers, setFilteredWorkers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -190,18 +199,18 @@ const Workers = () => {
     try {
       setLoading(true);
       const response = await authFetch(API_URL);
-      if (!response.ok) throw new Error("Ishchilarni yuklashda xatolik");
+      if (!response.ok) throw new Error(t("workers.loadError"));
       const data = await response.json();
       setWorkers(data.data || []);
       setFilteredWorkers(data.data || []);
     } catch (err) {
-      setError(err.message || "Nimadir xato ketdi");
+      setError(err.message || t("workers.somethingWrong"));
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { fetchWorkers(); }, []);
+  useEffect(() => { fetchWorkers(); }, [t]);
 
   useEffect(() => {
     const filtered = workers.filter((w) =>
@@ -225,12 +234,12 @@ const Workers = () => {
     setDeleting(true);
     try {
       const response = await authFetch(`${API_URL}/${id}`, { method: "DELETE" });
-      if (!response.ok) throw new Error("Ishchini o'chirishda xatolik");
+      if (!response.ok) throw new Error(t("workers.deleteError"));
       setWorkers((prev) => prev.filter((w) => w._id !== id));
       setConfirmDialog({ open: false, id: null, name: "" });
-      showToast(`${name} o'chirildi`);
+      showToast(t("workers.deleted", { name }));
     } catch (err) {
-      showToast(err.message || "O'chirishda xatolik", "error");
+      showToast(err.message || t("workers.deleteErr2"), "error");
     } finally {
       setDeleting(false);
     }
@@ -277,21 +286,21 @@ const Workers = () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(submitData),
         });
-        if (!response.ok) throw new Error("Ishchini yangilashda xatolik");
-        showToast(`${submitData.firstname} ${submitData.lastname} yangilandi`);
+        if (!response.ok) throw new Error(t("workers.updateError"));
+        showToast(t("workers.updated", { name: `${submitData.firstname} ${submitData.lastname}` }));
       } else {
         const response = await authFetch(API_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(submitData),
         });
-        if (!response.ok) throw new Error("Ishchi qo'shishda xatolik");
-        showToast(`${submitData.firstname} ${submitData.lastname} qo'shildi`);
+        if (!response.ok) throw new Error(t("workers.addError"));
+        showToast(t("workers.added", { name: `${submitData.firstname} ${submitData.lastname}` }));
       }
       closeModal();
       fetchWorkers();
     } catch (err) {
-      showToast(err.message || "Xatolik yuz berdi", "error");
+      showToast(err.message || t("workers.genericError"), "error");
     }
   };
 
@@ -347,10 +356,10 @@ const Workers = () => {
             </div>
             <div>
               <h1 className="text-2xl font-bold text-base-content leading-tight">
-                Ishchilarimiz
+                {t("workers.title")}
               </h1>
               <p className="text-base-content/50 text-xs mt-0.5">
-                {workers.length} ta xodim ro'yxatda
+                {t("workers.count", { count: workers.length })}
               </p>
             </div>
           </div>
@@ -364,7 +373,7 @@ const Workers = () => {
               />
               <input
                 type="text"
-                placeholder="Qidirish..."
+                placeholder={t("workers.search")}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full sm:w-60 h-10 pl-9 pr-4 rounded-xl text-sm
@@ -383,7 +392,7 @@ const Workers = () => {
                 transition-all duration-150 active:scale-95 shadow-lg shadow-warning/20"
             >
               <TbUsersPlus size={17} />
-              Qo'shish
+              {t("workers.add")}
             </button>
           </div>
         </div>
@@ -391,14 +400,14 @@ const Workers = () => {
         {/* ── Stats bar ────────────────────────────────────── */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {[
-            { label: "Jami xodimlar", value: workers.length, accent: "text-warning" },
+            { label: t("workers.statTotal"), value: workers.length, accent: "text-warning" },
             {
-              label: "Faol xodimlar",
+              label: t("workers.statActive"),
               value: workers.filter((w) => w.status === "Faol").length,
               accent: "text-success",
             },
             {
-              label: "Qidiruv natijasi",
+              label: t("workers.statSearch"),
               value: filteredWorkers.length,
               accent: "text-info",
             },
@@ -423,19 +432,19 @@ const Workers = () => {
                     #
                   </th>
                   <th className="px-5 py-3.5 text-left text-xs font-semibold text-base-content/50 uppercase tracking-wider">
-                    Xodim
+                    {t("workers.colWorker")}
                   </th>
                   <th className="px-5 py-3.5 text-left text-xs font-semibold text-base-content/50 uppercase tracking-wider">
-                    Kasb
+                    {t("workers.colPosition")}
                   </th>
                   <th className="px-5 py-3.5 text-left text-xs font-semibold text-base-content/50 uppercase tracking-wider">
-                    Telefon
+                    {t("workers.colPhone")}
                   </th>
                   <th className="px-5 py-3.5 text-left text-xs font-semibold text-base-content/50 uppercase tracking-wider">
-                    Holat
+                    {t("workers.colStatus")}
                   </th>
                   <th className="px-5 py-3.5 text-right text-xs font-semibold text-base-content/50 uppercase tracking-wider">
-                    Amallar
+                    {t("workers.colActions")}
                   </th>
                 </tr>
               </thead>
@@ -461,14 +470,14 @@ const Workers = () => {
                 <Users size={22} className="text-base-content/50" />
               </div>
               <p className="text-base-content/50 text-sm">
-                {searchTerm ? "Hech qanday ishchi topilmadi" : "Ishchilar mavjud emas"}
+                {searchTerm ? t("workers.emptySearch") : t("workers.empty")}
               </p>
               {!searchTerm && (
                 <button
                   onClick={() => openModal()}
                   className="mt-1 text-warning text-sm hover:text-warning underline underline-offset-2 transition-colors"
                 >
-                  Birinchi xodimni qo'shing
+                  {t("workers.addFirst")}
                 </button>
               )}
             </div>
@@ -490,4 +499,3 @@ const Workers = () => {
 };
 
 export default Workers;
-

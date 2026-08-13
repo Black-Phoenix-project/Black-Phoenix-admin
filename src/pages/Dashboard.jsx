@@ -6,10 +6,12 @@ import {
   BarChart2
 } from "lucide-react";
 import { authFetch } from "../lib/authFetch";
+import { useLanguage } from "../i18n/LanguageContext";
 
 const BASE_URL = import.meta.env.VITE_BACKENT_URL;
 const currencyUZS = (v) => Number(v || 0).toLocaleString("uz-UZ") + " so'm";
 const DashboardCharts = lazy(() => import("../components/dashboard/DashboardCharts"));
+const doughnutColors = ["#eab308","#f59e0b","#f97316","#fbbf24","#ca8a04","#fde68a"];
 
 function KpiCard({ icon, label, value, colorClass, sub }) {
   return (
@@ -52,6 +54,7 @@ function ChartsSectionSkeleton() {
 }
 
 export default function DentistChartsDashboard() {
+  const { t } = useLanguage();
   const [orders, setOrders] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -59,6 +62,7 @@ export default function DentistChartsDashboard() {
   const [refreshing, setRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [showCharts, setShowCharts] = useState(false);
+  const [error, setError] = useState(null);
   const chartsGateRef = useRef(null);
 
   const fetchStats = useCallback(async () => {
@@ -67,13 +71,15 @@ export default function DentistChartsDashboard() {
       const statsRes = await authFetch(`${BASE_URL}/api/orders/stats`);
       const statsJson = await statsRes.json();
       if (statsJson.success) setStats(statsJson.data);
+      setError(null);
       setLastUpdated(new Date());
     } catch (err) {
       console.error("Dashboard stats fetch error:", err);
+      setError(t("dashboard.statsError"));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   const fetchOrdersData = useCallback(async () => {
     setOrdersLoading(true);
@@ -84,13 +90,15 @@ export default function DentistChartsDashboard() {
       const ordersJson = await ordersRes.json();
       if (ordersJson.success) {
         setOrders(Array.isArray(ordersJson.data) ? ordersJson.data : []);
+        setError(null);
       }
     } catch (err) {
       console.error("Dashboard orders fetch error:", err);
+      setError(t("dashboard.ordersError"));
     } finally {
       setOrdersLoading(false);
     }
-  }, []);
+  }, [t]);
 
   const refreshAll = async () => {
     setRefreshing(true);
@@ -167,11 +175,11 @@ export default function DentistChartsDashboard() {
   const productRevenueMap = useMemo(() => {
     const map = {};
     orders.forEach((o) => {
-      const name = o.product?.productName || "Неизвестно";
+      const name = o.product?.productName || t("dashboard.unknown");
       map[name] = (map[name] || 0) + (Number(o.totalAmount) || 0);
     });
     return map;
-  }, [orders]);
+  }, [orders, t]);
 
   const sortedProducts = useMemo(
     () => Object.entries(productRevenueMap).sort((a, b) => b[1] - a[1]),
@@ -186,13 +194,13 @@ export default function DentistChartsDashboard() {
     const otherAmount = sortedProducts
       .slice(8)
       .reduce((sum, [, value]) => sum + value, 0);
-    return [...top, ["Остальные", otherAmount]];
-  }, [sortedProducts]);
+    return [...top, [t("dashboard.others"), otherAmount]];
+  }, [sortedProducts, t]);
 
   const lineData = useMemo(() => ({
     labels: last7DaysRevenue.map((x) => x.d),
     datasets: [{
-      label: "Выручка",
+      label: t("dashboard.revenue"),
       data: last7DaysRevenue.map((x) => x.amt),
       fill: true,
       tension: 0.4,
@@ -204,7 +212,7 @@ export default function DentistChartsDashboard() {
       pointRadius: 6,
       pointHoverRadius: 9,
     }],
-  }), [last7DaysRevenue]);
+  }), [last7DaysRevenue, t]);
 
   const lineOpts = useMemo(() => ({
     responsive: true,
@@ -225,8 +233,6 @@ export default function DentistChartsDashboard() {
       x: { grid: { display: false }, ticks: { color: "#94a3b8" } },
     },
   }), []);
-
-  const doughnutColors = ["#eab308","#f59e0b","#f97316","#fbbf24","#ca8a04","#fde68a"];
 
   const doughnutData = useMemo(() => ({
     labels: chartProducts.map(([name]) => name),
@@ -258,7 +264,7 @@ export default function DentistChartsDashboard() {
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between px-3 md:px-6 py-3 md:py-4 border-b border-base-300">
         <div className="flex items-center gap-2">
           <BarChart2 className="text-warning" size={20} />
-          <h1 className="text-base md:text-xl font-bold">Панель управления</h1>
+          <h1 className="text-base md:text-xl font-bold">{t("dashboard.title")}</h1>
         </div>
         <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3">
           {lastUpdated && (
@@ -272,10 +278,26 @@ export default function DentistChartsDashboard() {
             className="btn btn-warning btn-outline btn-xs md:btn-sm gap-1"
           >
             <RefreshCw size={12} className={refreshing ? "animate-spin" : ""} />
-            {refreshing ? "..." : "Обновить"}
+            {refreshing ? "..." : t("dashboard.refresh")}
           </button>
         </div>
       </div>
+
+      {error && (
+        <div className="mx-3 md:mx-6 flex items-center justify-between gap-3 bg-error/10 border border-error/30 text-error rounded-2xl px-4 py-3 text-sm">
+          <div className="flex items-center gap-2.5">
+            <XCircle size={16} className="shrink-0" />
+            <span>{error}</span>
+          </div>
+          <button
+            onClick={refreshAll}
+            className="flex items-center gap-1.5 shrink-0 px-3 py-1.5 rounded-lg bg-error/15 hover:bg-error/25 text-error font-medium transition-all"
+          >
+            <RefreshCw size={13} className={refreshing ? "animate-spin" : ""} />
+            {t("dashboard.retry")}
+          </button>
+        </div>
+      )}
 
       
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 md:gap-4 px-3 md:px-6">
@@ -283,31 +305,31 @@ export default function DentistChartsDashboard() {
        
         <KpiCard
           icon={<CheckCircle size={20} />}
-          label="Доставлено"
+          label={t("dashboard.delivered")}
           value={stats?.completedOrders ?? orders.length}
           colorClass="text-info"
-          sub="доставлено"
+          sub={t("dashboard.subDelivered")}
         />
         <KpiCard
           icon={<Clock size={20} />}
-          label="В ожидании"
+          label={t("dashboard.pending")}
           value={stats?.pendingOrders ?? "—"}
           colorClass="text-orange-400"
-          sub="ожидает"
+          sub={t("dashboard.subPending")}
         />
         <KpiCard
           icon={<Package size={20} />}
-          label="Всего"
+          label={t("dashboard.total")}
           value={stats?.totalOrders ?? "—"}
           colorClass="text-primary"
-          sub="все заказы"
+          sub={t("dashboard.subTotal")}
         />
         <KpiCard
           icon={<XCircle size={20} />}
-          label="Отменено"
+          label={t("dashboard.cancelled")}
           value={stats?.cancelledOrders ?? "—"}
           colorClass="text-error"
-          sub="отменено"
+          sub={t("dashboard.subCancelled")}
         />
       </div>
 
@@ -333,16 +355,16 @@ export default function DentistChartsDashboard() {
         <div className="px-3 md:px-6">
           <div className="font-semibold text-sm md:text-base flex items-center gap-2 mb-2 md:mb-3">
             <ShoppingBag size={15} className="text-warning" />
-            Рейтинг товаров
+            {t("dashboard.productRating")}
           </div>
           <div className="overflow-x-auto rounded-xl">
             <table className="table table-zebra w-full">
               <thead>
                 <tr className="text-[10px] md:text-xs">
                   <th>#</th>
-                  <th>Товар</th>
-                  <th>Выручка</th>
-                  <th className="hidden sm:table-cell">Доля</th>
+                  <th>{t("dashboard.product")}</th>
+                  <th>{t("dashboard.revenue")}</th>
+                  <th className="hidden sm:table-cell">{t("dashboard.share")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -376,10 +398,10 @@ export default function DentistChartsDashboard() {
         <div className="px-3 md:px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
             {[
-              { label: "Всего заказов", value: stats.totalOrders, color: "text-warning" },
-              { label: "В ожидании", value: stats.pendingOrders, color: "text-orange-400" },
-              { label: "Доставлено", value: stats.completedOrders, color: "text-success" },
-              { label: "Отменено", value: stats.cancelledOrders, color: "text-error" },
+              { label: t("dashboard.totalOrders"), value: stats.totalOrders, color: "text-warning" },
+              { label: t("dashboard.pending"), value: stats.pendingOrders, color: "text-orange-400" },
+              { label: t("dashboard.delivered"), value: stats.completedOrders, color: "text-success" },
+              { label: t("dashboard.cancelled"), value: stats.cancelledOrders, color: "text-error" },
             ].map((s) => (
               <div
                 key={s.label}
@@ -395,7 +417,7 @@ export default function DentistChartsDashboard() {
 
       
       <footer className="flex items-center justify-center text-[10px] md:text-xs text-base-content/30 mt-auto pt-3">
-        © {new Date().getFullYear()} Black Phoenix
+        © {new Date().getFullYear()} {t("nav.brand")}
       </footer>
 
     </div>

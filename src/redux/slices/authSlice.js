@@ -1,12 +1,34 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const token = localStorage.getItem("token");
+const isValidToken = (token) => {
+  if (!token || token === "undefined") return false;
+  const parts = token.split(".");
+  if (parts.length !== 3) return false;
+  try {
+    const payload = JSON.parse(
+      atob(parts[1].replace(/-/g, "+").replace(/_/g, "/"))
+    );
+    if (payload.exp && payload.exp * 1000 < Date.now()) return false;
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const storedToken = localStorage.getItem("token");
+const token = isValidToken(storedToken) ? storedToken : null;
 const storedUser = localStorage.getItem("user");
 let user = null;
 
 try {
   user = storedUser ? JSON.parse(storedUser) : null;
 } catch {
+  user = null;
+}
+
+if (!token && storedToken) {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
   user = null;
 }
 
@@ -21,20 +43,20 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     loginSuccess: (state, action) => {
+      const incomingToken = action.payload.token;
+      if (!isValidToken(incomingToken)) {
+        state.user = null;
+        state.token = null;
+        state.isAuthenticated = false;
+        return;
+      }
       state.user = action.payload.user;
-      state.token = action.payload.token;
+      state.token = incomingToken;
       state.isAuthenticated = true;
       localStorage.setItem("user", JSON.stringify(action.payload.user || null));
-      localStorage.setItem("token", action.payload.token);
+      localStorage.setItem("token", incomingToken);
     },
-    registerSuccess: (state, action) => {
-      state.user = action.payload.user; 
-      state.token = action.payload.token;
-      state.isAuthenticated = true;
-      localStorage.setItem("user", JSON.stringify(action.payload.user || null));
-      localStorage.setItem("token", action.payload.token);
-    },
-    
+
     logout: (state) => {
       state.user = null;
       state.token = null;
@@ -45,5 +67,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { loginSuccess, registerSuccess, logout } = authSlice.actions;
+export const { loginSuccess, logout } = authSlice.actions;
 export default authSlice.reducer;

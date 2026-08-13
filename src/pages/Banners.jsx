@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  FiImage, FiPlus, FiRefreshCw, FiTrash2, FiX, FiUploadCloud,
+  FiImage, FiPlus, FiRefreshCw, FiTrash2, FiX, FiUploadCloud, FiEdit, FiSave,
 } from "react-icons/fi";
 import { MdOutlineSlideshow } from "react-icons/md";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -9,6 +9,7 @@ import "swiper/css";
 import "swiper/css/pagination";
 import AppToast from "../components/AppToast";
 import { authFetch } from "../lib/authFetch";
+import { useLanguage } from "../i18n/LanguageContext";
 
 const BASE_URL = import.meta.env.VITE_BACKENT_URL;
 
@@ -24,11 +25,12 @@ const normalizeSwiperData = (payload) => {
 /* ─── Rasm yuklash zone ─── */
 const ImageUploadZone = ({ imageUrl, uploading, onFile, onRemove }) => {
   const inputRef = useRef(null);
+  const { t } = useLanguage();
 
   return (
     <div className="flex flex-col gap-1.5">
       <label className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">
-        Rasm
+        {t("banners.image")}
       </label>
 
       {imageUrl ? (
@@ -48,7 +50,7 @@ const ImageUploadZone = ({ imageUrl, uploading, onFile, onRemove }) => {
             <FiX />
           </button>
           <div className="absolute bottom-0 inset-x-0 bg-linear-to-t from-base-content/60 to-transparent px-3 py-2">
-            <p className="text-base-100 text-xs truncate">Rasm yuklandi</p>
+            <p className="text-base-100 text-xs truncate">{t("banners.uploaded")}</p>
           </div>
         </div>
       ) : (
@@ -65,8 +67,8 @@ const ImageUploadZone = ({ imageUrl, uploading, onFile, onRemove }) => {
             <>
               <FiUploadCloud className="text-3xl text-warning/60" />
               <div className="text-center">
-                <p className="text-sm font-semibold text-base-content/70">Fayl tanlash</p>
-                <p className="text-xs text-base-content/40 mt-0.5">JPG, PNG, WEBP — max 10MB</p>
+                <p className="text-sm font-semibold text-base-content/70">{t("banners.chooseFile")}</p>
+                <p className="text-xs text-base-content/40 mt-0.5">{t("banners.fileFormat")}</p>
               </div>
             </>
           )}
@@ -90,11 +92,13 @@ const ImageUploadZone = ({ imageUrl, uploading, onFile, onRemove }) => {
 
 /* ─── Asosiy komponent ─── */
 const Banners = () => {
+  const { t } = useLanguage();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState(initialForm);
+  const [editingId, setEditingId] = useState(null);
   const [toast, setToast] = useState(null);
 
   const showToast = useCallback((msg, type = "success") => {
@@ -112,11 +116,11 @@ const Banners = () => {
       const data = await res.json();
       setItems(normalizeSwiperData(data));
     } catch {
-      showToast("Swiper ma'lumotlarini yuklab bo'lmadi", "error");
+      showToast(t("banners.loadError"), "error");
     } finally {
       setLoading(false);
     }
-  }, [showToast]);
+  }, [showToast, t]);
 
   useEffect(() => { fetchSwipers(); }, [fetchSwipers]);
 
@@ -127,6 +131,15 @@ const Banners = () => {
 
   /* Fayl tanlanganda — cloudinaryga yuklash */
   const handleFile = async (file) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      showToast(t("banners.imageOnly"), "error");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      showToast(t("banners.fileTooBig"), "error");
+      return;
+    }
     setUploading(true);
     try {
       const fd = new FormData();
@@ -136,10 +149,10 @@ const Banners = () => {
         body: fd,
       });
       const data = await res.json();
-      if (!res.ok || !data.url) throw new Error(data.message || "Yuklash xatosi");
+      if (!res.ok || !data.url) throw new Error(data.message || t("banners.uploadError"));
       setFormData((prev) => ({ ...prev, image: data.url }));
     } catch (err) {
-      showToast(err.message || "Rasm yuklanmadi", "error");
+      showToast(err.message || t("banners.imageNotUploaded"), "error");
     } finally {
       setUploading(false);
     }
@@ -152,7 +165,7 @@ const Banners = () => {
   const validate = () => {
     const { title, image, description } = formData;
     if (!title.trim() || !image.trim() || !description.trim()) {
-      showToast("Barcha maydonlarni to'ldiring", "error");
+      showToast(t("banners.fillAll"), "error");
       return false;
     }
     return true;
@@ -163,31 +176,56 @@ const Banners = () => {
     if (!validate()) return;
     setSubmitting(true);
     try {
-      const res = await authFetch(`${BASE_URL}/api/swiper`, {
-        method: "POST",
+      const url = editingId ? `${BASE_URL}/api/swiper/${editingId}` : `${BASE_URL}/api/swiper`;
+      const res = await authFetch(url, {
+        method: editingId ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data?.message || "Create failed");
-      setItems((prev) => [data?.data || data, ...prev]);
+      if (!res.ok) throw new Error(data?.message || t("banners.saveFailed"));
+      if (editingId) {
+        setItems((prev) => prev.map((item) =>
+          item._id === editingId ? { ...item, ...formData } : item
+        ));
+        showToast(t("banners.updated"));
+      } else {
+        setItems((prev) => [data?.data || data, ...prev]);
+        showToast(t("banners.added"));
+      }
+      setEditingId(null);
       setFormData(initialForm);
-      showToast("Swiper muvaffaqiyatli qo'shildi");
     } catch (error) {
-      showToast(error.message || "Swiper yaratishda xatolik", "error");
+      showToast(error.message || t("banners.saveError"), "error");
     } finally {
       setSubmitting(false);
     }
   };
 
+  const startEdit = (item) => {
+    setEditingId(item._id);
+    setFormData({
+      title: item.title || "",
+      image: item.image || "",
+      description: item.description || "",
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setFormData(initialForm);
+  };
+
   const deleteSwiper = async (id) => {
+    if (!window.confirm(t("banners.deleteConfirm"))) return;
     try {
       const res = await authFetch(`${BASE_URL}/api/swiper/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error();
       setItems((prev) => prev.filter((item) => item._id !== id));
-      showToast("Swiper o'chirildi");
+      showToast(t("banners.deleted"));
     } catch {
-      showToast("Swiper o'chirishda xatolik", "error");
+      showToast(t("banners.deleteError"), "error");
     }
   };
 
@@ -208,15 +246,15 @@ const Banners = () => {
                   <MdOutlineSlideshow className="text-warning text-2xl" />
                 </div>
                 <div>
-                  <h1 className="text-2xl md:text-3xl font-bold text-warning">Swiper Boshqaruvi</h1>
+                  <h1 className="text-2xl md:text-3xl font-bold text-warning">{t("banners.title")}</h1>
                   <p className="mt-0.5 text-sm text-base-content/60">
-                    Slayder kontentini yarating va real vaqtda boshqaring
+                    {t("banners.subtitle")}
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
                 <div className="badge border border-warning/40 bg-base-100 text-base-content px-3 py-3">
-                  {items.length} ta aktiv slayd
+                  {t("banners.activeSlides", { count: items.length })}
                 </div>
                 <button
                   type="button"
@@ -225,7 +263,7 @@ const Banners = () => {
                   className="btn border-none bg-warning text-warning-content hover:bg-warning/80 gap-2"
                 >
                   <FiRefreshCw className={loading ? "animate-spin" : ""} />
-                  Yangilash
+                  {t("banners.refresh")}
                 </button>
               </div>
             </div>
@@ -237,22 +275,26 @@ const Banners = () => {
             {/* Form */}
             <section className="xl:col-span-2 rounded-3xl border border-warning/20 bg-base-100 p-5 md:p-6 shadow-md flex flex-col gap-5">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-bold text-warning">Yangi slide</h2>
-                <span className="text-xs text-base-content/40 bg-base-200 px-2.5 py-1 rounded-full">Forma</span>
+                <h2 className="text-lg font-bold text-warning">
+                  {editingId ? t("banners.editSlide") : t("banners.newSlide")}
+                </h2>
+                <span className="text-xs text-base-content/40 bg-base-200 px-2.5 py-1 rounded-full">
+                  {editingId ? t("banners.editBadge") : t("banners.formBadge")}
+                </span>
               </div>
 
               <form className="flex flex-col gap-3.5" onSubmit={createSwiper}>
                 {/* Title */}
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">
-                    Sarlavha
+                    {t("banners.titleLabel")}
                   </label>
                   <input
                     type="text"
                     name="title"
                     value={formData.title}
                     onChange={onChange}
-                    placeholder="Masalan: Yangi kolleksiya"
+                    placeholder={t("banners.titlePlaceholder")}
                     className="input input-bordered bg-base-200 border-warning/25 focus:border-warning focus:outline-none w-full"
                   />
                 </div>
@@ -268,14 +310,14 @@ const Banners = () => {
                 {/* Description */}
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">
-                    Tavsif
+                    {t("banners.descLabel")}
                   </label>
                   <textarea
                     name="description"
                     value={formData.description}
                     onChange={onChange}
                     rows={3}
-                    placeholder="Qisqa marketing matni..."
+                    placeholder={t("banners.descPlaceholder")}
                     className="textarea textarea-bordered bg-base-200 border-warning/25 focus:border-warning focus:outline-none resize-none w-full"
                   />
                 </div>
@@ -287,17 +329,33 @@ const Banners = () => {
                 >
                   {submitting ? (
                     <span className="loading loading-spinner loading-sm" />
+                  ) : editingId ? (
+                    <FiSave />
                   ) : (
                     <FiPlus />
                   )}
-                  {submitting ? "Saqlanmoqda..." : "Slide qo'shish"}
+                  {submitting
+                    ? t("banners.saving")
+                    : editingId
+                      ? t("banners.save")
+                      : t("banners.addSlide")}
                 </button>
+
+                {editingId && (
+                  <button
+                    type="button"
+                    onClick={cancelEdit}
+                    className="btn w-full border-base-300 bg-base-200 text-base-content hover:bg-base-300"
+                  >
+                    {t("banners.cancel")}
+                  </button>
+                )}
               </form>
 
               {/* Mini preview */}
               <div className="rounded-2xl border border-warning/15 bg-base-200/60 p-3">
                 <p className="text-[11px] font-semibold text-base-content/50 uppercase tracking-wider mb-2">
-                  Preview
+                  {t("banners.preview")}
                 </p>
                 <div className="relative overflow-hidden rounded-xl h-32">
                   <img
@@ -308,7 +366,7 @@ const Banners = () => {
                   />
                   <div className="absolute inset-0 bg-linear-to-t from-base-content/65 via-transparent to-transparent" />
                   <p className="absolute left-3 bottom-2 text-xs text-base-100/90 font-semibold truncate max-w-[90%] drop-shadow">
-                    {formData.title || "Sarlavha preview"}
+                    {formData.title || t("banners.titlePreview")}
                   </p>
                 </div>
               </div>
@@ -317,9 +375,9 @@ const Banners = () => {
             {/* Preview + List */}
             <section className="xl:col-span-3 rounded-3xl border border-warning/20 bg-base-100 p-5 md:p-6 shadow-md flex flex-col gap-5">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-bold text-warning">Jonli preview</h2>
+                <h2 className="text-lg font-bold text-warning">{t("banners.livePreview")}</h2>
                 <span className="badge border border-warning/30 bg-base-200 text-base-content">
-                  {items.length} ta slide
+                  {t("banners.slideCount", { count: items.length })}
                 </span>
               </div>
 
@@ -359,8 +417,8 @@ const Banners = () => {
                     <FiImage className="text-2xl text-warning" />
                   </div>
                   <div>
-                    <p className="font-bold text-base-content">Swiper mavjud emas</p>
-                    <p className="text-sm text-base-content/50 mt-0.5">Chap formadan birinchi slaydingizni yarating</p>
+                    <p className="font-bold text-base-content">{t("banners.noSwiper")}</p>
+                    <p className="text-sm text-base-content/50 mt-0.5">{t("banners.noSwiperHint")}</p>
                   </div>
                 </div>
               )}
@@ -369,7 +427,7 @@ const Banners = () => {
               {items.length > 0 && (
                 <div>
                   <h3 className="text-xs font-semibold text-base-content/50 uppercase tracking-wider mb-3">
-                    Barcha slaydlar
+                    {t("banners.allSlides")}
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 overflow-y-auto pr-1">
                     {items.map((item) => (
@@ -386,14 +444,24 @@ const Banners = () => {
                         <div className="min-w-0 flex-1">
                           <p className="font-semibold text-sm text-warning truncate">{item.title}</p>
                           <p className="text-xs text-base-content/55 line-clamp-2 mt-0.5">{item.description}</p>
-                          <button
-                            type="button"
-                            onClick={() => deleteSwiper(item._id)}
-                            className="mt-2 btn btn-xs border-none bg-error/90 text-error-content hover:bg-error gap-1"
-                          >
-                            <FiTrash2 className="text-xs" />
-                            O'chirish
-                          </button>
+                          <div className="mt-2 flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => startEdit(item)}
+                              className="btn btn-xs border-none bg-warning/15 text-warning hover:bg-warning/25 gap-1"
+                            >
+                              <FiEdit className="text-xs" />
+                              {t("banners.edit")}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => deleteSwiper(item._id)}
+                              className="btn btn-xs border-none bg-error/90 text-error-content hover:bg-error gap-1"
+                            >
+                              <FiTrash2 className="text-xs" />
+                              {t("banners.delete")}
+                            </button>
+                          </div>
                         </div>
                       </article>
                     ))}

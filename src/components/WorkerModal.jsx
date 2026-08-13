@@ -10,6 +10,7 @@ import {
   FiToggleLeft,
   FiToggleRight,
 } from "react-icons/fi";
+import { useLanguage } from "../i18n/LanguageContext";
 
 const WorkerModal = ({
   modalOpen,
@@ -19,6 +20,7 @@ const WorkerModal = ({
   editWorker,
   handleFormSubmit,
 }) => {
+  const { t } = useLanguage();
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -48,12 +50,12 @@ const WorkerModal = ({
                     </div>
                     <div>
                       <h2 className="text-xl sm:text-2xl font-bold text-warning-content">
-                        {editWorker ? "Ishchini Tahrirlash" : "Yangi Ishchi Qo'shish"}
+                        {editWorker ? t("wm.editTitle") : t("wm.addTitle")}
                       </h2>
                       <p className="text-warning-content/80 text-sm mt-1">
                         {editWorker
-                          ? "Ishchi ma'lumotlarini yangilash"
-                          : "Quyidagi ma'lumotlarni to'ldiring"}
+                          ? t("wm.editSub")
+                          : t("wm.addSub")}
                       </p>
                     </div>
                   </div>
@@ -78,7 +80,7 @@ const WorkerModal = ({
                     <div className="flex items-center gap-3 pb-2 border-b-2 border-warning/20">
                       <FiUser className="text-warning text-xl" />
                       <h3 className="text-base sm:text-lg font-bold text-base-content">
-                        Shaxsiy Ma'lumotlar
+                        {t("wm.personal")}
                       </h3>
                     </div>
 
@@ -87,7 +89,7 @@ const WorkerModal = ({
                       <div className="form-control">
                         <label className="label">
                           <span className="label-text font-semibold flex items-center gap-2">
-                            Ism <span className="text-error">*</span>
+                            {t("wm.firstName")} <span className="text-error">*</span>
                           </span>
                         </label>
                         <input
@@ -95,7 +97,7 @@ const WorkerModal = ({
                           name="firstname"
                           value={formData.firstname}
                           onChange={handleInputChange}
-                          placeholder="Ismni kiriting"
+                          placeholder={t("wm.firstNamePh")}
                           className="input input-bordered w-full h-12 focus:outline-none focus:border-warning focus:ring-2 focus:ring-warning/20 transition-all duration-200"
                           required
                         />
@@ -105,7 +107,7 @@ const WorkerModal = ({
                       <div className="form-control">
                         <label className="label">
                           <span className="label-text font-semibold flex items-center gap-2">
-                            Familiya <span className="text-error">*</span>
+                            {t("wm.lastName")} <span className="text-error">*</span>
                           </span>
                         </label>
                         <input
@@ -113,7 +115,7 @@ const WorkerModal = ({
                           name="lastname"
                           value={formData.lastname}
                           onChange={handleInputChange}
-                          placeholder="Familiyani kiriting"
+                          placeholder={t("wm.lastNamePh")}
                           className="input input-bordered w-full h-12 focus:outline-none focus:border-warning focus:ring-2 focus:ring-warning/20 transition-all duration-200"
                           required
                         />
@@ -126,7 +128,7 @@ const WorkerModal = ({
                     <div className="flex items-center gap-3 pb-2 border-b-2 border-warning/20">
                       <FiBriefcase className="text-warning text-xl" />
                       <h3 className="text-base sm:text-lg font-bold text-base-content">
-                        Ish Ma'lumotlari
+                        {t("wm.job")}
                       </h3>
                     </div>
 
@@ -135,7 +137,7 @@ const WorkerModal = ({
                       <div className="form-control">
                         <label className="label">
                           <span className="label-text font-semibold flex items-center gap-2">
-                            Lavozim <span className="text-error">*</span>
+                            {t("wm.position")} <span className="text-error">*</span>
                           </span>
                         </label>
                         <input
@@ -143,7 +145,7 @@ const WorkerModal = ({
                           name="position"
                           value={formData.position}
                           onChange={handleInputChange}
-                          placeholder="Masalan: Dasturchi"
+                          placeholder={t("wm.positionPh")}
                           className="input input-bordered w-full h-12 focus:outline-none focus:border-warning focus:ring-2 focus:ring-warning/20 transition-all duration-200"
                           required
                         />
@@ -154,7 +156,7 @@ const WorkerModal = ({
                         <label className="label">
                           <span className="label-text font-semibold flex items-center gap-2">
                             <FiPhone className="text-warning" />
-                            Telefon Raqami
+                            {t("wm.phone")}
                           </span>
                         </label>
                         <input
@@ -162,7 +164,7 @@ const WorkerModal = ({
                           name="phone"
                           value={formData.phone}
                           onChange={handleInputChange}
-                          placeholder="+998 (XX) XXX-XX-XX"
+                          placeholder={t("wm.phonePh")}
                           className="input input-bordered w-full h-12 focus:outline-none focus:border-warning focus:ring-2 focus:ring-warning/20 transition-all duration-200"
                         />
                       </div>
@@ -172,7 +174,7 @@ const WorkerModal = ({
                         <label className="label">
                           <span className="label-text font-semibold flex items-center gap-2">
                             <FiDollarSign className="text-warning" />
-                            Maosh <span className="text-error">*</span>
+                            {t("wm.salary")} <span className="text-error">*</span>
                           </span>
                         </label>
                         <div className="relative">
@@ -195,8 +197,40 @@ const WorkerModal = ({
 
                   
                   <div className="space-y-4">
-                  
+                    <div className="flex items-center gap-3 pb-2 border-b-2 border-warning/20">
+                      <FiToggleRight className="text-warning text-xl" />
+                      <h3 className="text-base sm:text-lg font-bold text-base-content">
+                        {t("wm.status")}
+                      </h3>
+                    </div>
 
+                    <div className="grid grid-cols-2 gap-3">
+                      {["Faol", "Dam olishda"].map((status) => {
+                        const active = formData.status === status;
+                        const label = status === "Faol" ? t("workers.active") : t("workers.onLeave");
+                        return (
+                          <button
+                            key={status}
+                            type="button"
+                            onClick={() =>
+                              setFormData((prev) => ({ ...prev, status }))
+                            }
+                            className={`flex items-center justify-center gap-2 h-12 rounded-xl border text-sm font-semibold transition-all duration-200 active:scale-95 ${
+                              active
+                                ? status === "Faol"
+                                  ? "bg-success/10 border-success/40 text-success"
+                                  : "bg-warning/10 border-warning/40 text-warning"
+                                : "bg-base-200 border-base-300 text-base-content/50 hover:border-warning/30"
+                            }`}
+                          >
+                            {active
+                              ? <FiToggleRight className="text-lg" />
+                              : <FiToggleLeft className="text-lg opacity-50" />}
+                            {label}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
 
@@ -207,7 +241,7 @@ const WorkerModal = ({
                     onClick={closeModal}
                     className="btn btn-ghost h-12 px-6 sm:px-8 hover:bg-base-300 order-2 sm:order-1"
                   >
-                    Bekor qilish
+                    {t("wm.cancel")}
                   </button>
                   <button
                     type="submit"
@@ -216,14 +250,14 @@ const WorkerModal = ({
                     {editWorker ? (
                       <>
                         <FiEdit className="text-lg" />
-                        <span className="hidden sm:inline">Yangilash</span>
-                        <span className="sm:hidden">Yangilash</span>
+                        <span className="hidden sm:inline">{t("wm.update")}</span>
+                        <span className="sm:hidden">{t("wm.update")}</span>
                       </>
                     ) : (
                       <>
                         <TbUsersPlus className="text-xl" />
-                        <span className="hidden sm:inline">Qo'shish</span>
-                        <span className="sm:hidden">Qo'shish</span>
+                        <span className="hidden sm:inline">{t("wm.add")}</span>
+                        <span className="sm:hidden">{t("wm.add")}</span>
                       </>
                     )}
                   </button>

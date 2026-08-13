@@ -11,19 +11,22 @@ import {
   ClipboardList,
   ToolCase,
 } from "lucide-react";
-
-const menuItems = [
-  { label: "Bosh sahifa", path: "/", icon: <Home size={20} /> },
-  { label: "Mahsulotlar", path: "/products", icon: <ToolCase size={18} /> },
-  { label: "Buyurtma", path: "/orders", icon: <ClipboardList size={20} /> },
-  { label: "Hamyon", path: "/wallet", icon: <Wallet size={20} /> },
-  { label: "Swiper", path: "/swiper", icon: <PanelsTopLeft size={20} /> },
-];
+import { useLanguage } from "./i18n/LanguageContext";
 
 function App() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useLanguage();
   const isActive = (path) => location.pathname === path;
+
+  const menuItems = [
+    { label: t("sidebar.dashboard"), path: "/", icon: <Home size={20} /> },
+    { label: t("sidebar.products"), path: "/products", icon: <ToolCase size={18} /> },
+    { label: t("sidebar.orders"), path: "/orders", icon: <ClipboardList size={20} /> },
+    { label: t("sidebar.workers"), path: "/workers", icon: <BriefcaseBusiness size={20} /> },
+    { label: t("sidebar.wallet"), path: "/wallet", icon: <Wallet size={20} /> },
+    { label: t("sidebar.banners"), path: "/swiper", icon: <PanelsTopLeft size={20} /> },
+  ];
 
   return (
     <div className="flex relative min-h-screen overflow-hidden bg-base-100">

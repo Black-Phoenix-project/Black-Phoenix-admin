@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import LoadingTemplate from "../components/LoadingTemplate";
 import { authFetch } from "../lib/authFetch";
+import { useLanguage } from "../i18n/LanguageContext";
 
 const BASE_URL = import.meta.env.VITE_BACKENT_URL;
 const asUZS = (v) => Number(v || 0).toLocaleString("uz-UZ") + " so'm";
@@ -19,12 +20,6 @@ const paymentStyle = {
   paid: "bg-success/15 text-success border-success/35",
   unpaid: "bg-error/15 text-error border-error/35",
   refunded: "bg-info/15 text-info border-info/35",
-};
-
-const paymentLabel = {
-  paid: "To'langan",
-  unpaid: "To'lanmagan",
-  refunded: "Qaytarilgan",
 };
 
 function MetricCard({ icon, label, value, sub, tone }) {
@@ -41,11 +36,15 @@ function MetricCard({ icon, label, value, sub, tone }) {
 }
 
 const Wallet = () => {
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [stats, setStats] = useState(null);
   const [orders, setOrders] = useState([]);
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [error, setError] = useState(null);
+
+  const paymentLabel = (k) => (k === "paid" || k === "unpaid" || k === "refunded" ? t(`wallet.${k}`) : "");
 
   const fetchWalletData = async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
@@ -60,9 +59,11 @@ const Wallet = () => {
 
       if (statsJson?.success) setStats(statsJson.data);
       if (ordersJson?.success) setOrders(Array.isArray(ordersJson.data) ? ordersJson.data : []);
+      setError(null);
       setLastUpdated(new Date());
     } catch (error) {
-      console.error("Hamyon ma'lumotini yuklashda xatolik:", error);
+      console.error("Wallet data fetch error:", error);
+      setError(t("wallet.loadError"));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -71,7 +72,7 @@ const Wallet = () => {
 
   useEffect(() => {
     fetchWalletData();
-  }, []);
+  }, [t]);
 
   const paymentCounts = useMemo(() => {
     return orders.reduce(
@@ -118,14 +119,14 @@ const Wallet = () => {
             <div>
               <h1 className="text-2xl md:text-3xl font-black text-warning flex items-center gap-2">
                 <WalletCards size={28} />
-                Hamyon
+                {t("wallet.title")}
               </h1>
-              <p className="text-base-content/60 mt-1 text-sm">To'lovlar, tushumlar va tranzaksiyalar nazorati</p>
+              <p className="text-base-content/60 mt-1 text-sm">{t("wallet.subtitle")}</p>
             </div>
             <div className="flex items-center gap-3">
               {lastUpdated && (
                 <p className="text-xs text-base-content/50">
-                  Yangilandi: {lastUpdated.toLocaleTimeString("uz-UZ")}
+                  {t("wallet.updated", { time: lastUpdated.toLocaleTimeString("uz-UZ") })}
                 </p>
               )}
               <button
@@ -134,36 +135,52 @@ const Wallet = () => {
                 disabled={refreshing}
               >
                 <RefreshCw size={15} className={refreshing ? "animate-spin" : ""} />
-                {refreshing ? "Yangilanmoqda..." : "Yangilash"}
+                {refreshing ? t("wallet.refreshing") : t("wallet.refresh")}
               </button>
             </div>
           </div>
         </section>
 
+        {error && (
+          <section className="rounded-3xl border border-error/30 bg-error/10 p-4 flex items-center justify-between gap-3 text-error text-sm">
+            <div className="flex items-center gap-2.5">
+              <CreditCard size={16} className="shrink-0" />
+              <span>{error}</span>
+            </div>
+            <button
+              onClick={() => fetchWalletData(true)}
+              className="flex items-center gap-1.5 shrink-0 px-3 py-1.5 rounded-xl bg-error/15 hover:bg-error/25 font-medium transition-all"
+            >
+              <RefreshCw size={13} className={refreshing ? "animate-spin" : ""} />
+              {t("wallet.retry")}
+            </button>
+          </section>
+        )}
+
         <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           <MetricCard
             icon={<CircleDollarSign size={18} />}
-            label="Jami tushum"
+            label={t("wallet.totalIncome")}
             value={asUZS(stats?.totalRevenue || 0)}
-            sub="To'langan buyurtmalar bo'yicha"
+            sub={t("wallet.totalIncomeSub")}
           />
           <MetricCard
             icon={<CreditCard size={18} />}
-            label="To'langanlar"
+            label={t("wallet.paidCount")}
             value={paymentCounts.paid}
-            sub="Tranzaksiya soni"
+            sub={t("wallet.paidSub")}
           />
           <MetricCard
             icon={<Clock3 size={18} />}
-            label="Kutilayotgan to'lov"
+            label={t("wallet.pendingPayment")}
             value={paymentCounts.unpaid}
-            sub="To'lanmagan buyurtmalar"
+            sub={t("wallet.pendingSub")}
           />
           <MetricCard
             icon={<RotateCcw size={18} />}
-            label="Qaytarilgan"
+            label={t("wallet.refundedCount")}
             value={paymentCounts.refunded}
-            sub="Refund qilinganlar"
+            sub={t("wallet.refundedSub")}
           />
         </section>
 
@@ -171,7 +188,7 @@ const Wallet = () => {
           <div className="rounded-3xl border border-base-content/10 bg-base-300 p-5 md:p-6">
             <div className="flex items-center gap-2 mb-4">
               <TrendingUp size={16} className="text-warning" />
-              <h2 className="font-bold text-base md:text-lg">Oxirgi 7 kun tushumi</h2>
+              <h2 className="font-bold text-base md:text-lg">{t("wallet.last7days")}</h2>
             </div>
             <div className="h-52 flex items-end gap-3">
               {income7Days.map((day) => {
@@ -195,7 +212,7 @@ const Wallet = () => {
           <div className="rounded-3xl border border-base-content/10 bg-base-300 p-5 md:p-6">
             <div className="flex items-center gap-2 mb-4">
               <ReceiptText size={16} className="text-warning" />
-              <h2 className="font-bold text-base md:text-lg">To'lov holati</h2>
+              <h2 className="font-bold text-base md:text-lg">{t("wallet.paymentStatus")}</h2>
             </div>
             <div className="space-y-3">
               {["paid", "unpaid", "refunded"].map((k) => {
@@ -205,14 +222,14 @@ const Wallet = () => {
                   <div key={k} className="rounded-2xl border border-base-content/10 bg-base-200/70 p-3">
                     <div className="flex items-center justify-between mb-2">
                       <span className={`px-2.5 py-1 rounded-full text-xs border ${paymentStyle[k]}`}>
-                        {paymentLabel[k]}
+                        {paymentLabel(k)}
                       </span>
                       <span className="text-sm font-bold">{paymentCounts[k] || 0}</span>
                     </div>
                     <div className="w-full h-2 bg-base-300 rounded-full overflow-hidden">
                       <div className="h-full bg-warning rounded-full" style={{ width: `${share}%` }} />
                     </div>
-                    <p className="mt-1 text-xs text-base-content/50">Ulush: {share}%</p>
+                    <p className="mt-1 text-xs text-base-content/50">{t("wallet.share", { p: share })}</p>
                   </div>
                 );
               })}
@@ -221,19 +238,19 @@ const Wallet = () => {
         </section>
 
         <section className="rounded-3xl border border-base-content/10 bg-base-300 p-5 md:p-6">
-          <h2 className="font-bold text-base md:text-lg mb-4">So'nggi tranzaksiyalar</h2>
+          <h2 className="font-bold text-base md:text-lg mb-4">{t("wallet.recentTransactions")}</h2>
           {recentOrders.length === 0 ? (
-            <div className="text-center py-10 text-base-content/50">Tranzaksiya ma'lumoti topilmadi</div>
+            <div className="text-center py-10 text-base-content/50">{t("wallet.noTransactions")}</div>
           ) : (
             <div className="overflow-x-auto">
               <table className="table table-zebra">
                 <thead>
                   <tr className="text-xs">
-                    <th>Mijoz</th>
-                    <th>Mahsulot</th>
-                    <th>Summa</th>
-                    <th>To'lov</th>
-                    <th>Sana</th>
+                    <th>{t("wallet.colClient")}</th>
+                    <th>{t("wallet.colProduct")}</th>
+                    <th>{t("wallet.colAmount")}</th>
+                    <th>{t("wallet.colPayment")}</th>
+                    <th>{t("wallet.colDate")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -243,11 +260,11 @@ const Wallet = () => {
                         <div className="font-semibold text-sm">{order.username}</div>
                         <div className="text-xs text-base-content/50">{order.phoneNumber}</div>
                       </td>
-                      <td className="text-sm">{order.product?.productName || "Noma'lum"}</td>
+                      <td className="text-sm">{order.product?.productName || t("wallet.unknown")}</td>
                       <td className="font-bold text-warning">{asUZS(order.totalAmount)}</td>
                       <td>
                         <span className={`px-2.5 py-1 rounded-full text-xs border ${paymentStyle[order.paymentStatus] || paymentStyle.unpaid}`}>
-                          {paymentLabel[order.paymentStatus] || "To'lanmagan"}
+                          {paymentLabel(order.paymentStatus) || t("wallet.unpaid")}
                         </span>
                       </td>
                       <td className="text-xs text-base-content/60">

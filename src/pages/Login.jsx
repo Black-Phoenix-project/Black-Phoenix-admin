@@ -5,6 +5,9 @@ import { loginSuccess } from "../redux/slices/authSlice";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import AppToast from "../components/AppToast";
+import ThemeToggle from "../components/ThemeToggle";
+import { useLanguage } from "../i18n/LanguageContext";
+import LanguageSwitcher from "../i18n/LanguageSwitcher";
 
 const BASE_URL = import.meta.env.VITE_BACKENT_URL;
 
@@ -12,6 +15,7 @@ const Login = () => {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const [showPassword, setShowPassword] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -31,7 +35,7 @@ const Login = () => {
     const normalizedPassword = String(password || "");
 
     if (!normalizedPhone || !normalizedPassword) {
-      setError("Barcha maydonlarni to'ldiring");
+      setError(t("login.fillFields"));
       return;
     }
 
@@ -44,14 +48,11 @@ const Login = () => {
         { phoneNumber: normalizedPhone, password: normalizedPassword }
       );
 
-      console.log("Login response:", res.data); 
-
       dispatch(loginSuccess({ user: res.data.user, token: res.data.token }));
       navigate("/");
-      showToast("Muvaffaqiyatli kirildi");
+      showToast(t("login.success"));
     } catch (err) {
-      const serverMessage = err.response?.data?.message || "Kirish amalga oshmadi";
-      console.error(err.response?.data); 
+      const serverMessage = err.response?.data?.message || t("login.failed");
       setError(serverMessage);
       showToast(serverMessage, "error");
     } finally {
@@ -62,6 +63,11 @@ const Login = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-warning/5 via-base-100 to-warning/10 p-4 relative overflow-hidden">
       <AppToast toast={toast} />
+
+      <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
+        <LanguageSwitcher />
+        <ThemeToggle />
+      </div>
       
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-warning/10 rounded-full blur-3xl animate-pulse"></div>
@@ -80,8 +86,8 @@ const Login = () => {
               <div className="inline-flex items-center justify-center w-16 h-16 bg-warning-content/20 backdrop-blur-sm rounded-2xl mb-4 shadow-lg">
                 <Sparkles className="w-8 h-8 text-warning-content" />
               </div>
-              <h1 className="text-3xl font-bold text-base-300 mb-2">Qaytganingiz bilan</h1>
-              <p className="text-base-content text-sm">Ishingizga omad tilaymiz</p>
+              <h1 className="text-3xl font-bold text-base-300 mb-2">{t("login.welcome")}</h1>
+              <p className="text-base-content text-sm">{t("login.wish")}</p>
             </div>
           </div>
 
@@ -98,7 +104,7 @@ const Login = () => {
 
               <div className="space-y-2">
                 <label className="text-sm font-medium text-base-content/70 ml-1">
-                  Telefon raqami
+                  {t("login.phone")}
                 </label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
@@ -106,7 +112,7 @@ const Login = () => {
                   </div>
                   <input
                     type="tel"
-                    placeholder="telefon raqamingizni kiriting"
+                    placeholder={t("login.phonePlaceholder")}
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
                     className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-base-200/50 border-2 border-transparent focus:border-warning focus:bg-base-200 outline-none transition-all duration-200 placeholder:text-base-content/40"
@@ -116,7 +122,7 @@ const Login = () => {
 
               <div className="space-y-2">
                 <label className="text-sm font-medium text-base-content/70 ml-1">
-                  Parol
+                  {t("login.password")}
                 </label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
@@ -124,7 +130,7 @@ const Login = () => {
                   </div>
                   <input
                     type={showPassword ? "text" : "password"}
-                    placeholder="Parolingizni kiriting"
+                    placeholder={t("login.passwordPlaceholder")}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full pl-12 pr-12 py-3.5 rounded-xl bg-base-200/50 border-2 border-transparent focus:border-warning focus:bg-base-200 outline-none transition-all duration-200 placeholder:text-base-content/40"
@@ -151,11 +157,11 @@ const Login = () => {
                 {loading ? (
                   <>
                     <div className="w-5 h-5 border-3 border-warning-content/30 border-t-warning-content rounded-full animate-spin"></div>
-                    <span>Kirilmoqda...</span>
+                    <span>{t("login.signingIn")}</span>
                   </>
                 ) : (
                   <>
-                    <span>Kirish</span>
+                    <span>{t("login.signIn")}</span>
                     <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                   </>
                 )}
@@ -168,7 +174,7 @@ const Login = () => {
         </div>
 
         <p className="text-center text-base-content/50 text-xs mt-6">
-          Sanoat standartidagi shifrlash bilan himoyalangan
+          {t("login.secure")}
         </p>
       </div>
     </div>

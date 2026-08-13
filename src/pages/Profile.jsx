@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../redux/slices/authSlice";
 import { useNavigate } from "react-router-dom";
 import { ShieldCheck, Phone, BadgeCheck, LogOut, Hash } from "lucide-react";
+import { useLanguage } from "../i18n/LanguageContext";
 
 const variants = [
   {
@@ -35,10 +36,10 @@ const Profile = () => {
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const accent = useMemo(() => pickVariant(user), [user]);
-  const displayName = user?.username || user?.name || "Admin";
-  const avatar = user?.image || "https://placehold.co/180x180?text=ADMIN";
+  const displayName = user?.username || user?.name || t("profile.admin");
 
   const handleLogout = () => {
     dispatch(logout());
@@ -49,8 +50,8 @@ const Profile = () => {
     return (
       <div className="min-h-screen bg-base-200 flex items-center justify-center p-6"> 
         <div className="bg-base-300 border border-base-content/10 rounded-3xl px-8 py-10 text-center w-full max-w-md">
-          <p className="text-base-content/70 text-lg font-semibold">Foydalanuvchi ma'lumoti topilmadi</p> 
-          <p className="text-base-content/50 text-sm mt-1">Iltimos, qayta kiring.</p>
+          <p className="text-base-content/70 text-lg font-semibold">{t("profile.notFound")}</p> 
+          <p className="text-base-content/50 text-sm mt-1">{t("profile.pleaseLogin")}</p>
         </div>
       </div>
     );
@@ -76,30 +77,30 @@ const Profile = () => {
                         e.currentTarget.src = "https://placehold.co/180x180?text=ADMIN";
                       }}
                     />
-                    <span className="absolute -bottom-1 -right-1 badge badge-success">onlayn</span>
+                    <span className="absolute -bottom-1 -right-1 badge badge-success">{t("profile.online")}</span>
                   </div>
 
                   <div className="flex-1">
                     <h1 className="text-2xl md:text-3xl font-black tracking-tight text-warning">{displayName}</h1>
-                    <p className="text-base-content/60 mt-1 text-sm md:text-base">Profil ko'rinishi</p>
+                    <p className="text-base-content/60 mt-1 text-sm md:text-base">{t("profile.view")}</p>
                     <div className="mt-4 flex flex-wrap gap-2">
-                      <div className={`badge badge-lg ${accent.soft} ${accent.border} border`}>Admin panel</div>
-                      <div className="badge badge-lg bg-base-300 border-base-content/10">Xavfsiz sessiya</div>
+                      <div className={`badge badge-lg ${accent.soft} ${accent.border} border`}>{t("profile.adminPanel")}</div>
+                      <div className="badge badge-lg bg-base-300 border-base-content/10">{t("profile.secureSession")}</div>
                     </div>
                   </div>
 
                   <button onClick={handleLogout} className={`btn bg-error text-error-content border-none hover:bg-error/80 shadow-lg ${accent.glow}`}>
                     <LogOut size={16} />
-                    Chiqish
+                    {t("profile.logout")}
                   </button>
                 </div>
               </section>
 
               <section className="grid grid-cols-2 gap-3">
-                <StatCard label="Holat" value="Faol" icon={<ShieldCheck size={18} />} accent={accent} />
-                <StatCard label="Ruxsat" value="Admin" icon={<BadgeCheck size={18} />} accent={accent} />
-                <StatCard label="Profil ID" value={user?.id || "Mavjud emas"} icon={<Hash size={18} />} accent={accent} />
-                <StatCard label="Telefon" value={user?.phoneNumber || "Mavjud emas"} icon={<Phone size={18} />} accent={accent} />
+                <StatCard label={t("profile.status")} value={t("profile.active")} icon={<ShieldCheck size={18} />} accent={accent} />
+                <StatCard label={t("profile.role")} value={t("profile.admin")} icon={<BadgeCheck size={18} />} accent={accent} />
+                <StatCard label={t("profile.id")} value={user?.id || t("profile.na")} icon={<Hash size={18} />} accent={accent} />
+                <StatCard label={t("profile.phone")} value={user?.phoneNumber || t("profile.na")} icon={<Phone size={18} />} accent={accent} />
               </section>
             </div>
 

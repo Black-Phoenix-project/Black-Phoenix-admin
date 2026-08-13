@@ -14,7 +14,7 @@ This is the real admin panel contract and structure. Use this document instead o
 
 Example:
 ```env
-VITE_BACKENT_URL=https://black-phoenixx-backend.onrender.com
+VITE_BACKENT_URL=https://black-phoenix-backend.onrender.com
 ```
 
 ## 3) Start / Build

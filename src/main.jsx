@@ -6,6 +6,7 @@ import "./index.css";
 import App from "./App";
 import { store } from "./redux/store";
 import LoadingTemplate from "./components/LoadingTemplate";
+import { LanguageProvider } from "./i18n/LanguageContext";
 
 import AuthRoute from "./components/AuthRoute";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -15,7 +16,6 @@ const Orders = lazy(() => import("./pages/Orders"));
 const Products = lazy(() => import("./pages/Products"));
 const Wallet = lazy(() => import("./pages/Wallet"));
 const Workers = lazy(() => import("./pages/Workers"));
-const Register = lazy(() => import("./pages/Register"));
 const Login = lazy(() => import("./pages/Login"));
 const Profile = lazy(() => import("./pages/Profile"));
 const Banners = lazy(() => import("./pages/Banners"));
@@ -49,13 +49,14 @@ export const router = createBrowserRouter([
     element: <AuthRoute />,
     children: [
       { path: "/login", element: withSuspense(<Login />) },
-      { path: "/register", element: withSuspense(<Register />) },
     ],
   },
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <Provider store={store}>
-    <RouterProvider router={router} />
+    <LanguageProvider>
+      <RouterProvider router={router} />
+    </LanguageProvider>
   </Provider>
 );

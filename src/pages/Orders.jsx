@@ -8,23 +8,24 @@ import {
   SquarePen,
 } from "lucide-react";
 import { authFetch } from "../lib/authFetch";
+import { useLanguage } from "../i18n/LanguageContext";
 
 const BASE_URL = import.meta.env.VITE_BACKENT_URL;
 const currencyUZS = (v) => Number(v || 0).toLocaleString("uz-UZ") + " so'm";
 
 const STATUS_CONFIG = {
-  pending:    { label: "Ожидает",    colorClass: "text-warning",   bgClass: "bg-warning/10",   borderClass: "border-warning/30",   dotColor: "bg-warning",   icon: <Clock size={12} /> },
-  confirmed:  { label: "Подтверждён",   colorClass: "text-info",      bgClass: "bg-info/10",      borderClass: "border-info/30",      dotColor: "bg-info",      icon: <CheckCircle size={12} /> },
-  processing: { label: "В обработке",     colorClass: "text-secondary", bgClass: "bg-secondary/10", borderClass: "border-secondary/30", dotColor: "bg-secondary", icon: <RefreshCw size={12} /> },
-  shipped:    { label: "Отправлен",     colorClass: "text-accent",    bgClass: "bg-accent/10",    borderClass: "border-accent/30",    dotColor: "bg-accent",    icon: <Truck size={12} /> },
-  delivered:  { label: "Доставлен",    colorClass: "text-success",   bgClass: "bg-success/10",   borderClass: "border-success/30",   dotColor: "bg-success",   icon: <Package size={12} /> },
-  cancelled:  { label: "Отменён", colorClass: "text-error",     bgClass: "bg-error/10",     borderClass: "border-error/30",     dotColor: "bg-error",     icon: <XCircle size={12} /> },
+  pending:    { labelKey: "orders.status.pending",    colorClass: "text-warning",   bgClass: "bg-warning/10",   borderClass: "border-warning/30",   dotColor: "bg-warning",   icon: <Clock size={12} /> },
+  confirmed:  { labelKey: "orders.status.confirmed",   colorClass: "text-info",      bgClass: "bg-info/10",      borderClass: "border-info/30",      dotColor: "bg-info",      icon: <CheckCircle size={12} /> },
+  processing: { labelKey: "orders.status.processing", colorClass: "text-secondary", bgClass: "bg-secondary/10", borderClass: "border-secondary/30", dotColor: "bg-secondary", icon: <RefreshCw size={12} /> },
+  shipped:    { labelKey: "orders.status.shipped",    colorClass: "text-accent",    bgClass: "bg-accent/10",    borderClass: "border-accent/30",    dotColor: "bg-accent",    icon: <Truck size={12} /> },
+  delivered:  { labelKey: "orders.status.delivered",  colorClass: "text-success",   bgClass: "bg-success/10",   borderClass: "border-success/30",   dotColor: "bg-success",   icon: <Package size={12} /> },
+  cancelled:  { labelKey: "orders.status.cancelled",  colorClass: "text-error",     bgClass: "bg-error/10",     borderClass: "border-error/30",     dotColor: "bg-error",     icon: <XCircle size={12} /> },
 };
 
 const PAYMENT_CONFIG = {
-  unpaid:   { label: "Не оплачен", colorClass: "text-error",   bgClass: "bg-error/10",   borderClass: "border-error/30",   dotColor: "bg-error" },
-  paid:     { label: "Оплачен",   colorClass: "text-success", bgClass: "bg-success/10", borderClass: "border-success/30", dotColor: "bg-success" },
-  refunded: { label: "Возврат",  colorClass: "text-warning", bgClass: "bg-warning/10", borderClass: "border-warning/30", dotColor: "bg-warning" },
+  unpaid:   { labelKey: "orders.pay.unpaid",   colorClass: "text-error",   bgClass: "bg-error/10",   borderClass: "border-error/30",   dotColor: "bg-error" },
+  paid:     { labelKey: "orders.pay.paid",     colorClass: "text-success", bgClass: "bg-success/10", borderClass: "border-success/30", dotColor: "bg-success" },
+  refunded: { labelKey: "orders.pay.refunded", colorClass: "text-warning", bgClass: "bg-warning/10", borderClass: "border-warning/30", dotColor: "bg-warning" },
 };
 
 const STATUS_ORDER = ["pending", "confirmed", "processing", "shipped", "delivered", "cancelled"];
@@ -111,10 +112,10 @@ function CustomSelect({ value, onChange, options, disabled, className, dropUp })
   );
 }
 
-function buildStatusOptions(currentStatus) {
+function buildStatusOptions(currentStatus, t) {
   return Object.entries(STATUS_CONFIG).map(([v, c]) => ({
     value: v,
-    label: c.label,
+    label: t(c.labelKey),
     colorClass: c.colorClass,
     borderClass: c.borderClass,
     disabled: v === "delivered" && !isDeliveredAllowed(currentStatus),
@@ -122,14 +123,28 @@ function buildStatusOptions(currentStatus) {
   }));
 }
 
-function buildPaymentOptions() {
+function buildPaymentOptions(t) {
   return Object.entries(PAYMENT_CONFIG).map(([v, c]) => ({
     value: v,
-    label: c.label,
+    label: t(c.labelKey),
     colorClass: c.colorClass,
     borderClass: c.borderClass,
     dotEl: <span className={`inline-block w-2 h-2 rounded-full ${c.dotColor} shrink-0`} />,
   }));
+}
+
+function getPageItems(current, total) {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  const pages = new Set([1, total, current - 1, current, current + 1]);
+  const sorted = [...pages].filter((p) => p >= 1 && p <= total).sort((a, b) => a - b);
+  const items = [];
+  let prev = 0;
+  for (const p of sorted) {
+    if (p - prev > 1) items.push(`gap-${prev}-${p}`);
+    items.push(p);
+    prev = p;
+  }
+  return items;
 }
 
 function Toast({ toast }) {
@@ -148,6 +163,8 @@ function Toast({ toast }) {
   );
 }
 function OrderCard({ order, idx, page, LIMIT, updating, deleting, onView, onDelete, onStatusChange, onPaymentChange }) {
+  const { t } = useLanguage();
+
   return (
     <div className={`w-full rounded-2xl border px-4 py-3.5   transition-all hover:border-warning/40 ${
       idx % 2 === 0 ? "bg-base-100 border-base-content/10" : "bg-base-200 border-base-content/5"
@@ -191,13 +208,13 @@ function OrderCard({ order, idx, page, LIMIT, updating, deleting, onView, onDele
             <p className="text-sm font-medium text-base-content truncate leading-tight max-w-[180px]">
               {order.product?.productName || "—"}
             </p>
-            <p className="text-xs text-base-content/50">{order.product?.quantity || 1} шт.</p>
+            <p className="text-xs text-base-content/50">{order.product?.quantity || 1} {t("orders.pcs")}</p>
           </div>
         </div>
 
         <div className="w-36 shrink-0 text-right hidden md:block">
           <p className="text-sm font-bold text-warning">{currencyUZS(order.totalAmount)}</p>
-          <p className="text-xs text-base-content/50">{currencyUZS(order.product?.price)} / шт.</p>
+          <p className="text-xs text-base-content/50">{currencyUZS(order.product?.price)} {t("orders.perPcs")}</p>
         </div>
 
         <div className="hidden lg:block w-px h-8  shrink-0" />
@@ -207,7 +224,7 @@ function OrderCard({ order, idx, page, LIMIT, updating, deleting, onView, onDele
             value={order.status}
             onChange={v => onStatusChange(order._id, v, order.status)}
             disabled={updating[order._id + "_status"]}
-            options={buildStatusOptions(order.status)}
+            options={buildStatusOptions(order.status, t)}
           />
         </div>
 
@@ -216,7 +233,7 @@ function OrderCard({ order, idx, page, LIMIT, updating, deleting, onView, onDele
             value={order.paymentStatus}
             onChange={v => onPaymentChange(order._id, v)}
             disabled={updating[order._id + "_pay"]}
-            options={buildPaymentOptions()}
+            options={buildPaymentOptions(t)}
           />
         </div>
 
@@ -225,13 +242,13 @@ function OrderCard({ order, idx, page, LIMIT, updating, deleting, onView, onDele
             value={order.status}
             onChange={v => onStatusChange(order._id, v, order.status)}
             disabled={updating[order._id + "_status"]}
-            options={buildStatusOptions(order.status)}
+            options={buildStatusOptions(order.status, t)}
           />
           <CustomSelect
             value={order.paymentStatus}
             onChange={v => onPaymentChange(order._id, v)}
             disabled={updating[order._id + "_pay"]}
-            options={buildPaymentOptions()}
+            options={buildPaymentOptions(t)}
           />
         </div>
 
@@ -253,7 +270,7 @@ function OrderCard({ order, idx, page, LIMIT, updating, deleting, onView, onDele
           <button
             onClick={() => onView(order)}
             className="p-2 rounded-xl bg-info/10 border cursor-pointer border-info/30 text-info hover:bg-info/20 transition-all active:scale-95"
-            title="Просмотр"
+            title={t("orders.details")}
           >
             <SquarePen size={14} />
           </button>
@@ -261,7 +278,7 @@ function OrderCard({ order, idx, page, LIMIT, updating, deleting, onView, onDele
             onClick={() => onDelete(order._id)}
             disabled={deleting === order._id}
             className="p-2 rounded-xl bg-error/10 cursor-pointer border border-error/30 text-error hover:bg-error/20 transition-all active:scale-95 disabled:opacity-50"
-            title="Удалить"
+            title={t("orders.delete")}
           >
             {deleting === order._id
               ? <RefreshCw size={14} className="animate-spin" />
@@ -276,6 +293,7 @@ function OrderCard({ order, idx, page, LIMIT, updating, deleting, onView, onDele
 }
 
 export default function Orders() {
+  const { t } = useLanguage();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState("");
@@ -306,21 +324,21 @@ export default function Orders() {
       if (json.success) {
         setOrders(Array.isArray(json.data) ? json.data : []);
         setTotalPages(json.totalPages || 1);
-        setTotalCount(json.count || json.data?.length || 0);
+        setTotalCount(json.total || json.count || json.data?.length || 0);
       }
     } catch {
-      showToast("Ошибка загрузки данных", "error");
+      showToast(t("orders.loadError"), "error");
     } finally {
       setLoading(false);
     }
-  }, [page, filterStatus, filterPayment]);
+  }, [page, filterStatus, filterPayment, t]);
 
   useEffect(() => { fetchOrders(); }, [fetchOrders]);
   useEffect(() => { setPage(1); }, [filterStatus, filterPayment]);
 
   const updateStatus = async (orderId, newStatus, currentStatus) => {
     if (newStatus === "delivered" && !isDeliveredAllowed(currentStatus)) {
-      showToast("«Доставлен» можно выбрать только после «Подтверждён»", "error");
+      showToast(t("orders.deliveredAfterConfirmed"), "error");
       return;
     }
     setUpdating(p => ({ ...p, [orderId + "_status"]: true }));
@@ -334,10 +352,10 @@ export default function Orders() {
       if (json.success) {
         setOrders(prev => prev.map(o => o._id === orderId ? { ...o, status: newStatus } : o));
         if (selectedOrder?._id === orderId) setSelectedOrder(p => ({ ...p, status: newStatus }));
-        showToast(`Статус изменён на "${STATUS_CONFIG[newStatus]?.label}"`);
-      } else showToast(json.message || "Ошибка", "error");
+        showToast(t("orders.statusChangedTo", { label: t(STATUS_CONFIG[newStatus]?.labelKey) }));
+      } else showToast(json.message || t("orders.error"), "error");
     } catch {
-      showToast("Ошибка сервера", "error");
+      showToast(t("orders.serverError"), "error");
     } finally {
       setUpdating(p => ({ ...p, [orderId + "_status"]: false }));
     }
@@ -355,16 +373,19 @@ export default function Orders() {
       if (json.success) {
         setOrders(prev => prev.map(o => o._id === orderId ? { ...o, paymentStatus: newPayment } : o));
         if (selectedOrder?._id === orderId) setSelectedOrder(p => ({ ...p, paymentStatus: newPayment }));
-        showToast(`Оплата изменена на "${PAYMENT_CONFIG[newPayment]?.label}"`);
-      } else showToast(json.message || "Ошибка", "error");
+        showToast(t("orders.paymentChangedTo", { label: t(PAYMENT_CONFIG[newPayment]?.labelKey) }));
+      } else showToast(json.message || t("orders.error"), "error");
     } catch {
-      showToast("Ошибка сервера", "error");
+      showToast(t("orders.serverError"), "error");
     } finally {
       setUpdating(p => ({ ...p, [orderId + "_pay"]: false }));
     }
   };
 
   const deleteOrder = async (orderId) => {
+    const order = orders.find((o) => o._id === orderId);
+    const label = order?.username || order?._id || "";
+    if (!window.confirm(t("orders.deleteConfirm", { label }))) return;
     setDeleting(orderId);
     try {
       const res = await authFetch(`${BASE_URL}/api/orders/${orderId}`, { method: "DELETE" });
@@ -372,10 +393,10 @@ export default function Orders() {
       if (json.success) {
         setOrders(prev => prev.filter(o => o._id !== orderId));
         if (selectedOrder?._id === orderId) setSelectedOrder(null);
-        showToast("Заказ удалён");
-      } else showToast(json.message || "Ошибка", "error");
+        showToast(t("orders.deleted"));
+      } else showToast(json.message || t("orders.error"), "error");
     } catch {
-      showToast("Ошибка сервера", "error");
+      showToast(t("orders.serverError"), "error");
     } finally {
       setDeleting(null);
     }
@@ -400,10 +421,10 @@ export default function Orders() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2 text-warning">
             <ShoppingBag size={22} className="text-warning" />
-            Заказы
+            {t("orders.title")}
           </h1>
           <p className="text-base-content/50 text-sm mt-0.5">
-            Всего <span className="text-warning font-semibold">{totalCount}</span> заказов
+            {t("orders.totalCount", { count: totalCount })}
           </p>
         </div>
         <button
@@ -411,7 +432,7 @@ export default function Orders() {
           className="flex items-center gap-2 px-4 py-2.5 bg-base-200 border border-base-300 hover:border-warning/40 rounded-2xl text-sm transition-all active:scale-95"
         >
           <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
-          Обновить
+          {t("orders.refresh")}
         </button>
       </div>
 
@@ -421,7 +442,7 @@ export default function Orders() {
           <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-base-content/50 pointer-events-none" />
           <input
             value={search}
-            placeholder="Поиск..."
+            placeholder={t("orders.search")}
             onChange={e => setSearch(e.target.value)}
             className="w-full bg-base-200 border border-warning rounded-xl pl-9 pr-4 py-2.5 text-sm focus:border-warning focus:outline-none transition-colors"
           />
@@ -433,12 +454,12 @@ export default function Orders() {
           className="w-44"
           options={[
             {
-              value: "", label: "Все статусы",
+              value: "", label: t("orders.allStatuses"),
               colorClass: "text-base-content/50", borderClass: "border-base-300",
               dotEl: <Filter size={12} className="opacity-50 shrink-0" />,
             },
             ...Object.entries(STATUS_CONFIG).map(([v, c]) => ({
-              value: v, label: c.label, colorClass: c.colorClass, borderClass: c.borderClass,
+              value: v, label: t(c.labelKey), colorClass: c.colorClass, borderClass: c.borderClass,
               dotEl: <span className={`inline-block w-2 h-2 rounded-full ${c.dotColor} shrink-0`} />,
             })),
           ]}
@@ -450,12 +471,12 @@ export default function Orders() {
           className="w-40"
           options={[
             {
-              value: "", label: "Все платежи",
+              value: "", label: t("orders.allPayments"),
               colorClass: "text-base-content/50", borderClass: "border-base-300",
               dotEl: <CreditCard size={12} className="opacity-50 shrink-0" />,
             },
             ...Object.entries(PAYMENT_CONFIG).map(([v, c]) => ({
-              value: v, label: c.label, colorClass: c.colorClass, borderClass: c.borderClass,
+              value: v, label: t(c.labelKey), colorClass: c.colorClass, borderClass: c.borderClass,
               dotEl: <span className={`inline-block w-2 h-2 rounded-full ${c.dotColor} shrink-0`} />,
             })),
           ]}
@@ -467,7 +488,7 @@ export default function Orders() {
             className="flex items-center gap-1.5 px-4 py-2.5 bg-error/10 border border-error/30 hover:bg-error/20 text-error rounded-xl text-sm font-medium transition-all active:scale-95"
           >
             <XCircle size={14} />
-            Сбросить
+            {t("orders.reset")}
           </button>
         )}
       </div>
@@ -476,16 +497,16 @@ export default function Orders() {
       {!loading && filteredOrders.length > 0 && (
         <div className="hidden lg:flex items-center gap-3 px-4 mb-2 text-xs font-semibold text-base-content/50 uppercase tracking-wider">
           <span className="w-5 shrink-0">#</span>
-          <span className="w-44 shrink-0">Клиент</span>
+          <span className="w-44 shrink-0">{t("orders.colClient")}</span>
           <div className="w-px" />
-          <span className="flex-1 min-w-[180px]">Товар</span>
-          <span className="w-36 shrink-0 text-right hidden md:block">Сумма</span>
+          <span className="flex-1 min-w-[180px]">{t("orders.colProduct")}</span>
+          <span className="w-36 shrink-0 text-right hidden md:block">{t("orders.colAmount")}</span>
           <div className="w-px" />
-          <span className="w-36 shrink-0">Статус</span>
-          <span className="w-32 shrink-0">Оплата</span>
+          <span className="w-36 shrink-0">{t("orders.colStatus")}</span>
+          <span className="w-32 shrink-0">{t("orders.colPayment")}</span>
           <div className="w-px" />
-          <span className="w-24 shrink-0 hidden xl:block">Дата</span>
-          <span className="ml-auto w-20 text-right">Действия</span>
+          <span className="w-24 shrink-0 hidden xl:block">{t("orders.colDate")}</span>
+          <span className="ml-auto w-20 text-right">{t("orders.colActions")}</span>
         </div>
       )}
 
@@ -495,7 +516,7 @@ export default function Orders() {
       ) : filteredOrders.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 text-base-content/50 gap-3">
           <ShoppingBag size={48} strokeWidth={1} />
-          <p className="text-lg">Заказы не найдены</p>
+          <p className="text-lg">{t("orders.notFound")}</p>
         </div>
       ) : (
         <>
@@ -527,19 +548,25 @@ export default function Orders() {
               >
                 <ChevronLeft size={15} />
               </button>
-              {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => i + 1).map(p => (
-                <button
-                  key={p}
-                  onClick={() => setPage(p)}
-                  className={`w-9 h-9 rounded-xl text-sm font-medium border transition-all ${
-                    p === page
-                      ? "bg-warning text-warning-content border-warning font-bold"
-                      : "border-base-300 text-base-content/60 hover:bg-base-200 hover:border-warning/40"
-                  }`}
-                >
-                  {p}
-                </button>
-              ))}
+              {getPageItems(page, totalPages).map((p) =>
+                typeof p === "string" ? (
+                  <span key={p} className="text-base-content/40 text-sm px-1 select-none">
+                    ...
+                  </span>
+                ) : (
+                  <button
+                    key={p}
+                    onClick={() => setPage(p)}
+                    className={`w-9 h-9 rounded-xl text-sm font-medium border transition-all ${
+                      p === page
+                        ? "bg-warning text-warning-content border-warning font-bold"
+                        : "border-base-300 text-base-content/60 hover:bg-base-200 hover:border-warning/40"
+                    }`}
+                  >
+                    {p}
+                  </button>
+                )
+              )}
               <button
                 onClick={() => setPage(p => p + 1)}
                 disabled={page === totalPages}
@@ -564,7 +591,7 @@ export default function Orders() {
             <div className="flex items-center justify-between px-6 py-5 border-b border-base-300">
               <h2 className="font-bold text-lg flex items-center gap-2">
                 <FileText size={18} className="text-warning" />
-                Детали заказа
+                {t("orders.details")}
               </h2>
               <button
                 onClick={() => setSelectedOrder(null)}
@@ -578,7 +605,7 @@ export default function Orders() {
 
               
               <div className="bg-base-300/40 rounded-2xl p-4 space-y-3">
-                <p className="text-xs font-semibold text-base-content/50 uppercase tracking-wider">Данные клиента</p>
+                <p className="text-xs font-semibold text-base-content/50 uppercase tracking-wider">{t("orders.clientData")}</p>
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-2xl bg-base-300 flex items-center justify-center shrink-0">
                     <User size={18} className="text-base-content/60" />
@@ -600,7 +627,7 @@ export default function Orders() {
 
               
               <div className="bg-base-300/40 rounded-2xl p-4">
-                <p className="text-xs font-semibold text-base-content/50 uppercase tracking-wider mb-3">Товар</p>
+                <p className="text-xs font-semibold text-base-content/50 uppercase tracking-wider mb-3">{t("orders.product")}</p>
                 <div className="flex items-center gap-3">
                   {selectedOrder.product?.image ? (
                     <img
@@ -619,7 +646,7 @@ export default function Orders() {
                   <div className="flex-1">
                     <p className="font-semibold text-base-content">{selectedOrder.product?.productName}</p>
                     <p className="text-base-content/50 text-sm">
-                      {(selectedOrder.product?.quantity || 1)} шт. × {currencyUZS(selectedOrder.product?.price)}
+                      {(selectedOrder.product?.quantity || 1)} {t("orders.pcs")} × {currencyUZS(selectedOrder.product?.price)}
                     </p>
                     <p className="text-warning font-bold mt-1">{currencyUZS(selectedOrder.totalAmount)}</p>
                   </div>
@@ -629,25 +656,25 @@ export default function Orders() {
               
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-base-300/40 rounded-2xl p-4 space-y-2">
-                  <p className="text-xs font-semibold text-base-content/50 uppercase tracking-wider">Статус</p>
+                  <p className="text-xs font-semibold text-base-content/50 uppercase tracking-wider">{t("orders.status")}</p>
                   <CustomSelect
                     value={selectedOrder.status}
                     onChange={v => updateStatus(selectedOrder._id, v, selectedOrder.status)}
-                    options={buildStatusOptions(selectedOrder.status)}
+                    options={buildStatusOptions(selectedOrder.status, t)}
                     dropUp
                   />
                   {!isDeliveredAllowed(selectedOrder.status) && (
                     <p className="text-xs text-base-content/50 leading-tight">
-                      ⚠️ «Доставлен» доступен только после «Подтверждён»
+                      {t("orders.deliveredHint")}
                     </p>
                   )}
                 </div>
                 <div className="bg-base-300/40 rounded-2xl p-4 space-y-2">
-                  <p className="text-xs font-semibold text-base-content/50 uppercase tracking-wider">Оплата</p>
+                  <p className="text-xs font-semibold text-base-content/50 uppercase tracking-wider">{t("orders.payment")}</p>
                   <CustomSelect
                     value={selectedOrder.paymentStatus}
                     onChange={v => updatePayment(selectedOrder._id, v)}
-                    options={buildPaymentOptions()}
+                    options={buildPaymentOptions(t)}
                     dropUp
                   />
                 </div>
@@ -667,13 +694,13 @@ export default function Orders() {
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-error/10 border border-error/30 hover:bg-error/20 text-error rounded-2xl font-semibold text-sm transition-all active:scale-95"
               >
                 <Trash2 size={15} />
-                Удалить
+                {t("orders.delete")}
               </button>
               <button
                 onClick={() => setSelectedOrder(null)}
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-warning/10 border border-warning/30 hover:bg-warning/20 text-warning rounded-2xl font-semibold text-sm transition-all active:scale-95"
               >
-                Закрыть
+                {t("orders.close")}
               </button>
             </div>
           </div>
@@ -682,7 +709,3 @@ export default function Orders() {
     </div>
   );
 }
-
-
- 
-
