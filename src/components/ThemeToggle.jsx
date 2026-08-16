@@ -13,7 +13,7 @@ function getInitialTheme() {
     : "light";
 }
 
-const ThemeToggle = () => {
+const ThemeToggle = ({ className = "" }) => {
   const [theme, setTheme] = useState(getInitialTheme);
   const { t } = useLanguage();
 
@@ -26,7 +26,7 @@ const ThemeToggle = () => {
     <button
       type="button"
       onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
-      className="w-9 h-9 rounded-xl flex items-center justify-center border border-base-300 text-base-content/70 hover:text-warning hover:border-warning/40 transition-all active:scale-90"
+      className={`w-9 h-9 rounded-xl flex items-center justify-center border border-base-300 text-base-content/70 hover:text-warning hover:border-warning/40 transition-all active:scale-90 ${className}`}
       title={theme === "dark" ? t("theme.lightMode") : t("theme.darkMode")}
       aria-label={
         theme === "dark" ? "Switch to light mode" : "Switch to dark mode"

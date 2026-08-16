@@ -7,8 +7,8 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
-import AppToast from "../components/AppToast";
 import { authFetch } from "../lib/authFetch";
+import { toast, showToast } from "../lib/toast";
 import { useLanguage } from "../i18n/LanguageContext";
 
 const BASE_URL = import.meta.env.VITE_BACKENT_URL;
@@ -99,11 +99,15 @@ const Banners = () => {
   const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState(initialForm);
   const [editingId, setEditingId] = useState(null);
-  const [toast, setToast] = useState(null);
 
   const showToast = useCallback((msg, type = "success") => {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 3000);
+    if (type === "error") {
+      toast.error(msg);
+    } else if (type === "warning") {
+      toast.warning(msg);
+    } else {
+      toast.success(msg);
+    }
   }, []);
 
   const hasItems = useMemo(() => items.length > 0, [items]);
@@ -231,8 +235,6 @@ const Banners = () => {
 
   return (
     <>
-      <AppToast toast={toast} />
-
       <div className="min-h-screen bg-base-300 p-4 md:p-6 lg:p-8">
         <div className="mx-auto w-full max-w-7xl space-y-6">
 

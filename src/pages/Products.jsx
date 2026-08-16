@@ -7,8 +7,8 @@ import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { RiDeleteBinLine } from "react-icons/ri";
 import { FiPlusCircle, FiUploadCloud, FiX } from "react-icons/fi";
 import LoadingTemplate from "../components/LoadingTemplate";
-import AppToast from "../components/AppToast";
 import { authFetch } from "../lib/authFetch";
+import { toast, showToast } from "../lib/toast";
 import { useLanguage } from "../i18n/LanguageContext";
 
 const BASE_URL = import.meta.env.VITE_BACKENT_URL;
@@ -108,7 +108,6 @@ const Products = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [editingProductId, setEditingProductId] = useState(null);
-  const [toast, setToast] = useState(null);
   const [uploading, setUploading] = useState([false, false, false]);
   const [saving, setSaving] = useState(false);
 
@@ -121,8 +120,13 @@ const Products = () => {
   });
 
   const showToast = useCallback((msg, type = "success") => {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 3000);
+    if (type === "error") {
+      toast.error(msg);
+    } else if (type === "warning") {
+      toast.warning(msg);
+    } else {
+      toast.success(msg);
+    }
   }, []);
 
   const resetProductForm = () => {
@@ -342,7 +346,6 @@ const Products = () => {
 
   return (
     <div className="min-h-screen bg-base-300 p-6">
-      <AppToast toast={toast} />
 
       {/* Toolbar */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">

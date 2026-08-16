@@ -2,6 +2,8 @@ import React, { Suspense, lazy } from "react";
 import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Provider } from "react-redux";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import "./index.css";
 import App from "./App";
 import { store } from "./redux/store";
@@ -57,6 +59,15 @@ ReactDOM.createRoot(document.getElementById("root")).render(
   <Provider store={store}>
     <LanguageProvider>
       <RouterProvider router={router} />
+      <ToastContainer
+        position="top-center"
+        autoClose={2500}
+        newestOnTop
+        closeOnClick
+        pauseOnFocusLoss
+        pauseOnHover
+        hideProgressBar
+      />
     </LanguageProvider>
   </Provider>
 );
