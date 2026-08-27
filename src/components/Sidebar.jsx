@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 
-import { Wallet, Coffee, BriefcaseBusiness, ClipboardList, Plus, LayoutDashboard, PanelsTopLeft } from "lucide-react";
+import { Wallet, Coffee, BriefcaseBusiness, ClipboardList, Plus, LayoutDashboard, PanelsTopLeft, Tag, FolderTree, Building2 } from "lucide-react";
 import { useLanguage } from "../i18n/LanguageContext";
 
 const Sidebar = () => {
@@ -17,6 +17,9 @@ const Sidebar = () => {
     { label: t("sidebar.workers"), path: "/workers", icon: <BriefcaseBusiness size={20} /> },
     { label: t("sidebar.wallet"), path: "/wallet", icon: <Wallet size={20} /> },
     { label: t("sidebar.banners"), path: "/swiper", icon: <PanelsTopLeft size={20} /> },
+    { label: "Kategoriyalar", path: "/categories", icon: <FolderTree size={20} /> },
+    { label: "Chegirmalar", path: "/discounts", icon: <Tag size={20} /> },
+    { label: "Kompaniya", path: "/settings", icon: <Building2 size={20} /> },
   ];
 
   const promoSlides = [
@@ -46,7 +49,10 @@ const Sidebar = () => {
 
   return (
     <aside className="fixed top-0 left-0 h-screen w-[17%] bg-base-300 shadow-xl flex flex-col p-3 border-r-2 border-warning rounded-b-2xl">
-      <div className="h-[12%] flex flex-col justify-center px-3">
+      <div className="h-[12%] flex items-center gap-2 px-3">
+        <div className="w-9 h-9 rounded-xl bg-warning text-warning-content flex items-center justify-center shadow-lg shadow-warning/30 shrink-0">
+          <img src="/clothing.svg" alt="Black Phoenix" className="w-5 h-5" />
+        </div>
         <p className="text-xl font-bold text-warning">{t("nav.brand")}</p>
       </div>
 

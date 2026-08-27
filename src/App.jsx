@@ -10,6 +10,9 @@ import {
   PanelsTopLeft,
   ClipboardList,
   ToolCase,
+  Tag,
+  FolderTree,
+  Building2,
 } from "lucide-react";
 import { useLanguage } from "./i18n/LanguageContext";
 
@@ -26,6 +29,9 @@ function App() {
     { label: t("sidebar.workers"), path: "/workers", icon: <BriefcaseBusiness size={20} /> },
     { label: t("sidebar.wallet"), path: "/wallet", icon: <Wallet size={20} /> },
     { label: t("sidebar.banners"), path: "/swiper", icon: <PanelsTopLeft size={20} /> },
+    { label: "Kategoriyalar", path: "/categories", icon: <FolderTree size={20} /> },
+    { label: "Chegirmalar", path: "/discounts", icon: <Tag size={20} /> },
+    { label: "Kompaniya", path: "/settings", icon: <Building2 size={20} /> },
   ];
 
   return (

@@ -21,6 +21,9 @@ const Workers = lazy(() => import("./pages/Workers"));
 const Login = lazy(() => import("./pages/Login"));
 const Profile = lazy(() => import("./pages/Profile"));
 const Banners = lazy(() => import("./pages/Banners"));
+const Categories = lazy(() => import("./pages/Categories"));
+const Discounts = lazy(() => import("./pages/Discounts"));
+const CompanySettings = lazy(() => import("./pages/CompanySettings"));
 
 const withSuspense = (element) => (
   <Suspense fallback={<LoadingTemplate />}>
@@ -43,6 +46,9 @@ export const router = createBrowserRouter([
           { path: "wallet", element: withSuspense(<Wallet />) },
           { path: "profile", element: withSuspense(<Profile />) },
           { path: "swiper", element: withSuspense(<Banners />) },
+          { path: "categories", element: withSuspense(<Categories />) },
+          { path: "discounts", element: withSuspense(<Discounts />) },
+          { path: "settings", element: withSuspense(<CompanySettings />) },
         ],
       },
     ],
