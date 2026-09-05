@@ -37,7 +37,7 @@ const Navbar = () => {
           />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-bold truncate">{user?.username || 'admin'}</p>
+          <p className="text-sm font-bold truncate">{user?.phoneNumber || 'admin'}</p>
           <p className="text-[11px] text-base-content/50">{t("nav.profile")}</p>
         </div>
         <span className="badge badge-warning badge-sm">{t("nav.new")}</span>
@@ -67,7 +67,7 @@ const Navbar = () => {
       <div className="hidden md:flex justify-between items-center px-6 py-3">
         <div>
           <span className="text-sm font-bold">
-            {t("nav.welcome", { name: user?.username || 'admin' })}
+            {t("nav.welcome", { name: user?.phoneNumber || 'admin' })}
           </span>
         </div>
 
