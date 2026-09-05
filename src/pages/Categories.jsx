@@ -2,12 +2,14 @@ import React, { useCallback, useEffect, useState } from "react";
 import { FiPlus, FiRefreshCw, FiTrash2, FiEdit, FiSave, FiX } from "react-icons/fi";
 import { toast } from "../lib/toast";
 import { authFetch } from "../lib/authFetch";
+import { useLanguage } from "../i18n/LanguageContext";
 
 const BASE_URL = import.meta.env.VITE_BACKENT_URL;
 
 const emptyForm = { name: "", slug: "", order: 0, active: true };
 
 const Categories = () => {
+  const { t } = useLanguage();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -24,11 +26,11 @@ const Categories = () => {
       const data = await res.json();
       setItems(data.data || []);
     } catch {
-      toast.error("Kategoriyalarni yuklab bo'lmadi");
+      toast.error(t("categories.loadError"));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   const fetchProducts = useCallback(async () => {
     try {
@@ -58,7 +60,7 @@ const Categories = () => {
   const submit = async (e) => {
     e.preventDefault();
     if (!form.name.trim() || !form.slug.trim()) {
-      toast.error("Nomi va slug majburiy");
+      toast.error(t("categories.nameSlugRequired"));
       return;
     }
     setSubmitting(true);
@@ -72,15 +74,15 @@ const Categories = () => {
         body: JSON.stringify({ ...form, productIds: selectedProducts }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Xatolik");
-      toast.success(editingId ? "Yangilandi" : "Qo'shildi");
+      if (!res.ok) throw new Error(data.message || t("categories.error"));
+      toast.success(editingId ? t("categories.updated") : t("categories.added"));
       setEditingId(null);
       setForm(emptyForm);
       setSelectedProducts([]);
       setProductQuery("");
       fetchAll();
     } catch (err) {
-      toast.error(err.message || "Xatolik");
+      toast.error(err.message || t("categories.error"));
     } finally {
       setSubmitting(false);
     }
@@ -99,14 +101,14 @@ const Categories = () => {
   };
 
   const remove = async (id) => {
-    if (!window.confirm("O'chirishni tasdiqlaysizmi?")) return;
+    if (!window.confirm(t("categories.deleteConfirm"))) return;
     try {
       const res = await authFetch(`${BASE_URL}/api/category/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error();
       setItems((p) => p.filter((i) => i._id !== id));
-      toast.success("O'chirildi");
+      toast.success(t("categories.deleted"));
     } catch {
-      toast.error("O'chirib bo'lmadi");
+      toast.error(t("categories.deleteError"));
     }
   };
 
@@ -121,8 +123,8 @@ const Categories = () => {
                 <FiEdit className="text-warning text-2xl" />
               </div>
               <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-warning">Kategoriyalar</h1>
-                <p className="mt-0.5 text-sm text-base-content/60">Mahsulot kategoriyalarini boshqaring</p>
+                <h1 className="text-2xl md:text-3xl font-bold text-warning">{t("categories.title")}</h1>
+                <p className="mt-0.5 text-sm text-base-content/60">{t("categories.subtitle")}</p>
               </div>
             </div>
             <button
@@ -132,7 +134,7 @@ const Categories = () => {
               className="btn border-none bg-warning text-warning-content hover:bg-warning/80 gap-2"
             >
               <FiRefreshCw className={loading ? "animate-spin" : ""} />
-              Yangilash
+              {t("categories.refresh")}
             </button>
           </div>
         </section>
@@ -140,31 +142,31 @@ const Categories = () => {
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
           <section className="lg:col-span-2 rounded-3xl border border-warning/20 bg-base-100 p-5 md:p-6 shadow-md flex flex-col gap-4">
             <h2 className="text-lg font-bold text-warning">
-              {editingId ? "Kategoriyani tahrirlash" : "Yangi kategoriya"}
+              {editingId ? t("categories.editTitle") : t("categories.addTitle")}
             </h2>
             <form className="flex flex-col gap-3" onSubmit={submit}>
               <div className="flex flex-col gap-1">
-                <label className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">Nomi</label>
+                <label className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">{t("categories.name")}</label>
                 <input
                   name="name"
                   value={form.name}
                   onChange={onChange}
-                  placeholder="Masalan: Spetsodezhda"
+                  placeholder={t("categories.namePlaceholder")}
                   className="input input-bordered bg-base-200 border-warning/25 focus:border-warning focus:outline-none w-full"
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">Slug</label>
+                <label className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">{t("categories.slug")}</label>
                 <input
                   name="slug"
                   value={form.slug}
                   onChange={onChange}
-                  placeholder="spetsodezhda"
+                  placeholder={t("categories.slugPlaceholder")}
                   className="input input-bordered bg-base-200 border-warning/25 focus:border-warning focus:outline-none w-full"
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">Tartib (order)</label>
+                <label className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">{t("categories.order")}</label>
                 <input
                   type="number"
                   name="order"
@@ -181,18 +183,18 @@ const Categories = () => {
                   onChange={onChange}
                   className="checkbox checkbox-warning checkbox-sm"
                 />
-                Faol
+                {t("categories.active")}
               </label>
 
               <div className="flex flex-col gap-1">
                 <label className="text-xs font-semibold text-base-content/60 uppercase tracking-wider">
-                  Mahsulotlar (kategoriyaga biriktirish)
+                  {t("categories.attachProducts")}
                 </label>
                 <input
                   type="text"
                   value={productQuery}
                   onChange={(e) => setProductQuery(e.target.value)}
-                  placeholder="Mahsulot qidirish..."
+                  placeholder={t("categories.searchProducts")}
                   className="input input-bordered bg-base-200 border-warning/25 focus:border-warning focus:outline-none w-full"
                 />
                 <div className="max-h-48 overflow-y-auto rounded-xl border border-base-300 bg-base-200/40 p-2 flex flex-col gap-1">
@@ -213,7 +215,7 @@ const Categories = () => {
                       </label>
                     ))}
                   {products.length === 0 && (
-                    <p className="text-xs text-base-content/40 px-2 py-1">Mahsulotlar yuklanmadi</p>
+                    <p className="text-xs text-base-content/40 px-2 py-1">{t("categories.noProducts")}</p>
                   )}
                 </div>
               </div>
@@ -224,7 +226,7 @@ const Categories = () => {
                 className="btn w-full border-none bg-warning text-warning-content hover:bg-warning/80 mt-1 disabled:opacity-60"
               >
                 {submitting ? <span className="loading loading-spinner loading-sm" /> : editingId ? <FiSave /> : <FiPlus />}
-                {editingId ? "Saqlash" : "Qo'shish"}
+                {editingId ? t("categories.save") : t("categories.add")}
               </button>
               {editingId && (
                 <button
@@ -232,14 +234,14 @@ const Categories = () => {
                   onClick={() => { setEditingId(null); setForm(emptyForm); setSelectedProducts([]); setProductQuery(""); }}
                   className="btn w-full border-base-300 bg-base-200 text-base-content hover:bg-base-300"
                 >
-                  <FiX /> Bekor qilish
+                  <FiX /> {t("categories.cancel")}
                 </button>
               )}
             </form>
           </section>
 
           <section className="lg:col-span-3 rounded-3xl border border-warning/20 bg-base-100 p-5 md:p-6 shadow-md flex flex-col gap-4">
-            <h2 className="text-lg font-bold text-warning">Barcha kategoriyalar</h2>
+            <h2 className="text-lg font-bold text-warning">{t("categories.all")}</h2>
             {loading ? (
               <div className="flex justify-center py-10">
                 <span className="loading loading-spinner loading-lg text-warning" />
@@ -249,7 +251,7 @@ const Categories = () => {
                 <div className="w-14 h-14 rounded-2xl bg-warning/10 flex items-center justify-center">
                   <FiEdit className="text-2xl text-warning" />
                 </div>
-                <p className="font-bold text-base-content">Kategoriyalar yo'q</p>
+                <p className="font-bold text-base-content">{t("categories.empty")}</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -262,7 +264,8 @@ const Categories = () => {
                       <p className="font-semibold text-sm text-warning truncate">{item.name}</p>
                       <p className="text-xs text-base-content/55">{item.slug}</p>
                       <p className="text-[11px] text-base-content/40 mt-0.5">
-                        tartib: {item.order} · {item.active === false ? "no faol" : "faol"}
+                        {t("categories.orderLabel", { order: item.order })} ·{" "}
+                        {item.active === false ? t("categories.statusInactive") : t("categories.statusActive")}
                       </p>
                       <div className="mt-2 flex items-center gap-2">
                         <button
@@ -270,14 +273,14 @@ const Categories = () => {
                           onClick={() => startEdit(item)}
                           className="btn btn-xs border-none bg-warning/15 text-warning hover:bg-warning/25 gap-1"
                         >
-                          <FiEdit className="text-xs" /> Tahrir
+                          <FiEdit className="text-xs" /> {t("categories.edit")}
                         </button>
                         <button
                           type="button"
                           onClick={() => remove(item._id)}
                           className="btn btn-xs border-none bg-error/90 text-error-content hover:bg-error gap-1"
                         >
-                          <FiTrash2 className="text-xs" /> O'chir
+                          <FiTrash2 className="text-xs" /> {t("categories.delete")}
                         </button>
                       </div>
                     </div>
